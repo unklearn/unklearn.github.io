@@ -30,15 +30,17 @@ const helpers = ({
   postNotice(text = settings().order) {
     if (settings().mode !== 'replay') world().postNotice(text);
   },
-  patrol: () => world().patrol(signal()),
-  walkTo: (place: Place) =>
-    world().execute({ name: 'walk_to', arguments: { place } }, signal()),
-  inspectPantry: () =>
-    world().execute({ name: 'inspect_pantry', arguments: {} }, signal()),
-  takeOne: (item: Item) =>
-    world().execute({ name: 'take_one', arguments: { item } }, signal()),
-  deliverItem: () =>
-    world().execute({ name: 'deliver_item', arguments: {} }, signal()),
+  patrol: (requestSignal = signal()) => world().patrol(requestSignal),
+  readNotice: (requestSignal = signal()) =>
+    world().execute({ name: 'read_notice', arguments: {} }, requestSignal),
+  walkTo: (place: Place, requestSignal = signal()) =>
+    world().execute({ name: 'walk_to', arguments: { place } }, requestSignal),
+  inspectPantry: (requestSignal = signal()) =>
+    world().execute({ name: 'inspect_pantry', arguments: {} }, requestSignal),
+  takeOne: (item: Item, requestSignal = signal()) =>
+    world().execute({ name: 'take_one', arguments: { item } }, requestSignal),
+  deliverItem: (requestSignal = signal()) =>
+    world().execute({ name: 'deliver_item', arguments: {} }, requestSignal),
   setPantry: (stock: Inventory) => world().setPantry(stock),
 });
 export const picnicScenario: Scenario<

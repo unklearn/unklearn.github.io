@@ -32,6 +32,7 @@ export function createTrace<State>({
       at: clock.now() - start,
     });
     trace.events.push(entry);
+    if (trace.final) trace.final = structuredClone(event.state);
     emit(structuredClone(entry));
   }
   function finish(state: State, status: string) {

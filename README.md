@@ -30,6 +30,27 @@ npm run format:check  # Check formatting without changing files
 Generated builds, saved traces, verification recordings, and the lockfile are
 excluded in `.prettierignore`.
 
+## Step 1: From a script to an AI workflow
+
+Start patrol. After a random 2–4 seconds, a notice arrives. Read it, inspect the
+pantry, and supply the item rule through three explicitly hypothetical examples.
+Incorrect choices explain the mismatch and allow another attempt. The examples
+configure a human-authored rule; they do not train a model or change real stock.
+Apply the rule, pick up the actual item, and deliver it. Scout walks back and
+resumes patrol. **Post another notice** repeats the scripted workflow without
+intermediate buttons, preserving inventory depletion and making zero provider
+calls.
+
+**Add an AI model to this workflow** offers an inline Mock/Live choice. **Start AI
+workflow** restores the starting stock and clears hands, basket, and conversation
+after Scout returns to the board. Reading, inspection, and navigation stay
+scripted. At the pantry, **Take item** makes one provider call with the exact
+notice and observed stock, offering only pickup. The provider's actual choice is
+executed, delivered, and recorded. Live choices are never corrected silently.
+
+Step 1 shows no code. **Give Scout control** enters Step 2, where a fresh model
+turn receives only a notice notification and the executable runtime begins.
+
 ## Contribute a step
 
 Open `article-sets/scout-foundations/articles/what-makes-scout-an-agent/`.
@@ -82,8 +103,8 @@ After the experiment settles, pass the observed choice ID as `outcome`; use
 The component shows the **observed choice’s explanation**, with a green
 blockquote border for a matching prediction and red for a different prediction.
 Without a prediction it shows neutral outcome feedback. Changing an answer only
-updates React state; it never executes the experiment. See `01-script.mdx` for
-an example driven by actual patrol and notice events.
+updates React state; it never executes the experiment. See the later MDX steps for comparisons driven by actual execution events.
+Step 1 instead uses button choices to configure its scripted rule.
 
 ### Executable code blocks
 
@@ -109,7 +130,7 @@ an expandable full snapshot. Write the explanation next to it. Blocks do not
 render automatically. Complete snapshots are authoritative; diffs are visual
 only. Import `blocks` from an earlier MDX file to reuse a runtime or compare it.
 
-The eight steps form one article: script → model → tool request and dispatch →
+The eight steps form one article: scripted/AI workflows → model control → tool request and dispatch →
 held result → feedback and loop → dynamic capabilities → autonomous picnic →
 model and harness review. Predictions are optional and never execute actions.
 The first runtime has no dispatch, append, or loop methods. The final snapshot
@@ -127,8 +148,15 @@ and recording aliases. Existing article URL and stable step identities remain.
 
 ### Helpers
 
-- `scout.world`: `postNotice`, `walkTo`, `patrol`, `inspectPantry`, `takeOne`,
+- `scout.world`: `postNotice`, `readNotice`, `walkTo`, `patrol`, `inspectPantry`, `takeOne`,
   `deliverItem`, `setPantry`, and `snapshot`. These use the real world rules.
+- `scout.background(async signal => …)` scopes patrol/timer work to the active
+  step without blocking learner actions. `scout.sleep(ms, signal)` is cancellable.
+  Stop patrol at a circuit boundary before foreground movement. Navigation
+  cancels background work; resumption requires an explicit learner action.
+- `scout.callProvider(messages, schemas, mock?)` instruments a single request,
+  sharing the same cancellation and activity events as runtime snapshots. It
+  supplies no dispatch or loop. Foundations owns the workflow decision Mock.
 - `scout.runtime(block)`: constructs that block’s runtime against the current
   messages, selected tools, cancellation signal, and instrumented provider.
 - `scout.act(async () => …)`: busy state, cancellation, errors, and trace saving.

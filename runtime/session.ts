@@ -7,6 +7,7 @@ import type {
   Message,
   RuntimeEvent,
   Tool,
+  ToolDefinition,
   Provider,
   Trace,
   TraceEvent,
@@ -95,6 +96,7 @@ export function createSessionHost<
       data: Record<string, unknown> = {};
     let context = '',
       stage = 'ready';
+    const backgrounds = new Set<AbortController>();
     let world: World, recording: ReturnType<typeof createTrace<State>>;
     const emit = (e: RuntimeEvent) => {
       if (abort.signal.aborted) return;
@@ -195,6 +197,54 @@ export function createSessionHost<
       step: steps.findIndex((s) => s.id === meta.id) + 1,
       stage,
     };
+    // Provider instrumentation is shared; callers still own dispatch and control flow.
+    function connectProvider(mock = scenario.mockProvider): Provider {
+      const signal = abort.signal,
+        token = generation;
+      const provider =
+        settings().mode === 'live' ? liveProvider(settings().live) : mock;
+      return async (input, schemas, requestSignal) => {
+        const assertActive = () => {
+          signal.throwIfAborted();
+          requestSignal.throwIfAborted();
+          if (
+            generation !== token ||
+            steps[index].id !== meta.id ||
+            settings().mode === 'replay'
+          )
+            throw new Error('Take is no longer active');
+        };
+        assertActive();
+        turn++;
+        const currentTurn = turn;
+        emit({
+          kind: 'model_start',
+          text: 'Provider call pending',
+          turn: currentTurn,
+          messages: structuredClone([...input]),
+          schemas: structuredClone([...schemas]),
+        });
+        try {
+          if (settings().mode === 'mock') await clock.sleep(650, requestSignal);
+          const reply = await provider(input, schemas, requestSignal);
+          assertActive();
+          emit({
+            kind: 'assistant',
+            text: reply.content || 'Tool requested',
+            tool: reply.tool_calls?.[0]?.function,
+            turn: currentTurn,
+          });
+          return reply;
+        } finally {
+          if (!signal.aborted && generation === token)
+            emit({
+              kind: 'model_end',
+              text: 'Provider call ended',
+              turn: currentTurn,
+            });
+        }
+      };
+    }
     const session = {
       meta,
       reset,
@@ -259,9 +309,6 @@ export function createSessionHost<
           if (generation !== token || steps[index].id !== meta.id)
             throw new Error('Take is no longer active');
         };
-        const mock = scenario.mockProvider;
-        const provider =
-          settings().mode === 'live' ? liveProvider(settings().live) : mock;
         emit({ kind: 'runtime_selected', text: block.id });
         return new Constructor({
           messages,
@@ -272,40 +319,67 @@ export function createSessionHost<
             assertActive();
             emit(e);
           },
-          provider: async (input, schemas, requestSignal) => {
-            assertActive();
-            turn++;
-            // This wrapper only observes requests; the selected snapshot supplies all agent behavior.
-            emit({
-              kind: 'model_start',
-              text: 'Provider call pending',
-              turn,
-              messages: structuredClone([...input]),
-              schemas: structuredClone([...schemas]),
-            });
-            try {
-              if (settings().mode === 'mock')
-                await clock.sleep(650, requestSignal);
-              const reply = await provider(input, schemas, requestSignal);
-              assertActive();
-              const publicReply = {
-                role: reply.role,
-                content: reply.content,
-                tool_calls: reply.tool_calls,
-              };
-              emit({
-                kind: 'assistant',
-                text: reply.content || 'Tool requested',
-                tool: publicReply.tool_calls?.[0]?.function,
-                turn,
-              });
-              return reply;
-            } finally {
-              if (!signal.aborted)
-                emit({ kind: 'model_end', text: 'Provider call ended', turn });
-            }
-          },
+          provider: connectProvider(),
         });
+      },
+      callProvider(
+        input: readonly Message[],
+        schemas: readonly ToolDefinition[],
+        mock?: Provider,
+        signal = abort.signal,
+      ) {
+        return connectProvider(mock)(input, schemas, signal);
+      },
+      sleep(ms: number, signal = abort.signal) {
+        return clock.sleep(ms, signal);
+      },
+      background(work: (signal: AbortSignal) => Promise<void>) {
+        if (settings().mode === 'replay' || steps[index].id !== meta.id)
+          throw new Error('This step is not active');
+        if (abort.signal.aborted) abort = new AbortController();
+        const owner = abort.signal,
+          controller = new AbortController(),
+          token = generation;
+        const cancel = () =>
+          controller.abort(
+            owner.reason ?? new Error('Background task cancelled'),
+          );
+        owner.addEventListener('abort', cancel, { once: true });
+        backgrounds.add(controller);
+        notify();
+        const done = Promise.resolve()
+          .then(() => work(controller.signal))
+          .catch((error) => {
+            if (!controller.signal.aborted && token === generation) {
+              emit({
+                kind: 'error',
+                text: error instanceof Error ? error.message : String(error),
+              });
+            }
+          })
+          .finally(() => {
+            owner.removeEventListener('abort', cancel);
+            backgrounds.delete(controller);
+            if (owner.aborted && token === generation) {
+              recording.record({
+                kind: 'background_stopped',
+                text: 'Background work stopped',
+                state: world.snapshot(),
+              });
+              saved(structuredClone(session.trace));
+            }
+            notify();
+          });
+        return { signal: controller.signal, done, cancel };
+      },
+      get backgroundActive() {
+        return backgrounds.size > 0;
+      },
+      get interrupted() {
+        return abort.signal.aborted;
+      },
+      get active() {
+        return steps[index].id === meta.id && settings().mode !== 'replay';
       },
       async act(work: () => void | Promise<void>) {
         if (busy || settings().mode === 'replay' || steps[index].id !== meta.id)
@@ -337,10 +411,11 @@ export function createSessionHost<
         }
       },
       cancel() {
-        if (busy) {
+        if (busy || backgrounds.size) {
+          const unfinished = busy || !recording.trace.final;
           abort.abort(new Error('Step left or mode changed'));
           busy = false;
-          recording.finish(world.snapshot(), 'cancelled');
+          if (unfinished) recording.finish(world.snapshot(), 'cancelled');
           saved(structuredClone(session.trace));
           notify();
         }

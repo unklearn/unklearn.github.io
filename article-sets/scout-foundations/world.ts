@@ -153,14 +153,31 @@ export function createWorld({
     );
   }
   async function patrol(signal: AbortSignal) {
+    signal.throwIfAborted();
+    if (!near('noticeboard'))
+      await execute(
+        { name: 'walk_to', arguments: { place: 'noticeboard' } },
+        signal,
+      );
     const path: Point[] = [
       [-4.1, 0.45, 1.6],
       [-2.2, 0.45, 2.5],
       [-4.6, 0.45, 3.1],
       [-4.1, 0.45, 1.6],
     ];
+    state.place = null;
     show('walk_start', 'Scripted patrol', { path, duration: 7000 });
-    await clock.sleep(7000, signal);
+    try {
+      await clock.sleep(7000, signal);
+      signal.throwIfAborted();
+    } catch (error) {
+      state.place = 'noticeboard';
+      state.position = [...places.noticeboard];
+      show('walk_cancelled', 'Patrol cancelled');
+      throw error;
+    }
+    state.place = 'noticeboard';
+    state.position = [...places.noticeboard];
     show('patrol_pass', 'Scout passed the noticeboard without reading.');
   }
   return { snapshot, execute, postNotice, setPantry, emptyApples, patrol };

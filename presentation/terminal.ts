@@ -54,7 +54,10 @@ export const screen = {
     this.render();
   },
   event(event: RuntimeEvent, quiet = false) {
-    if (event.kind === 'model_start') pending = true;
+    if (event.kind === 'model_start') {
+      pending = true;
+      document.querySelector<HTMLElement>('#terminal-custom')!.hidden = true;
+    }
     if (event.kind === 'model_end' || event.kind === 'run_end') pending = false;
     if (event.kind === 'lesson_approval' && !quiet) {
       document.querySelector('#context-notice')!.textContent =
@@ -65,7 +68,15 @@ export const screen = {
       this.render();
       return;
     }
-    if (['assistant', 'tool_result', 'report', 'error'].includes(event.kind)) {
+    if (
+      [
+        'assistant',
+        'tool_result',
+        'scripted_result',
+        'report',
+        'error',
+      ].includes(event.kind)
+    ) {
       const text =
         event.kind === 'assistant' && event.tool
           ? `Requested ${event.tool.name}(${JSON.stringify(event.tool.arguments)})`
@@ -82,7 +93,10 @@ export const screen = {
             text.length <= 220)
         )
           show('scout');
-        else if (!manual && event.kind === 'tool_result')
+        else if (
+          !manual &&
+          ['tool_result', 'scripted_result'].includes(event.kind)
+        )
           terminal.hidden = true;
       }
     }
@@ -126,12 +140,19 @@ export const screen = {
       ...entries.slice(-8).map((entry) => {
         const li = document.createElement('li');
         li.className = entry.kind;
-        if (entry.kind === 'tool_result' || entry.text.length > 220) {
+        if (
+          ['tool_result', 'scripted_result'].includes(entry.kind) ||
+          entry.text.length > 220
+        ) {
           const details = document.createElement('details'),
             summary = document.createElement('summary'),
             pre = document.createElement('pre');
           summary.textContent =
-            entry.kind === 'tool_result' ? 'Tool result' : 'Scout response';
+            entry.kind === 'tool_result'
+              ? 'Tool result'
+              : entry.kind === 'scripted_result'
+                ? 'Script result'
+                : 'Scout response';
           pre.textContent = entry.text;
           details.append(summary, pre);
           li.append(details);

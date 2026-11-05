@@ -1159,3 +1159,49 @@ body.film::after {
   border-left-color: #b44a40;
   background: #b44a400b;
 }
+
+.lesson-copy .workflow-instruction {
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 20px 0 16px;
+  padding: 10px 14px;
+  background: #347e7a08;
+  border-left: 3px solid #86a39b;
+}
+.hypothetical-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #7b6553;
+}
+.provider-choice {
+  border: 0;
+  padding: 0;
+  margin: 18px 0;
+}
+.provider-choice legend {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.provider-choice label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0;
+  font-size: 13px;
+}
+.provider-choice input {
+  width: auto;
+  accent-color: #347e7a;
+}
+.quiet-action {
+  padding: 2px 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  font-size: 12px;
+  color: #777367;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

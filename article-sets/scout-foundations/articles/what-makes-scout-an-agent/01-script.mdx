@@ -2,107 +2,526 @@ import { useState, useRef } from 'react';
 import { useScoutStep } from '../../authoring.ts';
 import {
   Action,
-  Prediction,
-  RuntimeChange,
-  RuntimeExcerpt,
   useLessonPresentation,
 } from '../../../../presentation/lesson-ui.tsx';
+import { defaultOrder } from '../../types.ts';
+import {
+  picnicRule,
+  ruleExamples,
+  scriptedObservation,
+  chooseAndTake,
+} from '../../workflow.ts';
 
 export const meta = {
   id: 'meet',
   title: 'Following a script',
-  question: 'Will posting a notice change a scripted patrol?',
+  question: 'Who decides what Scout does next?',
   initial: { tools: [], notice: '' },
   narration: {
-    text: 'Meet Scout, the courier. A patrol can move its body, but it does not interpret the job on a notice.',
+    text: 'First direct Scout yourself, then supply a rule for a scripted workflow. Adding a model for one decision still leaves the surrounding workflow under human control.',
   },
 };
 
 Scout is a courier. Its job is to carry one item from the pantry, across the bridge, to the picnic basket. We will build the runtime that lets it choose what to do.
 
-export function ScriptedPatrol() {
-  const [prediction, setPrediction] = useState(null);
+export function ScriptedWorkflow() {
   const s = useScoutStep(),
-    [phase, setPhase] = useState('ready');
+    ui = useLessonPresentation();
+  const [phase, setPhase] = useState('start'),
+    [example, setExample] = useState(0),
+    [answer, setAnswer] = useState(null);
+  const [inspection, setInspection] = useState(null),
+    [taken, setTaken] = useState(null);
+  const patrol = useRef(null),
+    policy = useRef('manual'),
+    initialPantry = useRef(null),
+    notice = useRef(''),
+    observed = useRef(null);
+  const advance = (value) => {
+    setPhase(value);
+    s.mark(value);
+  };
+  const observe = (name, operation) => scriptedObservation(s, name, operation);
+  async function stopPatrol() {
+    const task = patrol.current;
+    if (task) {
+      task.stopping = true;
+      await task.done;
+      if (patrol.current === task) patrol.current = null;
+    }
+  }
+  async function read(signal) {
+    await observe('walk_to noticeboard', () =>
+      s.world.walkTo('noticeboard', signal),
+    );
+    const result = await observe('read_notice', () =>
+      s.world.readNotice(signal),
+    );
+    notice.current = result.notice;
+    ui.renderSystemTerminal(<p>{result.notice}</p>);
+  }
+  async function inspect(signal) {
+    await observe('walk_to pantry', () => s.world.walkTo('pantry', signal));
+    const result = await observe('inspect_pantry', () =>
+      s.world.inspectPantry(signal),
+    );
+    observed.current = result.pantry;
+    setInspection(result.pantry);
+  }
+  async function takeByRule(signal) {
+    const item = picnicRule(observed.current);
+    if (!item)
+      throw new Error('The supplied rule cannot choose an available item.');
+    s.event({
+      kind: 'rule_decision',
+      text: `Human-authored rule chose ${item}`,
+      result: { item, pantry: observed.current },
+    });
+    const result = await observe('take_one', () =>
+      s.world.takeOne(item, signal),
+    );
+    setTaken(result.item);
+  }
+  async function deliverAndReturn(signal, ai = false) {
+    if (s.world.snapshot().carried) {
+      await observe('walk_to picnic basket', () =>
+        s.world.walkTo('picnic_basket', signal),
+      );
+      await observe('deliver_item', () => s.world.deliverItem(signal));
+    }
+    advance(ai ? 'ai-returning' : 'human-returning');
+    await observe('walk_to noticeboard', () =>
+      s.world.walkTo('noticeboard', signal),
+    );
+    advance(ai ? 'ai-done' : 'human-done');
+  }
+  function startPatrol() {
+    if (patrol.current?.running && !patrol.current.signal.aborted) return;
+    const task = { stopping: false, running: true };
+    const background = s.background(async (signal) => {
+      while (!task.stopping) {
+        await s.world.patrol(signal);
+        if (task.stopping) break;
+        if (s.world.snapshot().unread && policy.current !== 'manual') {
+          const ai = policy.current === 'ai';
+          await s.act(async () => {
+            advance(ai ? 'ai-preparing' : 'human-working');
+            await read(signal);
+            await inspect(signal);
+            if (ai) advance('ai-take');
+            else {
+              await takeByRule(signal);
+              await deliverAndReturn(signal);
+            }
+          });
+          if (ai || s.stage === 'error') break;
+        }
+      }
+    });
+    Object.assign(task, background);
+    patrol.current = task;
+    background.done.then(() => {
+      task.running = false;
+    });
+  }
+  function delayedNotice(ai = false) {
+    s.background(async (signal) => {
+      await s.sleep(2000 + Math.random() * 2000, signal);
+      signal.throwIfAborted();
+      s.world.postNotice(defaultOrder);
+      if (!ai) advance('notice');
+    });
+  }
+  function start() {
+    s.reset({ notice: '', tools: [] });
+    initialPantry.current = s.world.snapshot().pantry;
+    policy.current = 'manual';
+    advance('waiting');
+    startPatrol();
+    delayedNotice();
+  }
+  function readNotice() {
+    return s.act(async () => {
+      await stopPatrol();
+      await read();
+      advance('inspect');
+    });
+  }
+  function inspectPantry() {
+    return s.act(async () => {
+      await inspect();
+      advance('examples');
+    });
+  }
+  function takeItem() {
+    return s.act(async () => {
+      await takeByRule();
+      advance('deliver');
+    });
+  }
+  function deliver() {
+    return s.act(async () => {
+      await deliverAndReturn();
+      policy.current = 'human';
+      startPatrol();
+    });
+  }
+  function postAnother() {
+    s.world.postNotice(defaultOrder);
+    s.event({
+      kind: 'workflow_trigger',
+      text: 'Reader posted another notice for the configured workflow',
+    });
+    startPatrol();
+  }
+  function addAI() {
+    ui.selectProvider('mock');
+    advance('provider');
+  }
+  async function startAI() {
+    let prepared = false;
+    await s.act(async () => {
+      await stopPatrol();
+      await observe('walk_to noticeboard', () => s.world.walkTo('noticeboard'));
+      prepared = true;
+    });
+    if (!prepared || !s.active || s.interrupted) return;
+    s.reset({ notice: '', pantry: initialPantry.current, tools: [] });
+    observed.current = null;
+    notice.current = '';
+    setInspection(null);
+    setTaken(null);
+    policy.current = 'ai';
+    advance('ai-waiting');
+    startPatrol();
+    delayedNotice(true);
+  }
+  function aiTakeItem() {
+    return s.act(async () => {
+      const item = await chooseAndTake(s, notice.current, observed.current);
+      setTaken(item);
+      advance('ai-delivering');
+      await deliverAndReturn(undefined, true);
+      startPatrol();
+    });
+  }
+  function resume() {
+    if (
+      phase === 'human-returning' ||
+      phase === 'ai-returning' ||
+      phase === 'ai-delivering' ||
+      phase === 'deliver'
+    ) {
+      return s.act(async () => {
+        const ai = phase.startsWith('ai');
+        await deliverAndReturn(undefined, ai);
+        policy.current = ai ? 'ai' : 'human';
+        startPatrol();
+      });
+    }
+    if (phase === 'human-working') {
+      return s.act(async () => {
+        if (!s.world.snapshot().carried) {
+          await read();
+          await inspect();
+          await takeByRule();
+        }
+        await deliverAndReturn();
+        startPatrol();
+      });
+    }
+    startPatrol();
+    if (['waiting', 'ai-waiting', 'ai-preparing'].includes(phase)) {
+      if (!s.world.snapshot().unread) delayedNotice(policy.current === 'ai');
+      else if (policy.current === 'manual') advance('notice');
+    }
+  }
+  function restart() {
+    s.reset({ notice: '', tools: [] });
+    patrol.current = null;
+    policy.current = 'manual';
+    initialPantry.current = null;
+    observed.current = null;
+    notice.current = '';
+    setInspection(null);
+    setTaken(null);
+    setExample(0);
+    setAnswer(null);
+    setPhase('start');
+  }
+  const current = ruleExamples[example],
+    correct = answer === current.item;
+  const interrupted = s.interrupted && !s.busy;
+  const humanReady =
+    phase === 'human-done' ||
+    (phase === 'human-working' && s.stage === 'error');
+  const waiting = [
+    'waiting',
+    'ai-waiting',
+    'ai-preparing',
+    'human-working',
+    'human-returning',
+    'ai-returning',
+    'ai-delivering',
+  ].includes(phase);
+  const instructions = {
+    start: 'Click Start patrol to send Scout around the courtyard.',
+    waiting:
+      'Scout is following an authored patrol. A picnic notice will arrive shortly.',
+    notice:
+      'Click Read notice to bring Scout to the board and read the posted notice.',
+    inspect: 'Scout needs to inspect the pantry. Click Inspect pantry.',
+    examples:
+      'Supply the decision rule. Choose an item for each hypothetical pantry, following the posted picnic instruction.',
+    take: 'Ask Scout to make a decision using the rule you supplied. Click Take item.',
+    deliver: `Scout must take one ${taken ?? s.world.snapshot().carried ?? 'item'} to the picnic basket. Click Deliver to picnic basket.`,
+    'human-done':
+      'Scout follows your workflow now. Post another notice to watch it repeat, or add a model for the item decision.',
+    provider:
+      'Choose Mock or Live, then click Start AI workflow. Only the item decision will use the provider.',
+    'ai-waiting':
+      'Scout will read the next notice and inspect the pantry using the fixed workflow.',
+    'ai-preparing':
+      'The workflow is reading the notice, walking to the pantry, and inspecting its stock.',
+    'ai-take':
+      'The workflow has supplied the notice and observed stock. Click Take item to ask the provider for one item choice.',
+    'ai-delivering':
+      'The provider selected an item. The scripted workflow is delivering it.',
+    'human-working':
+      'The scripted workflow is reading, inspecting, choosing by your rule, and delivering.',
+    'human-returning':
+      'Scout is walking back to the noticeboard before resuming patrol.',
+    'ai-returning':
+      'Scout is walking back to the noticeboard before resuming patrol.',
+    'ai-done':
+      'AI supplied an item decision inside the workflow. Give Scout control to explore an agent.',
+  };
   return (
     <>
-      <Prediction
-        question={meta.question}
-        choices={[
-          {
-            id: 'reads',
-            label: 'Scout will read the notice',
-            explanation:
-              'Scout read the notice. The notice-read event, rather than movement alone, is evidence of reading.',
-          },
-          {
-            id: 'patrol',
-            label: 'Scout will follow its route',
-            explanation:
-              'Scout followed its authored path and left the posted notice unread. The patrol script never checked the board; posting a notice did not change its behavior.',
-          },
-        ]}
-        value={prediction}
-        onChange={setPrediction}
-        outcome={
-          !s.busy &&
-          s.stage === 'passed' &&
-          s.trace.events.some((e) => e.kind === 'notice_posted')
-            ? s.world.snapshot().unread
-              ? 'patrol'
-              : 'reads'
-            : null
-        }
-      />
-      <p>
-        {phase === 'walking'
-          ? 'Post a picnic notice while Scout walks. The amber light means a notice is waiting.'
-          : 'Start the patrol'}
-      </p>
-      <div className="actions">
-        <Action
-          className="primary"
-          onClick={async () => {
-            setPhase('walking');
-            await blocks.patrol.module.run(s);
-            if (s.stage === 'passed') setPhase('passed');
-          }}
-        >
-          Start patrol
-        </Action>
-        <Action
-          concurrent
-          disabled={phase === 'ready'}
-          onClick={() => s.world.postNotice()}
-        >
-          Post a notice
-        </Action>
-      </div>
-      {phase === 'passed' && (
-        <p>
-          Scout finished its authored path.{' '}
-          {s.world.snapshot().unread
-            ? 'The notice is still unread.'
-            : 'Post a notice, then continue.'}{' '}
-          Movement alone did not interpret a job. This experiment made no model
-          calls and executed no tools.
+      <blockquote className="workflow-instruction" aria-live="polite">
+        {phase === 'human-done' && s.world.snapshot().unread
+          ? 'A notice is waiting. Scout will handle it when the patrol reaches the board.'
+          : instructions[phase]}
+      </blockquote>
+      {s.stage === 'error' && (
+        <p role="status">
+          {s.trace.events.findLast((e) => e.kind === 'error')?.text} The
+          workflow stopped; no alternate choice was substituted.
         </p>
       )}
-      <RuntimeChange to={blocks.patrol} />
+      {phase === 'start' && (
+        <Action className="primary" onClick={start}>
+          Start patrol
+        </Action>
+      )}
+      {waiting && interrupted && (
+        <Action className="primary" onClick={resume}>
+          Resume workflow
+        </Action>
+      )}
+      {phase === 'notice' && (
+        <Action className="primary" onClick={readNotice}>
+          Read notice
+        </Action>
+      )}
+      {phase === 'inspect' && (
+        <Action className="primary" onClick={inspectPantry}>
+          Inspect pantry
+        </Action>
+      )}
+      {phase === 'examples' && (
+        <>
+          <p className="hypothetical-label">
+            Hypothetical pantry · Example {example + 1}/3
+          </p>
+          <p>
+            {current.pantry.apple} apples, {current.pantry.carrot} carrots.
+            These are practice counts; the real pantry stays unchanged.
+          </p>
+          <p>
+            The notice prefers an apple, while leaving at least one apple.
+            Otherwise take a carrot.
+          </p>
+          <div className="actions">
+            {['apple', 'carrot'].map((item) => (
+              <Action
+                key={item}
+                disabled={correct}
+                onClick={() => {
+                  setAnswer(item);
+                  s.event({
+                    kind: 'learner_choice',
+                    text: `Hypothetical example ${example + 1}: ${item}`,
+                    result: {
+                      hypothetical: true,
+                      pantry: current.pantry,
+                      item,
+                      correct: item === current.item,
+                    },
+                  });
+                }}
+              >
+                Take 1 {item}
+              </Action>
+            ))}
+          </div>
+          {answer && (
+            <blockquote
+              className={`prediction-feedback ${correct ? 'correct' : 'incorrect'}`}
+              role="status"
+            >
+              <strong>
+                {correct ? 'That follows the notice.' : 'Try again.'}
+              </strong>{' '}
+              {current.explanation}
+            </blockquote>
+          )}
+          {correct && (
+            <Action
+              className="primary"
+              onClick={() => {
+                if (example < 2) {
+                  setExample(example + 1);
+                  setAnswer(null);
+                } else {
+                  s.event({
+                    kind: 'rule_configured',
+                    text: 'Reader supplied the apple-preserving rule',
+                  });
+                  advance('take');
+                }
+              }}
+            >
+              {example < 2 ? 'Next example' : 'Use this rule'}
+            </Action>
+          )}
+        </>
+      )}
+      {['take', 'deliver'].includes(phase) && (
+        <>
+          <p>
+            Scout will now follow the rule you supplied: take an apple when more
+            than one is available; otherwise take a carrot if one is available.
+            You configured a rule; these examples did not train an AI model.
+          </p>
+          {inspection && (
+            <p>
+              Actual pantry observation: {inspection.apple} apples,{' '}
+              {inspection.carrot} carrots.
+            </p>
+          )}
+          {phase === 'take' ? (
+            <Action className="primary" onClick={takeItem}>
+              Take item
+            </Action>
+          ) : (
+            <>
+              <p>
+                Scout picked up one {taken}. The pantry now holds{' '}
+                {s.world.snapshot().pantry.apple} apples and{' '}
+                {s.world.snapshot().pantry.carrot} carrots.
+              </p>
+              <Action className="primary" onClick={deliver}>
+                Deliver to picnic basket
+              </Action>
+            </>
+          )}
+        </>
+      )}
+      {(humanReady || phase === 'provider') && (
+        <p>
+          You supplied the route, the notice trigger, and the decision rule.
+          Scout can repeat them automatically, but that repetition is still a
+          human-designed workflow.
+        </p>
+      )}
+      {humanReady && (
+        <div className="actions">
+          <Action
+            className="primary"
+            disabled={!!s.world.snapshot().unread}
+            onClick={addAI}
+          >
+            Add an AI model to this workflow
+          </Action>
+          <Action
+            disabled={!!s.world.snapshot().unread || s.stage === 'error'}
+            onClick={postAnother}
+          >
+            Post another notice
+          </Action>
+        </div>
+      )}
+      {phase === 'provider' && (
+        <>
+          <fieldset className="provider-choice">
+            <legend>Item decision provider</legend>
+            {['mock', 'live'].map((mode) => (
+              <label key={mode}>
+                <input
+                  type="radio"
+                  name="workflow-provider"
+                  checked={s.settings.mode === mode}
+                  disabled={s.busy}
+                  onChange={() => ui.selectProvider(mode)}
+                />
+                {mode === 'mock'
+                  ? 'Mock · deterministic demonstration'
+                  : 'Live · configured provider'}
+              </label>
+            ))}
+          </fieldset>
+          <p>
+            Ollama or gateway URL and model are configured in Settings. Provider
+            selection alone makes no call. Starting restores the original pantry
+            and clears the basket and hands after Scout walks back to the board.
+          </p>
+          <Action className="primary" onClick={startAI}>
+            Start AI workflow
+          </Action>
+        </>
+      )}
+      {phase === 'ai-take' && (
+        <>
+          <p>
+            Actual pantry observation: {inspection?.apple} apples,{' '}
+            {inspection?.carrot} carrots.
+          </p>
+          <Action className="primary" onClick={aiTakeItem}>
+            Take item
+          </Action>
+        </>
+      )}
+      {phase === 'ai-done' && (
+        <>
+          <p>
+            The provider chose one {taken}. The basket now contains{' '}
+            {s.world.snapshot().basket.apple} apples and{' '}
+            {s.world.snapshot().basket.carrot} carrots.
+          </p>
+          <p>
+            This is an AI workflow. A human-designed sequence still decided when
+            Scout read, inspected, asked for a decision, and delivered. The
+            model did not choose those steps. Next, we will let the model choose
+            what to do.
+          </p>
+          <Action className="primary" onClick={() => ui.goToStep('model')}>
+            Give Scout control
+          </Action>
+        </>
+      )}
+      {interrupted && ['human-done', 'provider', 'ai-done'].includes(phase) && (
+        <Action onClick={resume}>Resume patrol</Action>
+      )}
+      {phase !== 'start' && (
+        <p>
+          <Action className="quiet-action" onClick={restart}>
+            Restart step
+          </Action>
+        </p>
+      )}
     </>
   );
 }
 
-<ScriptedPatrol />
-
-```ts experiment="patrol"
-import type { ScoutStep } from '../../session.ts';
-export async function run(s: ScoutStep) {
-  s.reset({ notice: '', tools: [] });
-  await s.act(async () => {
-    await s.world.patrol();
-    s.saveCheckpoint('posted-board');
-    s.mark('passed');
-  });
-}
-```
+<ScriptedWorkflow />

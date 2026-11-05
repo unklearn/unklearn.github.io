@@ -11,12 +11,25 @@ export function renderStatus(
   const observations = messages
     .filter((m) => m.role === 'tool')
     .map((m) => ({ name: m.tool_name, result: JSON.parse(m.content) }));
-  const knowledge = observations.findLast(
-    (o) => o.name === 'inspect_pantry' && o.result.ok,
-  )?.result.pantry;
-  const read = observations.some(
-    (o) => o.name === 'read_notice' && o.result.ok,
-  );
+  const supplied = messages
+    .filter((m) => m.role === 'user')
+    .map((m) => {
+      try {
+        return JSON.parse(m.content) as {
+          notice?: string;
+          pantry?: Snapshot['pantry'];
+        };
+      } catch {
+        return {};
+      }
+    })
+    .findLast((value) => value.pantry);
+  const knowledge =
+    observations.findLast((o) => o.name === 'inspect_pantry' && o.result.ok)
+      ?.result.pantry ?? supplied?.pantry;
+  const read =
+    !!supplied?.notice ||
+    observations.some((o) => o.name === 'read_notice' && o.result.ok);
   const counts = (stock: Snapshot['pantry']) =>
     `${stock.apple} apple(s), ${stock.carrot} carrot(s)`;
   const pairs = [

@@ -4,7 +4,7 @@ The pending in-world terminal toggle was committed first as `9ee988c`.
 
 ## Executable teaching boundaries
 
-`npm test`: 13 focused checks pass. `npm run build`: TypeScript, all 12 stored
+`npm test`: 17 focused checks pass. `npm run build`: TypeScript, all 11 stored
 MDX runtime/configuration/experiment blocks, Vite static bundling, and lesson
 HTML pre-rendering pass. Vite reports its existing large Three.js bundle warning.
 
@@ -79,3 +79,38 @@ Browser-checked red and green feedback in the real patrol experiment, retained
 selection across navigation, and zero provider calls/tools after changing
 predictions. Two focused rendering checks cover correct/incorrect, pending,
 unanswered, and unsupported outcomes. Formatting and static build pass.
+
+## Step 1 workflow rewire
+
+Step 1 now contains the guided human-rule workflow and the single-decision AI
+workflow, with no displayed source or initial prediction. The common header is
+STEP 1/8, with one title below. The first model-directed runtime starts in
+Step 2, Giving Scout control, from a fresh conversation and posted notice.
+
+Focused checks cover real scripted transfers without provider calls, unchanged
+stock during hypothetical examples, the history-only workflow Mock receiving
+actual notice/stock with only pickup available, cancellation of patrol/timers,
+and retaining completed run status when stopping background patrol. Existing
+three autonomous-agent picnic cases and pure Replay checks continue to pass.
+
+Browser walkthrough verified repeating patrol, delayed notice, physical read,
+board indicator clearing, pantry walk/inspection, wrong-answer retry and all
+three practice examples, actual pickup/delivery and return, and automatic
+scripted repeats with depleted stock and zero provider calls. The AI comparison
+restored 2 apples / 2 carrots, empty hands/basket, and zero calls before Take item.
+Inline Mock/Live changes preserved progress and made no request.
+
+Local Ollama qwen3:14b was exercised separately for the new one-shot decision:
+with 2 apples it chose an apple; with 1 apple it also chose an apple, taking the
+last apple. Each used exactly one call. Both actual outcomes were preserved;
+no replacement choice or Mock fallback occurred. Actual traces are in ignored
+verification/workflow-{2,1}-apples.json. These one-shot workflow results are
+separate from the full agent-loop Live runs above.
+
+The final static browser take completed the single-decision Mock delivery while
+Ollama was suspended: before the call, pantry 2 apples / 2 carrots, empty hands
+and basket, zero calls; after Take item, one call and one pickup, one apple
+delivered. Give Scout control opened Step 2 without inference. Returning retained
+Step 1 progress and offered explicit Resume patrol. Bundled Replay completed
+with the original final inventories and zero new provider/tool executions.
+Ollama was restored afterward.

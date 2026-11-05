@@ -144,6 +144,11 @@ function renderLesson() {
     selected,
     replay: config.mode === 'replay',
     terminal: renderSystemTerminal,
+    selectProvider: changeProvider,
+    navigate: (id) => {
+      const index = steps.findIndex((step) => step.meta.id === id);
+      if (index >= 0) select(index);
+    },
     review: reviewExecution,
   });
   if (!lessonRoot) {
@@ -157,7 +162,7 @@ function renderLesson() {
       lessonRoot.render(content);
     }
   } else lessonRoot.render(content);
-  $('step-count').textContent = `${selected + 1} / ${steps.length}`;
+  $('step-count').textContent = `STEP ${selected + 1}/${steps.length}`;
   $<HTMLButtonElement>('previous').disabled = selected === 0;
   $<HTMLButtonElement>('next').disabled = selected === steps.length - 1;
   $('toc-steps')
@@ -263,7 +268,7 @@ function render() {
     `${steps[selected].meta.id}:${step.stage}`,
     reviewing ? recordedContext : config.mode === 'replay' ? '' : step.context,
   );
-  view.idle(!step.busy && !isRecorded());
+  view.idle(!step.busy && !step.backgroundActive && !isRecorded());
   if ($<HTMLDialogElement>('status-panel').open)
     renderStatus(
       currentState(),
@@ -399,7 +404,8 @@ $<HTMLFormElement>('order-form').onsubmit = (event) => {
     view.pause(false);
     $('replay-bar').hidden = true;
   }
-  if (!host.current.busy) host.current.reset({ tools: host.current.tools });
+  if (!host.current.busy && !host.current.backgroundActive)
+    host.current.reset({ tools: host.current.tools });
   host.current.world.postNotice(config.order);
   $<HTMLDialogElement>('settings-panel').close();
   if (!host.current.busy)
@@ -423,7 +429,26 @@ for (const id of ['transport', 'endpoint', 'model'])
       model: $<HTMLInputElement>('model').value,
     };
   };
+function changeProvider(mode: 'mock' | 'live') {
+  if (config.mode === mode) return;
+  if (host.current.busy) host.current.cancel();
+  config.mode = mode;
+  $<HTMLSelectElement>('mode').value = mode;
+  $('live-settings').hidden = mode !== 'live';
+  $('recording-settings').hidden = true;
+  $('mode-note').textContent =
+    mode === 'mock'
+      ? 'Deterministic demonstration. No backend or key.'
+      : 'Actual provider responses. No automatic fallback to Mock.';
+  screen.reset(source());
+  render();
+}
 $<HTMLSelectElement>('mode').onchange = () => {
+  const requested = $<HTMLSelectElement>('mode').value as Mode;
+  if (requested !== 'replay' && config.mode !== 'replay') {
+    changeProvider(requested);
+    return;
+  }
   reviewing = false;
   host.current.cancel();
   replay?.pause();

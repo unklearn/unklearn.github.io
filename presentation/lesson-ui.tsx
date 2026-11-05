@@ -35,6 +35,8 @@ interface LessonContext {
   step: PresentationStep;
   replay: boolean;
   terminal?: (content: ReactNode) => void;
+  selectProvider?: (mode: 'mock' | 'live') => void;
+  navigate?: (id: string) => void;
   review?: (trace: Trace<unknown>, at?: number, seq?: number) => void;
 }
 const Context = createContext<LessonContext | null>(null);
@@ -51,6 +53,8 @@ export function useLessonStep<T extends PresentationStep = PresentationStep>() {
 export function useLessonPresentation() {
   const context = useContext(Context)!;
   return {
+    selectProvider: (mode: 'mock' | 'live') => context.selectProvider?.(mode),
+    goToStep: (id: string) => context.navigate?.(id),
     renderSystemTerminal: (content: ReactNode) => context.terminal?.(content),
     showContext: context.step.showContext,
     showQuestion: context.step.showQuestion,
@@ -90,6 +94,8 @@ export function LessonPages({
   selected = 0,
   replay = false,
   terminal,
+  selectProvider,
+  navigate,
   review,
 }: {
   article: LessonArticle;
@@ -97,6 +103,8 @@ export function LessonPages({
   selected?: number;
   replay?: boolean;
   terminal?: (content: ReactNode) => void;
+  selectProvider?: (mode: 'mock' | 'live') => void;
+  navigate?: (id: string) => void;
   review?: (trace: Trace<unknown>, at?: number, seq?: number) => void;
 }) {
   useSyncExternalStore(host.subscribe, host.getRevision, host.getRevision);
@@ -112,7 +120,6 @@ export function LessonPages({
             hidden={index !== selected}
             aria-labelledby={id}
           >
-            <span className="step-kicker">Step {index + 1}</span>
             <h1 id={id}>{step.meta.title}</h1>
             <Context.Provider
               value={{
@@ -120,6 +127,8 @@ export function LessonPages({
                 step: host.get(step.meta.id),
                 replay,
                 terminal,
+                selectProvider,
+                navigate,
                 review,
               }}
             >

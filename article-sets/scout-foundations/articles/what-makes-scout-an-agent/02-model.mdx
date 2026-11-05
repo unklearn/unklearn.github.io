@@ -10,23 +10,23 @@ import {
 
 export const meta = {
   id: 'model',
-  title: 'Adding a model',
+  title: 'Giving Scout control',
   question: 'What information does the model actually have?',
-  initial: { checkpoint: 'posted-board', tools: [] },
+  initial: { tools: [] },
   narration: {
     text: 'A model can decide only from its input. A notice notification does not contain the notice itself.',
   },
 };
 
-We now give Scout a model. A thinking bubble marks the time a provider call is actually pending. The model receives a notification, not the notice text.
+The AI workflow let a model choose an item inside a fixed sequence. Now we will let it choose what to do next. Start with a fresh conversation: Scout receives only a new-notice notification, without the notice text, stock, or tools. A thinking bubble marks an actual pending provider call.
 
 export function ModelTurn() {
   const [prediction, setPrediction] = useState(null);
   const s = useScoutStep(),
     [done, setDone] = useState(false);
   function run() {
-    if (!s.restoreCheckpoint('posted-board')) s.reset({ tools: [] });
-    if (!s.world.snapshot().notice) s.world.postNotice();
+    s.reset({ notice: '', tools: [] });
+    s.world.postNotice();
     s.setTools([]);
     return s.act(async () => {
       await s.runtime(blocks.invoke).evaluate();

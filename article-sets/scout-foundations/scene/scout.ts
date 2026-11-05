@@ -61,6 +61,7 @@ export function buildScout(scene: THREE.Scene) {
         'walk_start',
         'walk_end',
         'walk_cancelled',
+        'background_stopped',
         'checkpoint',
         'patrol_pass',
       ].includes(event.kind)
@@ -69,9 +70,13 @@ export function buildScout(scene: THREE.Scene) {
     if (event.kind === 'walk_start' && event.movement)
       motion = { ...event.movement, elapsed };
     else if (
-      ['walk_end', 'walk_cancelled', 'checkpoint', 'patrol_pass'].includes(
-        event.kind,
-      )
+      [
+        'walk_end',
+        'walk_cancelled',
+        'background_stopped',
+        'checkpoint',
+        'patrol_pass',
+      ].includes(event.kind)
     )
       motion = null;
     gesture = event.kind;

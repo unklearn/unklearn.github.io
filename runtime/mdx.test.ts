@@ -292,7 +292,9 @@ test('Live preserves provider conversation fields without exposing private think
 test('the authored patrol runs without inference and every step has an editable teaching question', async () => {
   const h = host(),
     s = h.current;
-  await article.steps[0].blocks.patrol.module.run!(s);
+  await s.act(async () => {
+    await s.world.patrol();
+  });
   s.world.postNotice();
   assert(s.world.snapshot().unread);
   assert(
