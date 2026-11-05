@@ -1,7 +1,7 @@
 import { writeFile } from 'node:fs/promises';
-import { runScout } from '../runtime/loop.ts';
-import { mockProvider } from '../runtime/providers.ts';
-import { defaultOrder } from '../runtime/types.ts';
+import { runScout } from '../article-sets/scout-foundations/experiment.ts';
+import { mockProvider } from '../article-sets/scout-foundations/mock.ts';
+import { defaultOrder } from '../article-sets/scout-foundations/types.ts';
 
 for (const apple of [2, 1]) {
   let time = 0;

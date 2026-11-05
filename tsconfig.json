@@ -12,5 +12,5 @@
     "erasableSyntaxOnly": true,
     "skipLibCheck": true
   },
-  "include": ["runtime", "scene", "scripts", "vite.config.ts"]
+  "include": ["runtime", "scene", "presentation", "article-sets", "scripts", "vite.config.ts"]
 }

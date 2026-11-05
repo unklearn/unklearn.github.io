@@ -1,7 +1,7 @@
 import { mkdir, writeFile } from 'node:fs/promises';
-import { runScout } from '../runtime/loop.ts';
+import { runScout } from '../article-sets/scout-foundations/experiment.ts';
 import { liveProvider } from '../runtime/providers.ts';
-import { defaultOrder, carrotOrder } from '../runtime/types.ts';
+import { defaultOrder, carrotOrder } from '../article-sets/scout-foundations/types.ts';
 
 const provider = liveProvider({ endpoint: process.env.OLLAMA_URL || 'http://127.0.0.1:11434', model: process.env.OLLAMA_MODEL || 'qwen3:14b', think: process.env.OLLAMA_THINK === 'true', timeoutMs: Number(process.env.OLLAMA_TIMEOUT_MS || 180000) });
 await mkdir(new URL('../verification/', import.meta.url), { recursive: true });

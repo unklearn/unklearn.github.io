@@ -1,86 +1,203 @@
-# Scout’s picnic · Unklearn
+# Scout Foundations · Unklearn
 
-A small isometric world for teaching an agent loop. Scout reads a notice, walks to the pantry, inspects its stock, picks up a snack, and delivers it to the picnic basket. The **browser runs the loop, tools, and authoritative world**. Three.js draws what happens.
+An interactive article about an agent runtime. The browser owns the loop, message
+history, selected tools, and authoritative picnic world. Three.js renders events.
+Mock and Replay work on a static host without Ollama, a backend, or a key.
 
-## Open the world
+## Open it
 
-Node 22.12+ is needed only for local development/building. In this folder:
+Node 22.12+ is needed for building. After `npm ci`:
 
 ```sh
-npm ci
 npm start
 ```
 
-Open **http://127.0.0.1:4333/**. It starts in **Mock**. You need no Ollama, backend, account, API key, or environment file.
+Open **http://127.0.0.1:4333/**. This builds and serves the static files. For editing,
+use `npm run dev`. `npm run build` produces an independently hostable `dist/` with
+relative asset paths, local geometry, lesson content, and example recordings.
+Every registered article’s slides and code excerpts are rendered into the HTML
+at build time, so crawlers can read them without a separate Article mode or JavaScript.
+Serve that folder over HTTP; `file://` is not supported.
 
-For editing with live reload: `npm run dev`.
+## Follow the lesson
 
-## The teaching moment
+Slides start expanded. **Start lesson** starts Scout’s patrol; **Post a notice**
+posts the notice directly. Patrol and posting use no model calls or tools. Next
+adds the reading tool, execution, feedback, and finally the picnic.
 
-Leave the default notice unchanged:
+Step 2’s **Approve** changes the authored teaching stage; it does not execute the
+read or install a runtime permission system. Step 3 executes `read_notice` and
+holds the result. Step 4 appends the assistant request and matching observation,
+then evaluates again with the actual notice in context.
+
+Slides collapse through the top-bar book button. Scrolling reads the current slide;
+Previous, Next and TOC change steps. Navigation, scrolling and
+panels never initiate inference. Changing steps cancels unfinished
+execution and retains settled snapshots; **Run** starts a fresh experiment.
+
+Settings, Status and History are the top-right icons. Short public replies can open the terminal; long observations and experiment
+context wait behind the activity notification badge. It shows public responses, requests, observations, and
+activity during actual provider calls. Mock dialogue is authored, not model
+reasoning. Live shows public output/action summaries, never private thinking.
+The amber board light stays on until a successful read.
+
+## Reproduce the picnic comparison
+
+Select **5. Complete the picnic** in TOC. Keep **Mock** and the default notice:
 
 > Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.
 
-1. Select **2 apples · 2 carrots** and click **Post order**. Scout delivers an apple; the pantry has one apple and two carrots left.
-2. Select **1 apple · 2 carrots**, change nothing else, and post again. Scout delivers a carrot; the pantry has one apple and one carrot left.
-3. Select the first preset and replace the notice with **Deliver one carrot to the picnic basket.** Post again: Scout delivers a carrot despite the two apples.
+1. Settings → **2 apples · 2 carrots** → close. **Run picnic**, then **Continue**
+   after inspection. Basket: one apple. Pantry: one apple, two carrots.
+2. Settings → change only the preset to **1 apple · 2 carrots** → close.
+   **Run picnic**, then **Continue**. Basket: one carrot. Pantry: one apple, one carrot.
 
-Every post resets Scout, the basket, conversation, and stock. Film view hides the article and controls; Escape brings them back. The notebook below the world shows the ordered trace. **Save trace** opens the complete JSON, including initial/final inventories, with a download link and a copyable fallback. The six most recent runs are also saved in this browser and appear in Replay’s saved-take selector.
+Each Run resets the world, basket, conversation and trace. To run without the
+inspection pause, uncheck that option in Settings. Posting prepares a fresh notice
+without inference; Run explicitly starts the experiment.
 
-## Three modes
+For the third case, use two apples and change the notice to **Deliver one carrot
+to the picnic basket.** Post, Run, Continue. One carrot is delivered.
 
-**Mock** is a deterministic teaching provider, not a language model. It receives the same messages and tool definitions as a live provider. It reads the notice through `read_notice`, learns counts through `inspect_pantry`, and chooses its next tool from successful observations. It has no world reference, stock preset, or turn-indexed action list. It understands the two notice formats above; other orders produce an explanation. Pickup and delivery are real runtime operations.
+For stale observations, use two apples, Run, then **Empty apple shelf** at the
+inspection pause and Continue. The cached observation still says two apples.
+Pickup returns `out_of_stock`; Mock receives the failure, reinspects, and takes a
+carrot. The world has no “leave the last apple” rule. It enforces only proximity,
+stock, and possession.
 
-**Replay** plays bundled or imported traces. Choose a saved take, then play/pause or restart. No provider, agent loop, or tools run. Recorded snapshots and movements drive the scene, and the radio is labeled as recorded activity. Alongside the two Mock examples is an actual browser/Ollama recording: **Ollama · took the last apple**. Import a saved trace with **Open trace**; imported traces are data, never executable code.
+## Execution modes and recordings
 
-**Live** swaps only the provider. Select local Ollama, enter its URL and an installed tool-capable model (defaults: `http://127.0.0.1:11434`, `qwen3:14b`), and post. Scout uses exactly the same browser world and tools as Mock. The model may choose badly or stop early: the basket and trace show the actual result. A failed connection stays an error; there is no silent fallback to Mock.
+- **Mock** runs the real harness and tools with a deterministic provider. Its only
+  inputs are messages and active schemas. It learns the exact notice through
+  reading and stock through inspection. It supports the two orders above and
+  explains unsupported orders.
+- **Replay** renders recorded snapshots and movements. It has no provider or tool
+  executor. Select a bundled/local recording in Settings; use Play/Pause and
+  Restart. History → Export JSON offers a download and copyable JSON. Import JSON
+  loads that recording in Replay. The last twelve completed experiments are saved
+  locally when browser storage is available.
+- **Live** replaces only the provider. Set the Ollama URL and a tool-capable model
+  in Settings, then explicitly Run. Errors remain visible; there is no fallback.
+  Private provider thinking is preserved only in internal provider conversation,
+  excluded from exported traces and the terminal.
 
-Ollama must allow requests from the article’s origin. Local `127.0.0.1` origins work by default; for another origin, consult [Ollama’s browser-origin instructions](https://docs.ollama.com/faq#how-can-i-allow-additional-web-origins-to-access-ollama) and configure `OLLAMA_ORIGINS` for that specific site. An HTTPS article may need an HTTPS provider gateway rather than direct access to a local HTTP service, depending on browser restrictions.
+Configure Ollama to allow your article’s browser origin using its
+[official browser-origin instructions](https://docs.ollama.com/faq#how-can-i-allow-additional-web-origins-to-access-ollama).
+The adapter preserves `stream: false`, `think: false`, temperature 0 and a 4096-token
+context. Browser HTTPS/local-network restrictions may require an HTTPS gateway.
 
-For another model provider, select **Provider gateway** and give its complete chat endpoint. The gateway receives `{model, messages, tools, stream: false}` and returns `{message: {role: 'assistant', content, tool_calls?}}`, using the same tool-call shape as Ollama. It can translate a hosted API and keep its key on the server. No hosted keys are included in this static build. A gateway is optional and is not needed for Mock or Replay.
+An optional gateway endpoint accepts `{model, messages, tools, stream: false}` and
+returns `{message: {role: 'assistant', content, tool_calls?}}` in Ollama’s shape.
+It may translate another provider’s responses and hold its API key. It never owns
+the world or executes tools. No key is embedded in the static build.
 
-## Publish as a static article
+Film view hides the lesson and controls. Escape restores them.
 
-```sh
-npm run build
+## Edit the lesson and runtime
+
+| Folder | Ownership |
+| --- | --- |
+| `runtime/` | Plain TypeScript harness, provider transport, messages, feedback, stopping, tracing types and Replay. No Scout or pantry imports. |
+| `article-sets/scout-foundations/` | World, five tools, checkpoints, history-driven Mock, picnic experiments, village geometry and lesson. |
+| `presentation/` | Shared lesson controller, slide player, Markdown/excerpt rendering, terminal and panels. |
+| `scene/` | Browser application wiring, camera/rendering and styles. |
+| `traces/` | Bundled recordings; including an actual earlier Live mistake. |
+
+Articles have their own folders. The world and its capabilities are shared:
+
+```text
+runtime/
+presentation/
+article-sets/
+  registry.ts
+  scout-foundations/
+    world.ts, tools.ts, mock.ts
+    driver.ts, context.ts, capabilities.ts, catalogue.md
+    scene/
+    articles/
+      what-makes-scout-an-agent/
+        article.ts
+        brief.md
+        steps.ts
+        01-meet.md ... 07-picnic.md
 ```
 
-Host the contents of `dist/` on any static host, including a subdirectory. All geometry, styles, code, and bundled traces are local build assets; there are no CDNs or remote fonts. The static host only serves files. Mock and Replay do not make provider or backend requests.
+Edit these ordinary source files directly:
 
-To check that exact build locally, run `npm run preview`. Stop Ollama and any gateway, then reproduce the two default-order takes above. Static hosting is required; opening `index.html` through `file://` is not supported.
-
-## Build the runtime incrementally
-
-| Location | What to explore |
+| File | Role |
 | --- | --- |
-| `runtime/types.ts` | Messages, events, snapshots, named places/paths, and a small injectable clock. |
-| `runtime/world.ts` | Authoritative state and five tools. No graphics, DOM, or server dependencies. |
-| `runtime/loop.ts` | Notice notification → provider → tool dispatch → observation → next turn. |
-| `runtime/providers.ts` | Deterministic Mock and fetch-based Ollama/gateway providers. |
-| `runtime/replay.ts` | A playhead over saved events; no world or provider to execute. |
-| `scene/` | Village/Scout geometry, event-driven animation, article UI, and application wiring. |
-| `traces/` | Example Mock recordings generated through the real runtime. |
+| `brief.md` | Natural-language guidance for yourself or an AI helping author the article. It is not displayed or sent to Scout. |
+| `steps.ts` | Step IDs, order, stages, tool availability, learner actions, context views, labels and optional narration. |
+| Numbered Markdown files | The prose and executable-excerpt references displayed in slides. |
+| `article.ts` | Article ID/title, content directory, step factory, available actions, source files and Replay defaults. |
+| `article-sets/registry.ts` | The shared list of articles used by the browser and static build. |
 
-The tools are `read_notice()`, `walk_to({place})`, `inspect_pantry()`, `take_one({item})`, and `deliver_item()`. Places are `noticeboard`, `pantry`, and `picnic_basket`. Walking resolves after arrival. The world checks proximity, available stock, and whether Scout holds an item. **Taking the last apple is legal.** The preference belongs in the notice and its provider interpretation, never in the world rules.
+An AI assistant can author or revise these files from the brief and the shared
+`scout-foundations/catalogue.md`. **There is no automatic brief-to-code generator.**
+Saving a brief does not regenerate `steps.ts`; direct edits are not overwritten.
+There is no runtime lesson compiler.
 
-Provider input starts with only a generic courier prompt and “a new notice exists.” Reading returns the exact posted text. Only inspection returns pantry counts. Scene snapshots and trace metadata are kept separate from provider messages. Radio activity surrounds actual provider calls; Mock’s short pacing delay makes its decisions visible. Private provider thinking stays in internal conversation history and is excluded from exported traces.
+For editing, run:
 
-## Small checks
+```sh
+npm run dev
+```
+
+Stop a running `npm start` first; both commands request port 4333. Open the URL
+printed by Vite. Saving `steps.ts` or numbered Markdown updates the browser automatically. Reloads
+start a fresh take. Brief edits change authoring guidance only. **`npm start`
+builds once and serves `dist/`; it does not watch source edits.**
+
+To add another article within Scout Foundations:
+
+1. Create `articles/<unique-article-id>/` with a brief, `steps.ts`, numbered
+   Markdown, and an `article.ts` manifest. Reuse the shared world and tools.
+2. Import the manifest in `article-sets/registry.ts` and add it to `articleRegistry`.
+3. Open `/?article=<unique-article-id>`. When multiple articles are registered,
+   an article selector appears above the step selector. No backend routes are needed.
+   Keep `legacyStepIds` on the original article only; new articles use stable IDs.
+
+Steps carry their own context-view names and optional action labels. Moving the
+picnic step no longer changes its label or explanation. New traces record stable
+article/step IDs; old numbered recordings retain their original ID mapping.
+The focused registry check loads two independent articles and verifies reordered
+steps still run the right experiment and Replay checkpoint.
+
+Both schemas and dispatchable handlers come from the same active-tool selection.
+The shared harness has explicit `evaluate`, `execute` and `append` operations so a
+lesson can pause between execution and feedback. Marked `@excerpt` regions in that
+executable implementation are extracted by Vite. Markdown references them with
+`{{source:feedback}}`; `// +` highlights an added line. Missing regions fail the
+build. There are no separate tutorial code copies or full-source inspector.
+
+## Focused checks
 
 ```sh
 npm test
+npm run build
 ```
 
-Three focused checks use the same TypeScript runtime as the browser: all three teaching takes and information flow; physical transfers including the last apple; and replay without tool/provider execution. The injected clock skips animation waits in Node.
+Seven small checks cover observed-stock decisions, physical transfers including the
+last apple, pure Replay, selected-tool gating, held feedback versus model context,
+identical repetition, stale-stock failure, patrol/approval boundaries, and article
+loading with stable step identities. Node
+uses the same TypeScript with an injectable clock; no DOM or Three.js is required.
 
-To regenerate bundled traces: `npm run record`.
-
-To exercise actual Ollama through the same runtime without waiting for animations:
+Regenerate the bundled examples with `npm run record`. Exercise actual Ollama
+without animation delays using:
 
 ```sh
 npm run verify:live
 ```
 
-This runs all three orders sequentially, prints actual actions/inventories, and saves JSON traces in `verification/`. It reads the existing `OLLAMA_URL`, `OLLAMA_MODEL`, `OLLAMA_THINK`, and `OLLAMA_TIMEOUT_MS` settings from `.env` when present. A nonzero exit means a run did not match the expected teaching result; it does not replace the model’s choice.
+This reads existing `OLLAMA_URL`, `OLLAMA_MODEL`, `OLLAMA_THINK` and
+`OLLAMA_TIMEOUT_MS` from `.env`, runs the three picnic cases, prints actual actions,
+and saves traces in `verification/`. A mismatched delivery exits nonzero and
+preserves the model’s choice. See `VERIFICATION.md` for the latest observed runs.
 
-During verification with `qwen3:14b`, thinking disabled and temperature zero, the two-apple and carrot-only cases matched expectations. **The one-apple case did not:** the model inspected the stock, took the last apple, and delivered it. The browser Live run reproduced that mistake; its unmodified trace is bundled for Replay. This is model behavior, not a world-rule failure. Mock demonstrates the intended policy deterministically; Live is an experiment.
+The five-step lesson uses **TOC** to jump between steps and the top-bar book to
+show or hide the slides. Lesson posting is immediate; Settings remains available
+for manual orders. Provider calls animate Scout’s thinking bubble. A question
+cloud marks a missing capability, without displaying private reasoning. Activity
+and experiment data live behind a badged toolbar button; long results stay folded.
+Retired model-turn and repetition recordings still replay through their stable aliases.

@@ -1,12 +1,13 @@
 {
   "version": 1,
-  "id": "1793892944105-ngm1f",
+  "id": "1793899081293-okdlw",
   "mode": "mock",
   "provider": "Mock",
-  "startedAt": "2026-11-05T15:35:44.105Z",
+  "startedAt": "2026-11-05T17:18:01.293Z",
   "order": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
   "initial": {
     "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+    "unread": true,
     "pantry": {
       "apple": 2,
       "carrot": 2
@@ -26,9 +27,10 @@
   "events": [
     {
       "kind": "run_start",
-      "text": "A new notice is waiting for Scout",
+      "text": "Fresh checkpoint beside the noticeboard",
       "state": {
         "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "unread": true,
         "pantry": {
           "apple": 2,
           "carrot": 2
@@ -46,14 +48,110 @@
         ]
       },
       "seq": 0,
-      "at": 0,
-      "turn": 0
+      "at": 0
     },
     {
       "kind": "model_start",
-      "text": "Mock is choosing from observed messages",
+      "text": "Provider call pending",
+      "turn": 1,
+      "messages": [
+        {
+          "role": "system",
+          "content": "You are Scout, a village courier. Use only the tools offered. You start beside the noticeboard. Places: noticeboard, pantry, picnic_basket. Choose one tool per turn and wait for its result. Read notices to learn jobs. Pantry stock is unknown until inspected. Report what you actually did. If you lack a tool, explain what you need; do not invent observations."
+        },
+        {
+          "role": "user",
+          "content": "A new notice has been posted on the noticeboard."
+        }
+      ],
+      "schemas": [
+        {
+          "type": "function",
+          "function": {
+            "name": "read_notice",
+            "description": "Read the nearby noticeboard. Returns its exact text.",
+            "parameters": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": false
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "walk_to",
+            "description": "Walk a named path; returns after arrival.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "place": {
+                  "type": "string",
+                  "enum": [
+                    "noticeboard",
+                    "pantry",
+                    "picnic_basket"
+                  ]
+                }
+              },
+              "required": [
+                "place"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "inspect_pantry",
+            "description": "Inspect the nearby pantry to learn stock counts.",
+            "parameters": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": false
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "take_one",
+            "description": "Pick up one available item nearby. Carry at most one.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "item": {
+                  "type": "string",
+                  "enum": [
+                    "apple",
+                    "carrot"
+                  ]
+                }
+              },
+              "required": [
+                "item"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "deliver_item",
+            "description": "Put the carried item in the nearby picnic basket.",
+            "parameters": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": false
+            }
+          }
+        }
+      ],
       "state": {
         "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "unread": true,
         "pantry": {
           "apple": 2,
           "carrot": 2
@@ -71,14 +169,19 @@
         ]
       },
       "seq": 1,
-      "at": 0,
-      "turn": 1
+      "at": 0
     },
     {
-      "kind": "model_end",
-      "text": "Mock call ended",
+      "kind": "assistant",
+      "text": "Tool requested",
+      "turn": 1,
+      "tool": {
+        "name": "read_notice",
+        "arguments": {}
+      },
       "state": {
         "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "unread": true,
         "pantry": {
           "apple": 2,
           "carrot": 2
@@ -96,14 +199,15 @@
         ]
       },
       "seq": 2,
-      "at": 0,
-      "turn": 1
+      "at": 0
     },
     {
-      "kind": "tool_start",
-      "text": "read_notice({})",
+      "kind": "model_end",
+      "text": "Provider call ended",
+      "turn": 1,
       "state": {
         "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "unread": true,
         "pantry": {
           "apple": 2,
           "carrot": 2
@@ -120,19 +224,20 @@
           1.6
         ]
       },
+      "seq": 3,
+      "at": 0
+    },
+    {
+      "kind": "tool_start",
+      "text": "read_notice({})",
       "tool": {
         "name": "read_notice",
         "arguments": {}
       },
-      "seq": 3,
-      "at": 0,
-      "turn": 1
-    },
-    {
-      "kind": "read",
-      "text": "Reading the posted notice",
+      "turn": 1,
       "state": {
         "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "unread": true,
         "pantry": {
           "apple": 2,
           "carrot": 2
@@ -150,14 +255,14 @@
         ]
       },
       "seq": 4,
-      "at": 0,
-      "turn": 1
+      "at": 0
     },
     {
-      "kind": "tool_result",
-      "text": "{\"ok\":true,\"notice\":\"Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.\"}",
+      "kind": "read",
+      "text": "Reading the posted notice",
       "state": {
         "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "unread": true,
         "pantry": {
           "apple": 2,
           "carrot": 2
@@ -174,23 +279,15 @@
           1.6
         ]
       },
-      "tool": {
-        "name": "read_notice",
-        "arguments": {}
-      },
-      "result": {
-        "ok": true,
-        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket."
-      },
       "seq": 5,
-      "at": 1100,
-      "turn": 1
+      "at": 0
     },
     {
-      "kind": "model_start",
-      "text": "Mock is choosing from observed messages",
+      "kind": "notice_read",
+      "text": "Notice read; board light cleared",
       "state": {
         "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "unread": false,
         "pantry": {
           "apple": 2,
           "carrot": 2
@@ -208,14 +305,23 @@
         ]
       },
       "seq": 6,
-      "at": 1500,
-      "turn": 2
+      "at": 1100
     },
     {
-      "kind": "model_end",
-      "text": "Mock call ended",
+      "kind": "tool_result",
+      "text": "{\"ok\":true,\"notice\":\"Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.\"}",
+      "tool": {
+        "name": "read_notice",
+        "arguments": {}
+      },
+      "result": {
+        "ok": true,
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket."
+      },
+      "turn": 1,
       "state": {
         "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "unread": false,
         "pantry": {
           "apple": 2,
           "carrot": 2
@@ -233,14 +339,42 @@
         ]
       },
       "seq": 7,
-      "at": 1500,
-      "turn": 2
+      "at": 1100
     },
     {
-      "kind": "tool_start",
-      "text": "walk_to({\"place\":\"pantry\"})",
+      "kind": "context",
+      "text": "Tool request and observation appended to the next input",
+      "messages": [
+        {
+          "role": "system",
+          "content": "You are Scout, a village courier. Use only the tools offered. You start beside the noticeboard. Places: noticeboard, pantry, picnic_basket. Choose one tool per turn and wait for its result. Read notices to learn jobs. Pantry stock is unknown until inspected. Report what you actually did. If you lack a tool, explain what you need; do not invent observations."
+        },
+        {
+          "role": "user",
+          "content": "A new notice has been posted on the noticeboard."
+        },
+        {
+          "role": "assistant",
+          "content": "",
+          "tool_calls": [
+            {
+              "function": {
+                "name": "read_notice",
+                "arguments": {}
+              }
+            }
+          ]
+        },
+        {
+          "role": "tool",
+          "tool_name": "read_notice",
+          "content": "{\"ok\":true,\"notice\":\"Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.\"}"
+        }
+      ],
+      "turn": 1,
       "state": {
         "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "unread": false,
         "pantry": {
           "apple": 2,
           "carrot": 2
@@ -257,21 +391,243 @@
           1.6
         ]
       },
+      "seq": 8,
+      "at": 1100
+    },
+    {
+      "kind": "model_start",
+      "text": "Provider call pending",
+      "turn": 2,
+      "messages": [
+        {
+          "role": "system",
+          "content": "You are Scout, a village courier. Use only the tools offered. You start beside the noticeboard. Places: noticeboard, pantry, picnic_basket. Choose one tool per turn and wait for its result. Read notices to learn jobs. Pantry stock is unknown until inspected. Report what you actually did. If you lack a tool, explain what you need; do not invent observations."
+        },
+        {
+          "role": "user",
+          "content": "A new notice has been posted on the noticeboard."
+        },
+        {
+          "role": "assistant",
+          "content": "",
+          "tool_calls": [
+            {
+              "function": {
+                "name": "read_notice",
+                "arguments": {}
+              }
+            }
+          ]
+        },
+        {
+          "role": "tool",
+          "tool_name": "read_notice",
+          "content": "{\"ok\":true,\"notice\":\"Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.\"}"
+        }
+      ],
+      "schemas": [
+        {
+          "type": "function",
+          "function": {
+            "name": "read_notice",
+            "description": "Read the nearby noticeboard. Returns its exact text.",
+            "parameters": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": false
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "walk_to",
+            "description": "Walk a named path; returns after arrival.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "place": {
+                  "type": "string",
+                  "enum": [
+                    "noticeboard",
+                    "pantry",
+                    "picnic_basket"
+                  ]
+                }
+              },
+              "required": [
+                "place"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "inspect_pantry",
+            "description": "Inspect the nearby pantry to learn stock counts.",
+            "parameters": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": false
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "take_one",
+            "description": "Pick up one available item nearby. Carry at most one.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "item": {
+                  "type": "string",
+                  "enum": [
+                    "apple",
+                    "carrot"
+                  ]
+                }
+              },
+              "required": [
+                "item"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "deliver_item",
+            "description": "Put the carried item in the nearby picnic basket.",
+            "parameters": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": false
+            }
+          }
+        }
+      ],
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "unread": false,
+        "pantry": {
+          "apple": 2,
+          "carrot": 2
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 0
+        },
+        "carried": null,
+        "place": "noticeboard",
+        "position": [
+          -4.1,
+          0.45,
+          1.6
+        ]
+      },
+      "seq": 9,
+      "at": 1100
+    },
+    {
+      "kind": "assistant",
+      "text": "Tool requested",
+      "turn": 2,
       "tool": {
         "name": "walk_to",
         "arguments": {
           "place": "pantry"
         }
       },
-      "seq": 8,
-      "at": 1500,
-      "turn": 2
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "unread": false,
+        "pantry": {
+          "apple": 2,
+          "carrot": 2
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 0
+        },
+        "carried": null,
+        "place": "noticeboard",
+        "position": [
+          -4.1,
+          0.45,
+          1.6
+        ]
+      },
+      "seq": 10,
+      "at": 1100
+    },
+    {
+      "kind": "model_end",
+      "text": "Provider call ended",
+      "turn": 2,
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "unread": false,
+        "pantry": {
+          "apple": 2,
+          "carrot": 2
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 0
+        },
+        "carried": null,
+        "place": "noticeboard",
+        "position": [
+          -4.1,
+          0.45,
+          1.6
+        ]
+      },
+      "seq": 11,
+      "at": 1100
+    },
+    {
+      "kind": "tool_start",
+      "text": "walk_to({\"place\":\"pantry\"})",
+      "tool": {
+        "name": "walk_to",
+        "arguments": {
+          "place": "pantry"
+        }
+      },
+      "turn": 2,
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "unread": false,
+        "pantry": {
+          "apple": 2,
+          "carrot": 2
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 0
+        },
+        "carried": null,
+        "place": "noticeboard",
+        "position": [
+          -4.1,
+          0.45,
+          1.6
+        ]
+      },
+      "seq": 12,
+      "at": 1100
     },
     {
       "kind": "walk_start",
       "text": "Walking to pantry",
       "state": {
         "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "unread": false,
         "pantry": {
           "apple": 2,
           "carrot": 2
@@ -318,15 +674,15 @@
         ],
         "duration": 4431.788817975583
       },
-      "seq": 9,
-      "at": 1500,
-      "turn": 2
+      "seq": 13,
+      "at": 1100
     },
     {
       "kind": "walk_end",
       "text": "Arrived at pantry",
       "state": {
         "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "unread": false,
         "pantry": {
           "apple": 2,
           "carrot": 2
@@ -343,31 +699,12 @@
           -2.2
         ]
       },
-      "seq": 10,
-      "at": 5931.788817975583,
-      "turn": 2
+      "seq": 14,
+      "at": 5531.788817975583
     },
     {
       "kind": "tool_result",
       "text": "{\"ok\":true,\"place\":\"pantry\"}",
-      "state": {
-        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
-        "pantry": {
-          "apple": 2,
-          "carrot": 2
-        },
-        "basket": {
-          "apple": 0,
-          "carrot": 0
-        },
-        "carried": null,
-        "place": "pantry",
-        "position": [
-          -0.8,
-          1.25,
-          -2.2
-        ]
-      },
       "tool": {
         "name": "walk_to",
         "arguments": {
@@ -378,94 +715,10 @@
         "ok": true,
         "place": "pantry"
       },
-      "seq": 11,
-      "at": 5931.788817975583,
-      "turn": 2
-    },
-    {
-      "kind": "model_start",
-      "text": "Mock is choosing from observed messages",
+      "turn": 2,
       "state": {
         "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
-        "pantry": {
-          "apple": 2,
-          "carrot": 2
-        },
-        "basket": {
-          "apple": 0,
-          "carrot": 0
-        },
-        "carried": null,
-        "place": "pantry",
-        "position": [
-          -0.8,
-          1.25,
-          -2.2
-        ]
-      },
-      "seq": 12,
-      "at": 6331.788817975583,
-      "turn": 3
-    },
-    {
-      "kind": "model_end",
-      "text": "Mock call ended",
-      "state": {
-        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
-        "pantry": {
-          "apple": 2,
-          "carrot": 2
-        },
-        "basket": {
-          "apple": 0,
-          "carrot": 0
-        },
-        "carried": null,
-        "place": "pantry",
-        "position": [
-          -0.8,
-          1.25,
-          -2.2
-        ]
-      },
-      "seq": 13,
-      "at": 6331.788817975583,
-      "turn": 3
-    },
-    {
-      "kind": "tool_start",
-      "text": "inspect_pantry({})",
-      "state": {
-        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
-        "pantry": {
-          "apple": 2,
-          "carrot": 2
-        },
-        "basket": {
-          "apple": 0,
-          "carrot": 0
-        },
-        "carried": null,
-        "place": "pantry",
-        "position": [
-          -0.8,
-          1.25,
-          -2.2
-        ]
-      },
-      "tool": {
-        "name": "inspect_pantry",
-        "arguments": {}
-      },
-      "seq": 14,
-      "at": 6331.788817975583,
-      "turn": 3
-    },
-    {
-      "kind": "inspect",
-      "text": "Looking inside the pantry",
-      "state": {
-        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "unread": false,
         "pantry": {
           "apple": 2,
           "carrot": 2
@@ -483,14 +736,61 @@
         ]
       },
       "seq": 15,
-      "at": 6331.788817975583,
-      "turn": 3
+      "at": 5531.788817975583
     },
     {
-      "kind": "tool_result",
-      "text": "{\"ok\":true,\"pantry\":{\"apple\":2,\"carrot\":2}}",
+      "kind": "context",
+      "text": "Tool request and observation appended to the next input",
+      "messages": [
+        {
+          "role": "system",
+          "content": "You are Scout, a village courier. Use only the tools offered. You start beside the noticeboard. Places: noticeboard, pantry, picnic_basket. Choose one tool per turn and wait for its result. Read notices to learn jobs. Pantry stock is unknown until inspected. Report what you actually did. If you lack a tool, explain what you need; do not invent observations."
+        },
+        {
+          "role": "user",
+          "content": "A new notice has been posted on the noticeboard."
+        },
+        {
+          "role": "assistant",
+          "content": "",
+          "tool_calls": [
+            {
+              "function": {
+                "name": "read_notice",
+                "arguments": {}
+              }
+            }
+          ]
+        },
+        {
+          "role": "tool",
+          "tool_name": "read_notice",
+          "content": "{\"ok\":true,\"notice\":\"Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.\"}"
+        },
+        {
+          "role": "assistant",
+          "content": "",
+          "tool_calls": [
+            {
+              "function": {
+                "name": "walk_to",
+                "arguments": {
+                  "place": "pantry"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "role": "tool",
+          "tool_name": "walk_to",
+          "content": "{\"ok\":true,\"place\":\"pantry\"}"
+        }
+      ],
+      "turn": 2,
       "state": {
         "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "unread": false,
         "pantry": {
           "apple": 2,
           "carrot": 2
@@ -507,26 +807,147 @@
           -2.2
         ]
       },
-      "tool": {
-        "name": "inspect_pantry",
-        "arguments": {}
-      },
-      "result": {
-        "ok": true,
-        "pantry": {
-          "apple": 2,
-          "carrot": 2
-        }
-      },
       "seq": 16,
-      "at": 7631.788817975583,
-      "turn": 3
+      "at": 5531.788817975583
     },
     {
       "kind": "model_start",
-      "text": "Mock is choosing from observed messages",
+      "text": "Provider call pending",
+      "turn": 3,
+      "messages": [
+        {
+          "role": "system",
+          "content": "You are Scout, a village courier. Use only the tools offered. You start beside the noticeboard. Places: noticeboard, pantry, picnic_basket. Choose one tool per turn and wait for its result. Read notices to learn jobs. Pantry stock is unknown until inspected. Report what you actually did. If you lack a tool, explain what you need; do not invent observations."
+        },
+        {
+          "role": "user",
+          "content": "A new notice has been posted on the noticeboard."
+        },
+        {
+          "role": "assistant",
+          "content": "",
+          "tool_calls": [
+            {
+              "function": {
+                "name": "read_notice",
+                "arguments": {}
+              }
+            }
+          ]
+        },
+        {
+          "role": "tool",
+          "tool_name": "read_notice",
+          "content": "{\"ok\":true,\"notice\":\"Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.\"}"
+        },
+        {
+          "role": "assistant",
+          "content": "",
+          "tool_calls": [
+            {
+              "function": {
+                "name": "walk_to",
+                "arguments": {
+                  "place": "pantry"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "role": "tool",
+          "tool_name": "walk_to",
+          "content": "{\"ok\":true,\"place\":\"pantry\"}"
+        }
+      ],
+      "schemas": [
+        {
+          "type": "function",
+          "function": {
+            "name": "read_notice",
+            "description": "Read the nearby noticeboard. Returns its exact text.",
+            "parameters": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": false
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "walk_to",
+            "description": "Walk a named path; returns after arrival.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "place": {
+                  "type": "string",
+                  "enum": [
+                    "noticeboard",
+                    "pantry",
+                    "picnic_basket"
+                  ]
+                }
+              },
+              "required": [
+                "place"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "inspect_pantry",
+            "description": "Inspect the nearby pantry to learn stock counts.",
+            "parameters": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": false
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "take_one",
+            "description": "Pick up one available item nearby. Carry at most one.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "item": {
+                  "type": "string",
+                  "enum": [
+                    "apple",
+                    "carrot"
+                  ]
+                }
+              },
+              "required": [
+                "item"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "deliver_item",
+            "description": "Put the carried item in the nearby picnic basket.",
+            "parameters": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": false
+            }
+          }
+        }
+      ],
       "state": {
         "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "unread": false,
         "pantry": {
           "apple": 2,
           "carrot": 2
@@ -544,14 +965,19 @@
         ]
       },
       "seq": 17,
-      "at": 8031.788817975583,
-      "turn": 4
+      "at": 5531.788817975583
     },
     {
-      "kind": "model_end",
-      "text": "Mock call ended",
+      "kind": "assistant",
+      "text": "Tool requested",
+      "turn": 3,
+      "tool": {
+        "name": "inspect_pantry",
+        "arguments": {}
+      },
       "state": {
         "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "unread": false,
         "pantry": {
           "apple": 2,
           "carrot": 2
@@ -569,14 +995,15 @@
         ]
       },
       "seq": 18,
-      "at": 8031.788817975583,
-      "turn": 4
+      "at": 5531.788817975583
     },
     {
-      "kind": "tool_start",
-      "text": "take_one({\"item\":\"apple\"})",
+      "kind": "model_end",
+      "text": "Provider call ended",
+      "turn": 3,
       "state": {
         "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "unread": false,
         "pantry": {
           "apple": 2,
           "carrot": 2
@@ -593,30 +1020,29 @@
           -2.2
         ]
       },
-      "tool": {
-        "name": "take_one",
-        "arguments": {
-          "item": "apple"
-        }
-      },
       "seq": 19,
-      "at": 8031.788817975583,
-      "turn": 4
+      "at": 5531.788817975583
     },
     {
-      "kind": "pickup",
-      "text": "Picked up one apple",
+      "kind": "tool_start",
+      "text": "inspect_pantry({})",
+      "tool": {
+        "name": "inspect_pantry",
+        "arguments": {}
+      },
+      "turn": 3,
       "state": {
         "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "unread": false,
         "pantry": {
-          "apple": 1,
+          "apple": 2,
           "carrot": 2
         },
         "basket": {
           "apple": 0,
           "carrot": 0
         },
-        "carried": "apple",
+        "carried": null,
         "place": "pantry",
         "position": [
           -0.8,
@@ -625,14 +1051,429 @@
         ]
       },
       "seq": 20,
-      "at": 8681.788817975583,
-      "turn": 4
+      "at": 5531.788817975583
+    },
+    {
+      "kind": "inspect",
+      "text": "Looking inside the pantry",
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "unread": false,
+        "pantry": {
+          "apple": 2,
+          "carrot": 2
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 0
+        },
+        "carried": null,
+        "place": "pantry",
+        "position": [
+          -0.8,
+          1.25,
+          -2.2
+        ]
+      },
+      "seq": 21,
+      "at": 5531.788817975583
     },
     {
       "kind": "tool_result",
-      "text": "{\"ok\":true,\"item\":\"apple\",\"carried\":\"apple\"}",
+      "text": "{\"ok\":true,\"pantry\":{\"apple\":2,\"carrot\":2}}",
+      "tool": {
+        "name": "inspect_pantry",
+        "arguments": {}
+      },
+      "result": {
+        "ok": true,
+        "pantry": {
+          "apple": 2,
+          "carrot": 2
+        }
+      },
+      "turn": 3,
       "state": {
         "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "unread": false,
+        "pantry": {
+          "apple": 2,
+          "carrot": 2
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 0
+        },
+        "carried": null,
+        "place": "pantry",
+        "position": [
+          -0.8,
+          1.25,
+          -2.2
+        ]
+      },
+      "seq": 22,
+      "at": 6831.788817975583
+    },
+    {
+      "kind": "context",
+      "text": "Tool request and observation appended to the next input",
+      "messages": [
+        {
+          "role": "system",
+          "content": "You are Scout, a village courier. Use only the tools offered. You start beside the noticeboard. Places: noticeboard, pantry, picnic_basket. Choose one tool per turn and wait for its result. Read notices to learn jobs. Pantry stock is unknown until inspected. Report what you actually did. If you lack a tool, explain what you need; do not invent observations."
+        },
+        {
+          "role": "user",
+          "content": "A new notice has been posted on the noticeboard."
+        },
+        {
+          "role": "assistant",
+          "content": "",
+          "tool_calls": [
+            {
+              "function": {
+                "name": "read_notice",
+                "arguments": {}
+              }
+            }
+          ]
+        },
+        {
+          "role": "tool",
+          "tool_name": "read_notice",
+          "content": "{\"ok\":true,\"notice\":\"Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.\"}"
+        },
+        {
+          "role": "assistant",
+          "content": "",
+          "tool_calls": [
+            {
+              "function": {
+                "name": "walk_to",
+                "arguments": {
+                  "place": "pantry"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "role": "tool",
+          "tool_name": "walk_to",
+          "content": "{\"ok\":true,\"place\":\"pantry\"}"
+        },
+        {
+          "role": "assistant",
+          "content": "",
+          "tool_calls": [
+            {
+              "function": {
+                "name": "inspect_pantry",
+                "arguments": {}
+              }
+            }
+          ]
+        },
+        {
+          "role": "tool",
+          "tool_name": "inspect_pantry",
+          "content": "{\"ok\":true,\"pantry\":{\"apple\":2,\"carrot\":2}}"
+        }
+      ],
+      "turn": 3,
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "unread": false,
+        "pantry": {
+          "apple": 2,
+          "carrot": 2
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 0
+        },
+        "carried": null,
+        "place": "pantry",
+        "position": [
+          -0.8,
+          1.25,
+          -2.2
+        ]
+      },
+      "seq": 23,
+      "at": 6831.788817975583
+    },
+    {
+      "kind": "model_start",
+      "text": "Provider call pending",
+      "turn": 4,
+      "messages": [
+        {
+          "role": "system",
+          "content": "You are Scout, a village courier. Use only the tools offered. You start beside the noticeboard. Places: noticeboard, pantry, picnic_basket. Choose one tool per turn and wait for its result. Read notices to learn jobs. Pantry stock is unknown until inspected. Report what you actually did. If you lack a tool, explain what you need; do not invent observations."
+        },
+        {
+          "role": "user",
+          "content": "A new notice has been posted on the noticeboard."
+        },
+        {
+          "role": "assistant",
+          "content": "",
+          "tool_calls": [
+            {
+              "function": {
+                "name": "read_notice",
+                "arguments": {}
+              }
+            }
+          ]
+        },
+        {
+          "role": "tool",
+          "tool_name": "read_notice",
+          "content": "{\"ok\":true,\"notice\":\"Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.\"}"
+        },
+        {
+          "role": "assistant",
+          "content": "",
+          "tool_calls": [
+            {
+              "function": {
+                "name": "walk_to",
+                "arguments": {
+                  "place": "pantry"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "role": "tool",
+          "tool_name": "walk_to",
+          "content": "{\"ok\":true,\"place\":\"pantry\"}"
+        },
+        {
+          "role": "assistant",
+          "content": "",
+          "tool_calls": [
+            {
+              "function": {
+                "name": "inspect_pantry",
+                "arguments": {}
+              }
+            }
+          ]
+        },
+        {
+          "role": "tool",
+          "tool_name": "inspect_pantry",
+          "content": "{\"ok\":true,\"pantry\":{\"apple\":2,\"carrot\":2}}"
+        }
+      ],
+      "schemas": [
+        {
+          "type": "function",
+          "function": {
+            "name": "read_notice",
+            "description": "Read the nearby noticeboard. Returns its exact text.",
+            "parameters": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": false
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "walk_to",
+            "description": "Walk a named path; returns after arrival.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "place": {
+                  "type": "string",
+                  "enum": [
+                    "noticeboard",
+                    "pantry",
+                    "picnic_basket"
+                  ]
+                }
+              },
+              "required": [
+                "place"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "inspect_pantry",
+            "description": "Inspect the nearby pantry to learn stock counts.",
+            "parameters": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": false
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "take_one",
+            "description": "Pick up one available item nearby. Carry at most one.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "item": {
+                  "type": "string",
+                  "enum": [
+                    "apple",
+                    "carrot"
+                  ]
+                }
+              },
+              "required": [
+                "item"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "deliver_item",
+            "description": "Put the carried item in the nearby picnic basket.",
+            "parameters": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": false
+            }
+          }
+        }
+      ],
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "unread": false,
+        "pantry": {
+          "apple": 2,
+          "carrot": 2
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 0
+        },
+        "carried": null,
+        "place": "pantry",
+        "position": [
+          -0.8,
+          1.25,
+          -2.2
+        ]
+      },
+      "seq": 24,
+      "at": 6831.788817975583
+    },
+    {
+      "kind": "assistant",
+      "text": "Tool requested",
+      "turn": 4,
+      "tool": {
+        "name": "take_one",
+        "arguments": {
+          "item": "apple"
+        }
+      },
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "unread": false,
+        "pantry": {
+          "apple": 2,
+          "carrot": 2
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 0
+        },
+        "carried": null,
+        "place": "pantry",
+        "position": [
+          -0.8,
+          1.25,
+          -2.2
+        ]
+      },
+      "seq": 25,
+      "at": 6831.788817975583
+    },
+    {
+      "kind": "model_end",
+      "text": "Provider call ended",
+      "turn": 4,
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "unread": false,
+        "pantry": {
+          "apple": 2,
+          "carrot": 2
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 0
+        },
+        "carried": null,
+        "place": "pantry",
+        "position": [
+          -0.8,
+          1.25,
+          -2.2
+        ]
+      },
+      "seq": 26,
+      "at": 6831.788817975583
+    },
+    {
+      "kind": "tool_start",
+      "text": "take_one({\"item\":\"apple\"})",
+      "tool": {
+        "name": "take_one",
+        "arguments": {
+          "item": "apple"
+        }
+      },
+      "turn": 4,
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "unread": false,
+        "pantry": {
+          "apple": 2,
+          "carrot": 2
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 0
+        },
+        "carried": null,
+        "place": "pantry",
+        "position": [
+          -0.8,
+          1.25,
+          -2.2
+        ]
+      },
+      "seq": 27,
+      "at": 6831.788817975583
+    },
+    {
+      "kind": "pickup",
+      "text": "Picked up one apple",
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "unread": false,
         "pantry": {
           "apple": 1,
           "carrot": 2
@@ -649,6 +1490,12 @@
           -2.2
         ]
       },
+      "seq": 28,
+      "at": 7481.788817975583
+    },
+    {
+      "kind": "tool_result",
+      "text": "{\"ok\":true,\"item\":\"apple\",\"carried\":\"apple\"}",
       "tool": {
         "name": "take_one",
         "arguments": {
@@ -660,15 +1507,311 @@
         "item": "apple",
         "carried": "apple"
       },
-      "seq": 21,
-      "at": 8681.788817975583,
-      "turn": 4
+      "turn": 4,
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "unread": false,
+        "pantry": {
+          "apple": 1,
+          "carrot": 2
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 0
+        },
+        "carried": "apple",
+        "place": "pantry",
+        "position": [
+          -0.8,
+          1.25,
+          -2.2
+        ]
+      },
+      "seq": 29,
+      "at": 7481.788817975583
+    },
+    {
+      "kind": "context",
+      "text": "Tool request and observation appended to the next input",
+      "messages": [
+        {
+          "role": "system",
+          "content": "You are Scout, a village courier. Use only the tools offered. You start beside the noticeboard. Places: noticeboard, pantry, picnic_basket. Choose one tool per turn and wait for its result. Read notices to learn jobs. Pantry stock is unknown until inspected. Report what you actually did. If you lack a tool, explain what you need; do not invent observations."
+        },
+        {
+          "role": "user",
+          "content": "A new notice has been posted on the noticeboard."
+        },
+        {
+          "role": "assistant",
+          "content": "",
+          "tool_calls": [
+            {
+              "function": {
+                "name": "read_notice",
+                "arguments": {}
+              }
+            }
+          ]
+        },
+        {
+          "role": "tool",
+          "tool_name": "read_notice",
+          "content": "{\"ok\":true,\"notice\":\"Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.\"}"
+        },
+        {
+          "role": "assistant",
+          "content": "",
+          "tool_calls": [
+            {
+              "function": {
+                "name": "walk_to",
+                "arguments": {
+                  "place": "pantry"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "role": "tool",
+          "tool_name": "walk_to",
+          "content": "{\"ok\":true,\"place\":\"pantry\"}"
+        },
+        {
+          "role": "assistant",
+          "content": "",
+          "tool_calls": [
+            {
+              "function": {
+                "name": "inspect_pantry",
+                "arguments": {}
+              }
+            }
+          ]
+        },
+        {
+          "role": "tool",
+          "tool_name": "inspect_pantry",
+          "content": "{\"ok\":true,\"pantry\":{\"apple\":2,\"carrot\":2}}"
+        },
+        {
+          "role": "assistant",
+          "content": "",
+          "tool_calls": [
+            {
+              "function": {
+                "name": "take_one",
+                "arguments": {
+                  "item": "apple"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "role": "tool",
+          "tool_name": "take_one",
+          "content": "{\"ok\":true,\"item\":\"apple\",\"carried\":\"apple\"}"
+        }
+      ],
+      "turn": 4,
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "unread": false,
+        "pantry": {
+          "apple": 1,
+          "carrot": 2
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 0
+        },
+        "carried": "apple",
+        "place": "pantry",
+        "position": [
+          -0.8,
+          1.25,
+          -2.2
+        ]
+      },
+      "seq": 30,
+      "at": 7481.788817975583
     },
     {
       "kind": "model_start",
-      "text": "Mock is choosing from observed messages",
+      "text": "Provider call pending",
+      "turn": 5,
+      "messages": [
+        {
+          "role": "system",
+          "content": "You are Scout, a village courier. Use only the tools offered. You start beside the noticeboard. Places: noticeboard, pantry, picnic_basket. Choose one tool per turn and wait for its result. Read notices to learn jobs. Pantry stock is unknown until inspected. Report what you actually did. If you lack a tool, explain what you need; do not invent observations."
+        },
+        {
+          "role": "user",
+          "content": "A new notice has been posted on the noticeboard."
+        },
+        {
+          "role": "assistant",
+          "content": "",
+          "tool_calls": [
+            {
+              "function": {
+                "name": "read_notice",
+                "arguments": {}
+              }
+            }
+          ]
+        },
+        {
+          "role": "tool",
+          "tool_name": "read_notice",
+          "content": "{\"ok\":true,\"notice\":\"Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.\"}"
+        },
+        {
+          "role": "assistant",
+          "content": "",
+          "tool_calls": [
+            {
+              "function": {
+                "name": "walk_to",
+                "arguments": {
+                  "place": "pantry"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "role": "tool",
+          "tool_name": "walk_to",
+          "content": "{\"ok\":true,\"place\":\"pantry\"}"
+        },
+        {
+          "role": "assistant",
+          "content": "",
+          "tool_calls": [
+            {
+              "function": {
+                "name": "inspect_pantry",
+                "arguments": {}
+              }
+            }
+          ]
+        },
+        {
+          "role": "tool",
+          "tool_name": "inspect_pantry",
+          "content": "{\"ok\":true,\"pantry\":{\"apple\":2,\"carrot\":2}}"
+        },
+        {
+          "role": "assistant",
+          "content": "",
+          "tool_calls": [
+            {
+              "function": {
+                "name": "take_one",
+                "arguments": {
+                  "item": "apple"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "role": "tool",
+          "tool_name": "take_one",
+          "content": "{\"ok\":true,\"item\":\"apple\",\"carried\":\"apple\"}"
+        }
+      ],
+      "schemas": [
+        {
+          "type": "function",
+          "function": {
+            "name": "read_notice",
+            "description": "Read the nearby noticeboard. Returns its exact text.",
+            "parameters": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": false
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "walk_to",
+            "description": "Walk a named path; returns after arrival.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "place": {
+                  "type": "string",
+                  "enum": [
+                    "noticeboard",
+                    "pantry",
+                    "picnic_basket"
+                  ]
+                }
+              },
+              "required": [
+                "place"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "inspect_pantry",
+            "description": "Inspect the nearby pantry to learn stock counts.",
+            "parameters": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": false
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "take_one",
+            "description": "Pick up one available item nearby. Carry at most one.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "item": {
+                  "type": "string",
+                  "enum": [
+                    "apple",
+                    "carrot"
+                  ]
+                }
+              },
+              "required": [
+                "item"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "deliver_item",
+            "description": "Put the carried item in the nearby picnic basket.",
+            "parameters": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": false
+            }
+          }
+        }
+      ],
       "state": {
         "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "unread": false,
         "pantry": {
           "apple": 1,
           "carrot": 2
@@ -685,71 +1828,105 @@
           -2.2
         ]
       },
-      "seq": 22,
-      "at": 9081.788817975583,
-      "turn": 5
+      "seq": 31,
+      "at": 7481.788817975583
     },
     {
-      "kind": "model_end",
-      "text": "Mock call ended",
-      "state": {
-        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
-        "pantry": {
-          "apple": 1,
-          "carrot": 2
-        },
-        "basket": {
-          "apple": 0,
-          "carrot": 0
-        },
-        "carried": "apple",
-        "place": "pantry",
-        "position": [
-          -0.8,
-          1.25,
-          -2.2
-        ]
-      },
-      "seq": 23,
-      "at": 9081.788817975583,
-      "turn": 5
-    },
-    {
-      "kind": "tool_start",
-      "text": "walk_to({\"place\":\"picnic_basket\"})",
-      "state": {
-        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
-        "pantry": {
-          "apple": 1,
-          "carrot": 2
-        },
-        "basket": {
-          "apple": 0,
-          "carrot": 0
-        },
-        "carried": "apple",
-        "place": "pantry",
-        "position": [
-          -0.8,
-          1.25,
-          -2.2
-        ]
-      },
+      "kind": "assistant",
+      "text": "Tool requested",
+      "turn": 5,
       "tool": {
         "name": "walk_to",
         "arguments": {
           "place": "picnic_basket"
         }
       },
-      "seq": 24,
-      "at": 9081.788817975583,
-      "turn": 5
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "unread": false,
+        "pantry": {
+          "apple": 1,
+          "carrot": 2
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 0
+        },
+        "carried": "apple",
+        "place": "pantry",
+        "position": [
+          -0.8,
+          1.25,
+          -2.2
+        ]
+      },
+      "seq": 32,
+      "at": 7481.788817975583
+    },
+    {
+      "kind": "model_end",
+      "text": "Provider call ended",
+      "turn": 5,
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "unread": false,
+        "pantry": {
+          "apple": 1,
+          "carrot": 2
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 0
+        },
+        "carried": "apple",
+        "place": "pantry",
+        "position": [
+          -0.8,
+          1.25,
+          -2.2
+        ]
+      },
+      "seq": 33,
+      "at": 7481.788817975583
+    },
+    {
+      "kind": "tool_start",
+      "text": "walk_to({\"place\":\"picnic_basket\"})",
+      "tool": {
+        "name": "walk_to",
+        "arguments": {
+          "place": "picnic_basket"
+        }
+      },
+      "turn": 5,
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "unread": false,
+        "pantry": {
+          "apple": 1,
+          "carrot": 2
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 0
+        },
+        "carried": "apple",
+        "place": "pantry",
+        "position": [
+          -0.8,
+          1.25,
+          -2.2
+        ]
+      },
+      "seq": 34,
+      "at": 7481.788817975583
     },
     {
       "kind": "walk_start",
       "text": "Walking to picnic basket",
       "state": {
         "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "unread": false,
         "pantry": {
           "apple": 1,
           "carrot": 2
@@ -811,15 +1988,15 @@
         ],
         "duration": 6128.758514945279
       },
-      "seq": 25,
-      "at": 9081.788817975583,
-      "turn": 5
+      "seq": 35,
+      "at": 7481.788817975583
     },
     {
       "kind": "walk_end",
       "text": "Arrived at picnic basket",
       "state": {
         "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "unread": false,
         "pantry": {
           "apple": 1,
           "carrot": 2
@@ -836,31 +2013,12 @@
           2.4
         ]
       },
-      "seq": 26,
-      "at": 15210.547332920862,
-      "turn": 5
+      "seq": 36,
+      "at": 13610.547332920862
     },
     {
       "kind": "tool_result",
       "text": "{\"ok\":true,\"place\":\"picnic_basket\"}",
-      "state": {
-        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
-        "pantry": {
-          "apple": 1,
-          "carrot": 2
-        },
-        "basket": {
-          "apple": 0,
-          "carrot": 0
-        },
-        "carried": "apple",
-        "place": "picnic_basket",
-        "position": [
-          4.5,
-          0.45,
-          2.4
-        ]
-      },
       "tool": {
         "name": "walk_to",
         "arguments": {
@@ -871,15 +2029,349 @@
         "ok": true,
         "place": "picnic_basket"
       },
-      "seq": 27,
-      "at": 15210.547332920862,
-      "turn": 5
+      "turn": 5,
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "unread": false,
+        "pantry": {
+          "apple": 1,
+          "carrot": 2
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 0
+        },
+        "carried": "apple",
+        "place": "picnic_basket",
+        "position": [
+          4.5,
+          0.45,
+          2.4
+        ]
+      },
+      "seq": 37,
+      "at": 13610.547332920862
+    },
+    {
+      "kind": "context",
+      "text": "Tool request and observation appended to the next input",
+      "messages": [
+        {
+          "role": "system",
+          "content": "You are Scout, a village courier. Use only the tools offered. You start beside the noticeboard. Places: noticeboard, pantry, picnic_basket. Choose one tool per turn and wait for its result. Read notices to learn jobs. Pantry stock is unknown until inspected. Report what you actually did. If you lack a tool, explain what you need; do not invent observations."
+        },
+        {
+          "role": "user",
+          "content": "A new notice has been posted on the noticeboard."
+        },
+        {
+          "role": "assistant",
+          "content": "",
+          "tool_calls": [
+            {
+              "function": {
+                "name": "read_notice",
+                "arguments": {}
+              }
+            }
+          ]
+        },
+        {
+          "role": "tool",
+          "tool_name": "read_notice",
+          "content": "{\"ok\":true,\"notice\":\"Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.\"}"
+        },
+        {
+          "role": "assistant",
+          "content": "",
+          "tool_calls": [
+            {
+              "function": {
+                "name": "walk_to",
+                "arguments": {
+                  "place": "pantry"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "role": "tool",
+          "tool_name": "walk_to",
+          "content": "{\"ok\":true,\"place\":\"pantry\"}"
+        },
+        {
+          "role": "assistant",
+          "content": "",
+          "tool_calls": [
+            {
+              "function": {
+                "name": "inspect_pantry",
+                "arguments": {}
+              }
+            }
+          ]
+        },
+        {
+          "role": "tool",
+          "tool_name": "inspect_pantry",
+          "content": "{\"ok\":true,\"pantry\":{\"apple\":2,\"carrot\":2}}"
+        },
+        {
+          "role": "assistant",
+          "content": "",
+          "tool_calls": [
+            {
+              "function": {
+                "name": "take_one",
+                "arguments": {
+                  "item": "apple"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "role": "tool",
+          "tool_name": "take_one",
+          "content": "{\"ok\":true,\"item\":\"apple\",\"carried\":\"apple\"}"
+        },
+        {
+          "role": "assistant",
+          "content": "",
+          "tool_calls": [
+            {
+              "function": {
+                "name": "walk_to",
+                "arguments": {
+                  "place": "picnic_basket"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "role": "tool",
+          "tool_name": "walk_to",
+          "content": "{\"ok\":true,\"place\":\"picnic_basket\"}"
+        }
+      ],
+      "turn": 5,
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "unread": false,
+        "pantry": {
+          "apple": 1,
+          "carrot": 2
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 0
+        },
+        "carried": "apple",
+        "place": "picnic_basket",
+        "position": [
+          4.5,
+          0.45,
+          2.4
+        ]
+      },
+      "seq": 38,
+      "at": 13610.547332920862
     },
     {
       "kind": "model_start",
-      "text": "Mock is choosing from observed messages",
+      "text": "Provider call pending",
+      "turn": 6,
+      "messages": [
+        {
+          "role": "system",
+          "content": "You are Scout, a village courier. Use only the tools offered. You start beside the noticeboard. Places: noticeboard, pantry, picnic_basket. Choose one tool per turn and wait for its result. Read notices to learn jobs. Pantry stock is unknown until inspected. Report what you actually did. If you lack a tool, explain what you need; do not invent observations."
+        },
+        {
+          "role": "user",
+          "content": "A new notice has been posted on the noticeboard."
+        },
+        {
+          "role": "assistant",
+          "content": "",
+          "tool_calls": [
+            {
+              "function": {
+                "name": "read_notice",
+                "arguments": {}
+              }
+            }
+          ]
+        },
+        {
+          "role": "tool",
+          "tool_name": "read_notice",
+          "content": "{\"ok\":true,\"notice\":\"Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.\"}"
+        },
+        {
+          "role": "assistant",
+          "content": "",
+          "tool_calls": [
+            {
+              "function": {
+                "name": "walk_to",
+                "arguments": {
+                  "place": "pantry"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "role": "tool",
+          "tool_name": "walk_to",
+          "content": "{\"ok\":true,\"place\":\"pantry\"}"
+        },
+        {
+          "role": "assistant",
+          "content": "",
+          "tool_calls": [
+            {
+              "function": {
+                "name": "inspect_pantry",
+                "arguments": {}
+              }
+            }
+          ]
+        },
+        {
+          "role": "tool",
+          "tool_name": "inspect_pantry",
+          "content": "{\"ok\":true,\"pantry\":{\"apple\":2,\"carrot\":2}}"
+        },
+        {
+          "role": "assistant",
+          "content": "",
+          "tool_calls": [
+            {
+              "function": {
+                "name": "take_one",
+                "arguments": {
+                  "item": "apple"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "role": "tool",
+          "tool_name": "take_one",
+          "content": "{\"ok\":true,\"item\":\"apple\",\"carried\":\"apple\"}"
+        },
+        {
+          "role": "assistant",
+          "content": "",
+          "tool_calls": [
+            {
+              "function": {
+                "name": "walk_to",
+                "arguments": {
+                  "place": "picnic_basket"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "role": "tool",
+          "tool_name": "walk_to",
+          "content": "{\"ok\":true,\"place\":\"picnic_basket\"}"
+        }
+      ],
+      "schemas": [
+        {
+          "type": "function",
+          "function": {
+            "name": "read_notice",
+            "description": "Read the nearby noticeboard. Returns its exact text.",
+            "parameters": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": false
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "walk_to",
+            "description": "Walk a named path; returns after arrival.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "place": {
+                  "type": "string",
+                  "enum": [
+                    "noticeboard",
+                    "pantry",
+                    "picnic_basket"
+                  ]
+                }
+              },
+              "required": [
+                "place"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "inspect_pantry",
+            "description": "Inspect the nearby pantry to learn stock counts.",
+            "parameters": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": false
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "take_one",
+            "description": "Pick up one available item nearby. Carry at most one.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "item": {
+                  "type": "string",
+                  "enum": [
+                    "apple",
+                    "carrot"
+                  ]
+                }
+              },
+              "required": [
+                "item"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "deliver_item",
+            "description": "Put the carried item in the nearby picnic basket.",
+            "parameters": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": false
+            }
+          }
+        }
+      ],
       "state": {
         "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "unread": false,
         "pantry": {
           "apple": 1,
           "carrot": 2
@@ -896,69 +2388,101 @@
           2.4
         ]
       },
-      "seq": 28,
-      "at": 15610.547332920862,
-      "turn": 6
+      "seq": 39,
+      "at": 13610.547332920862
     },
     {
-      "kind": "model_end",
-      "text": "Mock call ended",
-      "state": {
-        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
-        "pantry": {
-          "apple": 1,
-          "carrot": 2
-        },
-        "basket": {
-          "apple": 0,
-          "carrot": 0
-        },
-        "carried": "apple",
-        "place": "picnic_basket",
-        "position": [
-          4.5,
-          0.45,
-          2.4
-        ]
-      },
-      "seq": 29,
-      "at": 15610.547332920862,
-      "turn": 6
-    },
-    {
-      "kind": "tool_start",
-      "text": "deliver_item({})",
-      "state": {
-        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
-        "pantry": {
-          "apple": 1,
-          "carrot": 2
-        },
-        "basket": {
-          "apple": 0,
-          "carrot": 0
-        },
-        "carried": "apple",
-        "place": "picnic_basket",
-        "position": [
-          4.5,
-          0.45,
-          2.4
-        ]
-      },
+      "kind": "assistant",
+      "text": "Tool requested",
+      "turn": 6,
       "tool": {
         "name": "deliver_item",
         "arguments": {}
       },
-      "seq": 30,
-      "at": 15610.547332920862,
-      "turn": 6
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "unread": false,
+        "pantry": {
+          "apple": 1,
+          "carrot": 2
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 0
+        },
+        "carried": "apple",
+        "place": "picnic_basket",
+        "position": [
+          4.5,
+          0.45,
+          2.4
+        ]
+      },
+      "seq": 40,
+      "at": 13610.547332920862
+    },
+    {
+      "kind": "model_end",
+      "text": "Provider call ended",
+      "turn": 6,
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "unread": false,
+        "pantry": {
+          "apple": 1,
+          "carrot": 2
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 0
+        },
+        "carried": "apple",
+        "place": "picnic_basket",
+        "position": [
+          4.5,
+          0.45,
+          2.4
+        ]
+      },
+      "seq": 41,
+      "at": 13610.547332920862
+    },
+    {
+      "kind": "tool_start",
+      "text": "deliver_item({})",
+      "tool": {
+        "name": "deliver_item",
+        "arguments": {}
+      },
+      "turn": 6,
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "unread": false,
+        "pantry": {
+          "apple": 1,
+          "carrot": 2
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 0
+        },
+        "carried": "apple",
+        "place": "picnic_basket",
+        "position": [
+          4.5,
+          0.45,
+          2.4
+        ]
+      },
+      "seq": 42,
+      "at": 13610.547332920862
     },
     {
       "kind": "delivery",
       "text": "Delivered one apple to the picnic basket",
       "state": {
         "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "unread": false,
         "pantry": {
           "apple": 1,
           "carrot": 2
@@ -975,31 +2499,12 @@
           2.4
         ]
       },
-      "seq": 31,
-      "at": 16260.547332920862,
-      "turn": 6
+      "seq": 43,
+      "at": 14260.547332920862
     },
     {
       "kind": "tool_result",
       "text": "{\"ok\":true,\"item\":\"apple\",\"basket\":{\"apple\":1,\"carrot\":0},\"carried\":null}",
-      "state": {
-        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
-        "pantry": {
-          "apple": 1,
-          "carrot": 2
-        },
-        "basket": {
-          "apple": 1,
-          "carrot": 0
-        },
-        "carried": null,
-        "place": "picnic_basket",
-        "position": [
-          4.5,
-          0.45,
-          2.4
-        ]
-      },
       "tool": {
         "name": "deliver_item",
         "arguments": {}
@@ -1013,15 +2518,383 @@
         },
         "carried": null
       },
-      "seq": 32,
-      "at": 16260.547332920862,
-      "turn": 6
+      "turn": 6,
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "unread": false,
+        "pantry": {
+          "apple": 1,
+          "carrot": 2
+        },
+        "basket": {
+          "apple": 1,
+          "carrot": 0
+        },
+        "carried": null,
+        "place": "picnic_basket",
+        "position": [
+          4.5,
+          0.45,
+          2.4
+        ]
+      },
+      "seq": 44,
+      "at": 14260.547332920862
+    },
+    {
+      "kind": "context",
+      "text": "Tool request and observation appended to the next input",
+      "messages": [
+        {
+          "role": "system",
+          "content": "You are Scout, a village courier. Use only the tools offered. You start beside the noticeboard. Places: noticeboard, pantry, picnic_basket. Choose one tool per turn and wait for its result. Read notices to learn jobs. Pantry stock is unknown until inspected. Report what you actually did. If you lack a tool, explain what you need; do not invent observations."
+        },
+        {
+          "role": "user",
+          "content": "A new notice has been posted on the noticeboard."
+        },
+        {
+          "role": "assistant",
+          "content": "",
+          "tool_calls": [
+            {
+              "function": {
+                "name": "read_notice",
+                "arguments": {}
+              }
+            }
+          ]
+        },
+        {
+          "role": "tool",
+          "tool_name": "read_notice",
+          "content": "{\"ok\":true,\"notice\":\"Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.\"}"
+        },
+        {
+          "role": "assistant",
+          "content": "",
+          "tool_calls": [
+            {
+              "function": {
+                "name": "walk_to",
+                "arguments": {
+                  "place": "pantry"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "role": "tool",
+          "tool_name": "walk_to",
+          "content": "{\"ok\":true,\"place\":\"pantry\"}"
+        },
+        {
+          "role": "assistant",
+          "content": "",
+          "tool_calls": [
+            {
+              "function": {
+                "name": "inspect_pantry",
+                "arguments": {}
+              }
+            }
+          ]
+        },
+        {
+          "role": "tool",
+          "tool_name": "inspect_pantry",
+          "content": "{\"ok\":true,\"pantry\":{\"apple\":2,\"carrot\":2}}"
+        },
+        {
+          "role": "assistant",
+          "content": "",
+          "tool_calls": [
+            {
+              "function": {
+                "name": "take_one",
+                "arguments": {
+                  "item": "apple"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "role": "tool",
+          "tool_name": "take_one",
+          "content": "{\"ok\":true,\"item\":\"apple\",\"carried\":\"apple\"}"
+        },
+        {
+          "role": "assistant",
+          "content": "",
+          "tool_calls": [
+            {
+              "function": {
+                "name": "walk_to",
+                "arguments": {
+                  "place": "picnic_basket"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "role": "tool",
+          "tool_name": "walk_to",
+          "content": "{\"ok\":true,\"place\":\"picnic_basket\"}"
+        },
+        {
+          "role": "assistant",
+          "content": "",
+          "tool_calls": [
+            {
+              "function": {
+                "name": "deliver_item",
+                "arguments": {}
+              }
+            }
+          ]
+        },
+        {
+          "role": "tool",
+          "tool_name": "deliver_item",
+          "content": "{\"ok\":true,\"item\":\"apple\",\"basket\":{\"apple\":1,\"carrot\":0},\"carried\":null}"
+        }
+      ],
+      "turn": 6,
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "unread": false,
+        "pantry": {
+          "apple": 1,
+          "carrot": 2
+        },
+        "basket": {
+          "apple": 1,
+          "carrot": 0
+        },
+        "carried": null,
+        "place": "picnic_basket",
+        "position": [
+          4.5,
+          0.45,
+          2.4
+        ]
+      },
+      "seq": 45,
+      "at": 14260.547332920862
     },
     {
       "kind": "model_start",
-      "text": "Mock is choosing from observed messages",
+      "text": "Provider call pending",
+      "turn": 7,
+      "messages": [
+        {
+          "role": "system",
+          "content": "You are Scout, a village courier. Use only the tools offered. You start beside the noticeboard. Places: noticeboard, pantry, picnic_basket. Choose one tool per turn and wait for its result. Read notices to learn jobs. Pantry stock is unknown until inspected. Report what you actually did. If you lack a tool, explain what you need; do not invent observations."
+        },
+        {
+          "role": "user",
+          "content": "A new notice has been posted on the noticeboard."
+        },
+        {
+          "role": "assistant",
+          "content": "",
+          "tool_calls": [
+            {
+              "function": {
+                "name": "read_notice",
+                "arguments": {}
+              }
+            }
+          ]
+        },
+        {
+          "role": "tool",
+          "tool_name": "read_notice",
+          "content": "{\"ok\":true,\"notice\":\"Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.\"}"
+        },
+        {
+          "role": "assistant",
+          "content": "",
+          "tool_calls": [
+            {
+              "function": {
+                "name": "walk_to",
+                "arguments": {
+                  "place": "pantry"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "role": "tool",
+          "tool_name": "walk_to",
+          "content": "{\"ok\":true,\"place\":\"pantry\"}"
+        },
+        {
+          "role": "assistant",
+          "content": "",
+          "tool_calls": [
+            {
+              "function": {
+                "name": "inspect_pantry",
+                "arguments": {}
+              }
+            }
+          ]
+        },
+        {
+          "role": "tool",
+          "tool_name": "inspect_pantry",
+          "content": "{\"ok\":true,\"pantry\":{\"apple\":2,\"carrot\":2}}"
+        },
+        {
+          "role": "assistant",
+          "content": "",
+          "tool_calls": [
+            {
+              "function": {
+                "name": "take_one",
+                "arguments": {
+                  "item": "apple"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "role": "tool",
+          "tool_name": "take_one",
+          "content": "{\"ok\":true,\"item\":\"apple\",\"carried\":\"apple\"}"
+        },
+        {
+          "role": "assistant",
+          "content": "",
+          "tool_calls": [
+            {
+              "function": {
+                "name": "walk_to",
+                "arguments": {
+                  "place": "picnic_basket"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "role": "tool",
+          "tool_name": "walk_to",
+          "content": "{\"ok\":true,\"place\":\"picnic_basket\"}"
+        },
+        {
+          "role": "assistant",
+          "content": "",
+          "tool_calls": [
+            {
+              "function": {
+                "name": "deliver_item",
+                "arguments": {}
+              }
+            }
+          ]
+        },
+        {
+          "role": "tool",
+          "tool_name": "deliver_item",
+          "content": "{\"ok\":true,\"item\":\"apple\",\"basket\":{\"apple\":1,\"carrot\":0},\"carried\":null}"
+        }
+      ],
+      "schemas": [
+        {
+          "type": "function",
+          "function": {
+            "name": "read_notice",
+            "description": "Read the nearby noticeboard. Returns its exact text.",
+            "parameters": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": false
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "walk_to",
+            "description": "Walk a named path; returns after arrival.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "place": {
+                  "type": "string",
+                  "enum": [
+                    "noticeboard",
+                    "pantry",
+                    "picnic_basket"
+                  ]
+                }
+              },
+              "required": [
+                "place"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "inspect_pantry",
+            "description": "Inspect the nearby pantry to learn stock counts.",
+            "parameters": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": false
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "take_one",
+            "description": "Pick up one available item nearby. Carry at most one.",
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "item": {
+                  "type": "string",
+                  "enum": [
+                    "apple",
+                    "carrot"
+                  ]
+                }
+              },
+              "required": [
+                "item"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "deliver_item",
+            "description": "Put the carried item in the nearby picnic basket.",
+            "parameters": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": false
+            }
+          }
+        }
+      ],
       "state": {
         "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "unread": false,
         "pantry": {
           "apple": 1,
           "carrot": 2
@@ -1038,15 +2911,42 @@
           2.4
         ]
       },
-      "seq": 33,
-      "at": 16660.54733292086,
-      "turn": 7
+      "seq": 46,
+      "at": 14260.547332920862
+    },
+    {
+      "kind": "assistant",
+      "text": "I delivered one apple to the picnic basket.",
+      "turn": 7,
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "unread": false,
+        "pantry": {
+          "apple": 1,
+          "carrot": 2
+        },
+        "basket": {
+          "apple": 1,
+          "carrot": 0
+        },
+        "carried": null,
+        "place": "picnic_basket",
+        "position": [
+          4.5,
+          0.45,
+          2.4
+        ]
+      },
+      "seq": 47,
+      "at": 14260.547332920862
     },
     {
       "kind": "model_end",
-      "text": "Mock call ended",
+      "text": "Provider call ended",
+      "turn": 7,
       "state": {
         "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "unread": false,
         "pantry": {
           "apple": 1,
           "carrot": 2
@@ -1063,15 +2963,16 @@
           2.4
         ]
       },
-      "seq": 34,
-      "at": 16660.54733292086,
-      "turn": 7
+      "seq": 48,
+      "at": 14260.547332920862
     },
     {
       "kind": "report",
       "text": "I delivered one apple to the picnic basket.",
+      "turn": 7,
       "state": {
         "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "unread": false,
         "pantry": {
           "apple": 1,
           "carrot": 2
@@ -1088,15 +2989,15 @@
           2.4
         ]
       },
-      "seq": 35,
-      "at": 16660.54733292086,
-      "turn": 7
+      "seq": 49,
+      "at": 14260.547332920862
     },
     {
       "kind": "run_end",
-      "text": "Run reported. The basket shows what actually happened.",
+      "text": "Experiment reported",
       "state": {
         "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "unread": false,
         "pantry": {
           "apple": 1,
           "carrot": 2
@@ -1113,14 +3014,18 @@
           2.4
         ]
       },
-      "seq": 36,
-      "at": 16660.54733292086,
-      "turn": 7
+      "seq": 50,
+      "at": 14260.547332920862
     }
   ],
   "status": "reported",
+  "lesson": {
+    "step": 7,
+    "stage": "ready"
+  },
   "final": {
     "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+    "unread": false,
     "pantry": {
       "apple": 1,
       "carrot": 2

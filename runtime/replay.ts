@@ -1,7 +1,7 @@
 import type { Trace, TraceEvent } from './types.ts';
 
 // Replay owns a playhead, not a World or a Provider. No tools can run from here.
-export function createReplay(trace: Trace, emit: (event: TraceEvent, elapsed: number) => void) {
+export function createReplay<State>(trace: Trace<State>, emit: (event: TraceEvent<State>, elapsed: number) => void) {
   let elapsed = 0, cursor = 0, playing = false;
   const duration = trace.events.at(-1)?.at ?? 0;
   const flush = () => {

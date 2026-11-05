@@ -1,0 +1,1 @@
+Scout is a courier. It can carry one item from the pantry, across the bridge, to the picnic basket. There is a notice board next to Scout, with an amber light to indicate that a notice is waiting to be read.

@@ -1,8 +1,7 @@
 import * as THREE from 'three';
-import { buildVillage } from './village.ts';
-import { buildScout } from './scout.ts';
-import { places } from '../runtime/types.ts';
-import type { TraceEvent } from '../runtime/types.ts';
+import { buildVillage } from '../article-sets/scout-foundations/scene/village.ts';
+import { buildScout } from '../article-sets/scout-foundations/scene/scout.ts';
+import type { TraceEvent } from '../article-sets/scout-foundations/types.ts';
 
 export function createView(container: HTMLElement) {
   const scene = new THREE.Scene();
@@ -27,25 +26,31 @@ export function createView(container: HTMLElement) {
   const floor = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.MeshStandardMaterial({ color: '#e9e8df', roughness: 1 }));
   floor.rotation.x = -Math.PI / 2; floor.position.y = -0.93; floor.receiveShadow = true; scene.add(floor);
   const village = buildVillage(scene), scout = buildScout(scene);
-  const labels = [...container.querySelectorAll<HTMLElement>('[data-place]')];
+  const noticeLabel = container.querySelector<HTMLElement>('#notice-light-label')!;
   const projected = new THREE.Vector3();
+  const bubble = container.querySelector<HTMLElement>('#scout-bubble')!;
+  let thinking = false, confused = false;
+  function bubbleState() {
+    bubble.hidden = !thinking && !confused;
+    bubble.classList.toggle('confused', !thinking && confused);
+    container.querySelector('#bubble-label')!.textContent = thinking ? 'Scout is thinking · provider call pending' : confused ? 'Scout needs a tool that is not available' : '';
+  }
   function resize() {
     const width = container.clientWidth, height = container.clientHeight;
     const aspect = width / height;
     const span = Math.max(6.3, 8.4 / aspect);
     camera.left = -span * aspect; camera.right = span * aspect;
     camera.top = span; camera.bottom = -span;
-    camera.updateProjectionMatrix(); renderer.setSize(width, height);
-    for (const label of labels) {
-      const place = label.dataset.place as keyof typeof places;
-      const point = [...places[place]];
-      if (place === 'noticeboard') { point[1] += 2.15; point[2] -= 0.9; }
-      if (place === 'pantry') { point[1] += 3.6; point[2] -= 1.4; }
-      if (place === 'picnic_basket') { point[0] += 1.4; point[1] += 0.5; point[2] += 1.2; }
-      projected.fromArray(point).project(camera);
-      label.style.left = `${(projected.x + 1) / 2 * width}px`;
-      label.style.top = `${(-projected.y + 1) / 2 * height}px`;
-    }
+    camera.updateProjectionMatrix(); camera.updateMatrixWorld(); renderer.setSize(width, height);
+    // Put the label on a plane parallel to the noticeboard, using this camera's projection.
+    projected.set(-4.1, 2.85, .6).project(camera);
+    noticeLabel.style.left = `${(projected.x + 1) / 2 * width}px`;
+    noticeLabel.style.top = `${(-projected.y + 1) / 2 * height}px`;
+    const right = new THREE.Vector3(-3.1, 2.85, .6).project(camera).sub(projected);
+    const down = new THREE.Vector3(-4.1, 1.85, .6).project(camera).sub(projected);
+    const x = right.x * width / 2, y = -right.y * height / 2, scale = Math.hypot(x, y);
+    noticeLabel.style.setProperty('--isometric-plane', `matrix(${x / scale},${y / scale},${down.x * width / 2 / scale},${-down.y * height / 2 / scale},0,0)`);
+
   }
   new ResizeObserver(resize).observe(container); resize();
   let paused = false, idle = true, previous = performance.now();
@@ -53,10 +58,20 @@ export function createView(container: HTMLElement) {
   renderer.setAnimationLoop(now => {
     const dt = Math.max(0, (now - previous) / 1000); previous = now;
     onFrame(dt);
-    scout.update(dt, paused, idle); renderer.render(scene, camera);
+    scout.update(dt, paused, idle);
+    projected.copy(scout.position).add(new THREE.Vector3(.15, 2.05, 0)).project(camera);
+    bubble.style.left = `${(projected.x + 1) / 2 * container.clientWidth}px`;
+    bubble.style.top = `${(-projected.y + 1) / 2 * container.clientHeight}px`;
+    village.animate(now / 1000); renderer.render(scene, camera);
   });
   return {
-    apply(event: TraceEvent, elapsed = 0) { village.update(event.state); scout.apply(event, elapsed); },
+    apply(event: TraceEvent, elapsed = 0) {
+      if (event.kind === 'checkpoint') { thinking = false; confused = false; }
+      if (event.kind === 'model_start') { thinking = true; confused = false; }
+      if (['model_end','run_end','error'].includes(event.kind)) thinking = false;
+      if (event.kind === 'capability_missing' || (event.kind === 'tool_result' && event.result?.reason === 'tool_unavailable')) confused = true;
+      if (event.kind === 'lesson_approval') confused = false;
+      bubbleState(); village.update(event.state); noticeLabel.hidden = !event.state.unread; scout.apply(event, elapsed); },
     pause(value: boolean) { paused = value; },
     idle(value: boolean) { idle = value; },
     onFrame(callback: (dt: number) => void) { onFrame = callback; },

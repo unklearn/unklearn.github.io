@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { arch, box, colors as c, cylinder, itemMesh, plant, slab, sphere } from './geometry.ts';
-import type { Snapshot } from '../runtime/types.ts';
+import type { Snapshot } from '../types.ts';
 
 export function buildVillage(scene: THREE.Scene) {
   const village = new THREE.Group(); scene.add(village);
@@ -79,6 +79,13 @@ export function buildVillage(scene: THREE.Scene) {
   const canopy = box(board, 2.05, 0.13, 0.65, c.teal, 0, 1.89, 0); canopy.rotation.x = 0.12;
   cylinder(board, 0.12, 0.05, c.clay, 0.5, 0.89, 0.13).rotation.x = Math.PI / 2;
 
+  // A posted notice lights the board. Reading is a world event, not a renderer decision.
+  const lampMaterial = new THREE.MeshStandardMaterial({ color: '#806647', emissive: '#e8a438', emissiveIntensity: 0 });
+  const lamp = new THREE.Mesh(new THREE.SphereGeometry(.12, 16, 12), lampMaterial);
+  lamp.position.set(0, 2.12, 0); board.add(lamp);
+  cylinder(board, .17, .06, c.brass, 0, 1.99, 0);
+  let unread = false;
+
   // Picnic rug and basket on the smaller island.
   box(village, 2.4, 0.02, 1.7, '#cb8267', 4.45, 0.46, 3.1);
   for (let i = 0; i < 7; i++) box(village, 0.12, 0.005, 1.7, '#e4b598', 3.42 + i * 0.34, 0.475, 3.1);
@@ -109,7 +116,12 @@ export function buildVillage(scene: THREE.Scene) {
   }
   let counts = '';
   return {
+    animate(time: number) {
+      lampMaterial.emissiveIntensity = unread ? 1.1 + Math.sin(time * 4) * .6 : 0;
+      lampMaterial.color.set(unread ? '#edb74d' : '#806647');
+    },
     update(state: Snapshot) {
+      unread = !!state.unread;
       const key = JSON.stringify([state.pantry, state.basket]); if (key === counts) return; counts = key;
       displayItems(pantryItems, state.pantry.apple, state.pantry.carrot, 0.3);
       displayItems(basketItems, state.basket.apple, state.basket.carrot, 0.23);

@@ -1,85 +1,62 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#e9e8df">
-  <meta name="description" content="A little courier. A real agent loop. An interactive, isometric lesson in seeing, deciding, and doing.">
-  <title>Scout’s picnic · Unklearn</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23315b59'/%3E%3Cpath d='M18 26h28v24H18z' fill='%23bc6c50'/%3E%3Cpath d='M24 26v-7a8 8 0 0116 0v7' fill='none' stroke='%23ebd8b7' stroke-width='5'/%3E%3Ccircle cx='32' cy='36' r='4' fill='%23d5ad65'/%3E%3C/svg%3E">
+  <meta name="description" content="Teach an agent runtime by giving Scout, a village courier, tools and feedback.">
+  <title>Scout Foundations · Unklearn</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23315b59'/%3E%3Cpath d='M18 26h28v24H18z' fill='%23bc6c50'/%3E%3Cpath d='M24 26v-7a8 8 0 0116 0v7' fill='none' stroke='%23ebd8b7' stroke-width='5'/%3E%3C/svg%3E">
 </head>
 <body>
-  <header class="masthead">
-    <a class="brand" href="./" aria-label="Unklearn home"><span class="brand-mark">u.</span> UNKLEARN <span class="brand-divider">/</span> FIELD NOTES <span class="edition">001</span></a>
-    <button id="film" class="quiet-button" aria-pressed="false"><span aria-hidden="true">↗</span> Film view</button>
+  <header class="toolbar">
+    <a class="brand" href="./">u.<span>SCOUT FOUNDATIONS</span></a>
+    <nav aria-label="World controls">
+      <button class="icon-button" id="lesson-toggle" title="Hide lesson" aria-label="Hide lesson" aria-controls="lesson" aria-expanded="true"></button>
+      <button class="icon-button notification-button" id="activity-button" title="Scout activity and experiment context" aria-label="Scout activity and experiment context" aria-controls="terminal" aria-expanded="false"><span aria-hidden="true">☷</span><sup id="activity-count" hidden></sup></button>
+      <button class="icon-button" id="settings-button" title="Settings" aria-label="Settings"></button>
+      <button class="icon-button" id="status-button" title="Status" aria-label="Status"></button>
+      <button class="icon-button" id="history-button" title="History" aria-label="History"></button>
+      <button class="icon-button" id="film" title="Film view" aria-label="Film view" aria-pressed="false"></button>
+    </nav>
   </header>
-  <main>
-    <section class="intro" aria-labelledby="title">
-      <div><p class="eyebrow">A SMALL WORLD FOR A BIG IDEA</p><h1 id="title">A picnic, <em>with agency.</em></h1></div>
-      <p class="intro-copy">Meet Scout. Give it a job, change what’s on the shelf,<br class="wide-only"> and watch a decision become an action.</p>
-    </section>
-    <section class="workspace" aria-label="Scout’s village and controls">
-      <div class="stage" id="stage">
-        <div class="stage-top"><span class="live-location"><i></i> THE COURIER’S COURT</span><span id="mode-badge">MOCK · RUNS IN YOUR BROWSER</span></div>
-        <div class="place-label" data-place="noticeboard"><span>01</span> Noticeboard</div>
-        <div class="place-label" data-place="pantry"><span>02</span> Pantry</div>
-        <div class="place-label" data-place="picnic_basket"><span>03</span> Picnic basket</div>
-        <article class="radio" id="radio" aria-live="polite">
-          <div class="radio-top"><span class="radio-light"></span><span id="radio-source">SCOUT / MOCK PROVIDER</span><span id="radio-turn">STANDING BY</span></div>
-          <p id="radio-text">A notice, a pantry, a picnic. Scout is ready.</p>
-          <div id="radio-detail">No inference while idle.</div>
-        </article>
-        <div class="stage-bottom"><span>ISOMETRIC STUDY / 01</span><span>SEE → DECIDE → ACT → OBSERVE</span></div>
+  <main id="app" class="slides">
+    <div id="world-column">
+      <div id="stage">
+        <div id="scout-bubble" role="status" hidden><span class="thinking-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="question-mark" aria-hidden="true">?</span><span class="sr-only" id="bubble-label"></span></div>
+        <div id="notice-light-label" hidden>New notice</div>
       </div>
-      <aside class="controls" aria-label="Picnic controls">
-        <div class="control-heading"><span class="eyebrow">THE EXPERIMENT</span><span class="small-sun" aria-hidden="true">✳</span></div>
-        <div class="mode-switch" role="group" aria-label="Operating mode">
-          <button data-mode="replay" aria-pressed="false">Replay</button><button data-mode="mock" aria-pressed="true">Mock</button><button data-mode="live" aria-pressed="false">Live</button>
-        </div>
-        <p class="mode-note" id="mode-note">A deterministic provider. A real loop and real tools. Entirely in your browser.</p>
-        <form id="order-form">
-          <label for="order">01 <span>Post a notice</span></label>
-          <textarea id="order" rows="6" spellcheck="false"></textarea>
-          <label for="preset">02 <span>Stock the pantry</span></label>
-          <select id="preset"><option value="2">2 apples · 2 carrots</option><option value="1">1 apple · 2 carrots</option></select>
-          <p class="field-hint">Scout discovers the stock by inspecting it.</p>
-          <div id="live-settings" hidden>
-            <label for="transport">Connection</label><select id="transport"><option value="ollama">Local Ollama</option><option value="gateway">Provider gateway</option></select>
-            <label for="endpoint">Provider URL</label><input id="endpoint" type="url" value="http://127.0.0.1:11434">
-            <label for="model">Model</label><input id="model" value="qwen3:14b">
-          </div>
-          <button class="post-button" id="post" type="submit">Post order <span aria-hidden="true">↗</span></button>
-          <p class="field-hint reset-note">Each post starts a fresh take.</p>
-        </form>
-        <div id="replay-controls" hidden>
-          <label for="recording">Saved take</label><select id="recording"><option value="apple">Two apples → apple</option><option value="carrot">Last apple → carrot</option><option value="ollama">Ollama · took the last apple</option></select>
-          <div class="replay-buttons"><button id="play" class="post-button">Play recording <span>▷</span></button><button id="restart" class="quiet-button">↺ Restart</button></div>
-          <p class="field-hint" id="playhead">0:00 / 0:00</p>
-        </div>
-        <div class="inventories" aria-live="polite">
-          <div><span>PANTRY</span><strong id="pantry-count">2 apples · 2 carrots</strong></div>
-          <div><span>CARRYING</span><strong id="carried-count">Nothing yet</strong></div>
-          <div><span>BASKET</span><strong id="basket-count">Waiting for a delivery</strong></div>
-        </div>
-        <p class="status" id="status" role="status">Ready when you are.</p>
-        <div class="trace-actions"><button id="download" class="text-button" disabled>↓ Save trace</button><label class="text-button import-label" for="import">↑ Open trace</label><input type="file" id="import" accept="application/json,.json" class="visually-hidden"></div>
-      </aside>
-    </section>
-    <section class="lesson" aria-label="How the agent works">
-      <div class="lesson-heading"><p class="eyebrow">WHAT MAKES THIS AGENTIC?</p><h2>The next step is a decision.</h2><p>The world supplies facts. The provider chooses an action.<br>Scout’s tools make it happen, then report what changed.</p></div>
-      <ol class="loop-steps"><li><span>01 / SENSE</span><strong>Read the notice.</strong><p>The job is text in the world.</p></li><li><span>02 / DECIDE</span><strong>Ask the provider.</strong><p>Only observed facts go in.</p></li><li><span>03 / ACT</span><strong>Use a tool.</strong><p>Walk, inspect, pick up, deliver.</p></li><li><span>04 / OBSERVE</span><strong>See what changed.</strong><p>The result informs the next turn.</p></li></ol>
-    </section>
-    <details class="trace-panel"><summary>Open the field notebook <span id="event-count">0 observations</span></summary><ol id="event-log"></ol></details>
+      <section id="terminal" class="terminal" aria-label="Scout terminal" hidden>
+        <header><span class="activity-light"></span><span id="terminal-source">SCOUT / MOCK</span><button id="terminal-close" aria-label="Dismiss terminal">−</button></header>
+        <div id="terminal-activity" role="status">Ready</div>
+        <nav class="activity-tabs" aria-label="Activity view"><button id="scout-tab" aria-pressed="true">Scout</button><button id="context-tab" aria-pressed="false">Context</button></nav>
+        <div id="experiment-context" hidden><p id="context-notice"></p><details id="context-details"><summary>Inspect context</summary><pre id="context-data"></pre></details></div>
+        <ol id="terminal-lines" aria-live="polite"></ol>
+      </section>
+      <div id="replay-bar" hidden><span id="replay-time">Recorded activity</span><button id="replay-play">Play</button><button id="replay-restart">Restart</button></div>
+    </div>
+    <aside id="lesson" aria-label="Lesson">
+      <header class="lesson-header"><span id="step-count">1 / 5</span><button id="toc-open" aria-haspopup="dialog" aria-controls="toc-panel">TOC ☰</button></header>
+      <div id="lesson-pages"><!-- lesson-slides --></div>
+      <footer class="lesson-navigation"><button id="previous">← Previous</button><button id="next">Next →</button></footer>
+    </aside>
   </main>
-  <footer><span>UNKLEARN <span class="footer-dot">•</span> LEARN BY LOOKING CLOSER</span><span>A small world. No hidden route.</span></footer>
-  <button id="exit-film" class="quiet-button" hidden>↙ Exit film view</button>
-  <dialog id="export-dialog" aria-labelledby="export-title">
-    <div class="export-heading"><h2 id="export-title">Scout’s field notebook</h2><button id="close-export" class="quiet-button" aria-label="Close trace export">✕</button></div>
-    <p>Keep this run for your article, or open it again in Replay.</p>
-    <label for="trace-json">Complete trace · JSON</label><textarea id="trace-json" readonly spellcheck="false" rows="12"></textarea>
-    <a id="trace-link" class="post-button" download>Download .json <span>↓</span></a>
-    <p class="field-hint">If your browser blocks downloads, select and copy the JSON above into a .json file.</p>
+  <dialog id="toc-panel" aria-labelledby="article-title"><header class="panel-heading"><h2 id="article-title"><!-- article-title --></h2><button data-close aria-label="Close contents">×</button></header><div id="article-picker" hidden><label for="article-select">Article</label><select id="article-select"></select></div><nav id="toc-steps" aria-label="Teaching steps"></nav></dialog>
+  <dialog id="settings-panel" aria-labelledby="settings-title">
+    <header class="panel-heading"><h2 id="settings-title">Settings</h2><button data-close aria-label="Close settings">×</button></header>
+    <label for="mode">Execution mode</label><select id="mode"><option value="mock">Mock · deterministic demonstration</option><option value="replay">Replay · recorded activity</option><option value="live">Live · provider connection</option></select>
+    <p id="mode-note">Mock runs the real loop and tools in your browser.</p>
+    <form id="order-form"><label for="order">Notice</label><textarea id="order" rows="5"></textarea>
+      <label for="preset">Starting pantry</label><select id="preset"><option value="2">2 apples · 2 carrots</option><option value="1">1 apple · 2 carrots</option></select>
+      <label class="check-label"><input id="pause-inspection" type="checkbox" checked> Pause after the first pantry inspection</label>
+      <button type="submit" class="primary" id="post-order">Post order</button>
+    </form>
+    <div id="live-settings" hidden><label for="transport">Connection</label><select id="transport"><option value="ollama">Local Ollama</option><option value="gateway">Provider gateway</option></select><label for="endpoint">Provider URL</label><input id="endpoint" type="url" value="http://127.0.0.1:11434"><label for="model">Model</label><input id="model" value="qwen3:14b"><p>Live calls your provider directly. Errors stay visible. <a href="https://docs.ollama.com/faq#how-can-i-allow-additional-web-origins-to-access-ollama" target="_blank" rel="noreferrer">Configure Ollama’s allowed browser origins</a>.</p></div>
+    <div id="recording-settings" hidden><label for="recording">Recording</label><select id="recording"></select><p>Replay renders recorded events. It calls no provider and executes no tool.</p></div>
   </dialog>
+  <dialog id="status-panel" aria-labelledby="status-title"><header class="panel-heading"><h2 id="status-title">Status</h2><button data-close aria-label="Close status">×</button></header><div id="status-content"></div></dialog>
+  <dialog id="history-panel" aria-labelledby="history-title"><header class="panel-heading"><h2 id="history-title">Execution history</h2><button data-close aria-label="Close history">×</button></header><div class="history-actions"><button id="export">Export JSON</button><label class="file-button" for="import">Import JSON</label><input id="import" type="file" accept="application/json,.json" class="sr-only"></div><p id="history-summary"></p><ol id="history-events"></ol></dialog>
+  <dialog id="export-panel" aria-labelledby="export-title"><header class="panel-heading"><h2 id="export-title">Recorded take</h2><button data-close aria-label="Close export">×</button></header><a id="download" class="primary">Download JSON</a><label for="export-json">Trace JSON</label><textarea id="export-json" readonly rows="14"></textarea></dialog>
+  <p id="error" role="alert" hidden></p>
   <script type="module" src="/scene/main.ts"></script>
 </body>
 </html>

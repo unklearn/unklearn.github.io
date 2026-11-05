@@ -1,13 +1,16 @@
-import { distance, paths, places, realClock } from './types.ts';
-import type { Clock, Inventory, Item, Place, Point, Snapshot, ToolCall, WorldEvent } from './types.ts';
+import { distance, paths, places } from './types.ts';
+import { realClock } from '../../runtime/types.ts';
+import type { Clock, ToolCall } from '../../runtime/types.ts';
+import type { Inventory, Item, Place, Point, Snapshot, WorldEvent } from './types.ts';
 
-export function createWorld({ notice, pantry, clock = realClock, emit = () => {} }: {
-  notice: string; pantry: Inventory; clock?: Clock; emit?: (event: WorldEvent) => void;
+export function createWorld({ notice, pantry, clock = realClock, emit = () => {}, initial }: {
+  notice: string; pantry: Inventory; clock?: Clock; emit?: (event: WorldEvent) => void; initial?: Snapshot;
 }) {
   const state: Snapshot = {
-    notice, pantry: { ...pantry }, basket: { apple: 0, carrot: 0 },
+    notice, unread: !!notice, pantry: { ...pantry }, basket: { apple: 0, carrot: 0 },
     carried: null, place: 'noticeboard', position: [...places.noticeboard],
   };
+  if (initial) Object.assign(state, structuredClone(initial));
   const snapshot = (): Snapshot => structuredClone(state);
   const show = (kind: string, text: string, movement?: WorldEvent['movement']) => emit({ kind, text, state: snapshot(), ...(movement ? { movement } : {}) });
   const near = (place: Place) => distance(state.position, places[place]) < 0.9 && state.place === place;
@@ -29,8 +32,8 @@ export function createWorld({ notice, pantry, clock = realClock, emit = () => {}
       const duration = length / 1.65 * 1000;
       state.place = null;
       show('walk_start', `Walking to ${place.replaceAll('_', ' ')}`, { path, duration });
-      await clock.sleep(duration, signal);
-      signal.throwIfAborted();
+      try { await clock.sleep(duration, signal); signal.throwIfAborted(); }
+      catch (error) { state.place = from; show('walk_cancelled', 'Walk cancelled'); throw error; }
       state.position = [...places[place]];
       state.place = place;
       show('walk_end', `Arrived at ${place.replaceAll('_', ' ')}`);
@@ -40,6 +43,8 @@ export function createWorld({ notice, pantry, clock = realClock, emit = () => {}
       if (!near('noticeboard')) return fail('Walk to the noticeboard first.');
       show('read', 'Reading the posted notice');
       await clock.sleep(1100, signal);
+      state.unread = false;
+      show('notice_read', 'Notice read; board light cleared');
       return { ok: true, notice: state.notice };
     }
     if (call.name === 'inspect_pantry') {
@@ -53,9 +58,10 @@ export function createWorld({ notice, pantry, clock = realClock, emit = () => {}
       const item = args.item as Item;
       if (item !== 'apple' && item !== 'carrot') return fail('Choose apple or carrot.');
       if (state.carried) return fail('Scout is already carrying an item.');
-      if (state.pantry[item] < 1) return fail('That item is out of stock.');
+      if (state.pantry[item] < 1) return fail('out_of_stock');
       await clock.sleep(650, signal);
       signal.throwIfAborted();
+      if (state.pantry[item] < 1) return fail('out_of_stock');
       // Physical availability is the only stock rule. The last apple is legal.
       state.pantry[item]--;
       state.carried = item;
@@ -75,7 +81,20 @@ export function createWorld({ notice, pantry, clock = realClock, emit = () => {}
     }
     return fail('Unknown tool.');
   }
-  return { snapshot, execute };
+  function postNotice(text: string) {
+    state.notice = text; state.unread = true;
+    show('notice_posted', 'New notice posted; amber light on');
+  }
+  function emptyApples() { state.pantry.apple = 0; show('shelf_change', 'Reader emptied the apple shelf. Scout has not observed this change.'); }
+  async function patrol(signal: AbortSignal) {
+    // @excerpt patrol start
+    const path: Point[] = [[-4.1, .45, 1.6], [-2.2, .45, 2.5], [-4.6, .45, 3.1], [-4.1, .45, 1.6]];
+    show('walk_start', 'Scripted patrol', { path, duration: 7000 });
+    await clock.sleep(7000, signal);
+    // @excerpt patrol end
+    show('patrol_pass', 'Scout passed the noticeboard without reading.');
+  }
+  return { snapshot, execute, postNotice, emptyApples, patrol };
 }
 
 export type World = ReturnType<typeof createWorld>;

@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { box, colors as c, cylinder, itemMesh, sphere } from './geometry.ts';
-import { distance } from '../runtime/types.ts';
-import type { Item, Movement, Point, TraceEvent } from '../runtime/types.ts';
+import { distance } from '../types.ts';
+import type { Item, Movement, Point, TraceEvent } from '../types.ts';
 
 export function buildScout(scene: THREE.Scene) {
   const root = new THREE.Group(); scene.add(root);
@@ -38,9 +38,9 @@ export function buildScout(scene: THREE.Scene) {
   root.position.set(-4.1, 0.45, 1.6);
 
   function apply(event: TraceEvent, elapsed = 0) {
-    root.position.fromArray(event.state.position);
+    if (!motion || ['walk_start','walk_end','walk_cancelled','checkpoint','patrol_pass'].includes(event.kind)) root.position.fromArray(event.state.position);
     if (event.kind === 'walk_start' && event.movement) motion = { ...event.movement, elapsed };
-    else motion = null;
+    else if (['walk_end','walk_cancelled','checkpoint','patrol_pass'].includes(event.kind)) motion = null;
     gesture = event.kind;
     if (['read', 'inspect'].includes(event.kind)) targetYaw = Math.PI;
     if (event.kind === 'delivery') targetYaw = 0;
@@ -79,5 +79,5 @@ export function buildScout(scene: THREE.Scene) {
     coat.rotation.z = walking ? Math.sin(time * 10) * 0.025 : 0;
     scarf.rotation.z = walking ? Math.sin(time * 8) * 0.06 : 0;
   }
-  return { apply, update };
+  return { apply, update, position: root.position };
 }
