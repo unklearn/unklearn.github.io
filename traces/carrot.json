@@ -1,0 +1,1140 @@
+{
+  "version": 1,
+  "id": "1793892944109-pu8k2",
+  "mode": "mock",
+  "provider": "Mock",
+  "startedAt": "2026-11-05T15:35:44.109Z",
+  "order": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+  "initial": {
+    "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+    "pantry": {
+      "apple": 1,
+      "carrot": 2
+    },
+    "basket": {
+      "apple": 0,
+      "carrot": 0
+    },
+    "carried": null,
+    "place": "noticeboard",
+    "position": [
+      -4.1,
+      0.45,
+      1.6
+    ]
+  },
+  "events": [
+    {
+      "kind": "run_start",
+      "text": "A new notice is waiting for Scout",
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "pantry": {
+          "apple": 1,
+          "carrot": 2
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 0
+        },
+        "carried": null,
+        "place": "noticeboard",
+        "position": [
+          -4.1,
+          0.45,
+          1.6
+        ]
+      },
+      "seq": 0,
+      "at": 0,
+      "turn": 0
+    },
+    {
+      "kind": "model_start",
+      "text": "Mock is choosing from observed messages",
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "pantry": {
+          "apple": 1,
+          "carrot": 2
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 0
+        },
+        "carried": null,
+        "place": "noticeboard",
+        "position": [
+          -4.1,
+          0.45,
+          1.6
+        ]
+      },
+      "seq": 1,
+      "at": 0,
+      "turn": 1
+    },
+    {
+      "kind": "model_end",
+      "text": "Mock call ended",
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "pantry": {
+          "apple": 1,
+          "carrot": 2
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 0
+        },
+        "carried": null,
+        "place": "noticeboard",
+        "position": [
+          -4.1,
+          0.45,
+          1.6
+        ]
+      },
+      "seq": 2,
+      "at": 0,
+      "turn": 1
+    },
+    {
+      "kind": "tool_start",
+      "text": "read_notice({})",
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "pantry": {
+          "apple": 1,
+          "carrot": 2
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 0
+        },
+        "carried": null,
+        "place": "noticeboard",
+        "position": [
+          -4.1,
+          0.45,
+          1.6
+        ]
+      },
+      "tool": {
+        "name": "read_notice",
+        "arguments": {}
+      },
+      "seq": 3,
+      "at": 0,
+      "turn": 1
+    },
+    {
+      "kind": "read",
+      "text": "Reading the posted notice",
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "pantry": {
+          "apple": 1,
+          "carrot": 2
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 0
+        },
+        "carried": null,
+        "place": "noticeboard",
+        "position": [
+          -4.1,
+          0.45,
+          1.6
+        ]
+      },
+      "seq": 4,
+      "at": 0,
+      "turn": 1
+    },
+    {
+      "kind": "tool_result",
+      "text": "{\"ok\":true,\"notice\":\"Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.\"}",
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "pantry": {
+          "apple": 1,
+          "carrot": 2
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 0
+        },
+        "carried": null,
+        "place": "noticeboard",
+        "position": [
+          -4.1,
+          0.45,
+          1.6
+        ]
+      },
+      "tool": {
+        "name": "read_notice",
+        "arguments": {}
+      },
+      "result": {
+        "ok": true,
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket."
+      },
+      "seq": 5,
+      "at": 1100,
+      "turn": 1
+    },
+    {
+      "kind": "model_start",
+      "text": "Mock is choosing from observed messages",
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "pantry": {
+          "apple": 1,
+          "carrot": 2
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 0
+        },
+        "carried": null,
+        "place": "noticeboard",
+        "position": [
+          -4.1,
+          0.45,
+          1.6
+        ]
+      },
+      "seq": 6,
+      "at": 1500,
+      "turn": 2
+    },
+    {
+      "kind": "model_end",
+      "text": "Mock call ended",
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "pantry": {
+          "apple": 1,
+          "carrot": 2
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 0
+        },
+        "carried": null,
+        "place": "noticeboard",
+        "position": [
+          -4.1,
+          0.45,
+          1.6
+        ]
+      },
+      "seq": 7,
+      "at": 1500,
+      "turn": 2
+    },
+    {
+      "kind": "tool_start",
+      "text": "walk_to({\"place\":\"pantry\"})",
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "pantry": {
+          "apple": 1,
+          "carrot": 2
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 0
+        },
+        "carried": null,
+        "place": "noticeboard",
+        "position": [
+          -4.1,
+          0.45,
+          1.6
+        ]
+      },
+      "tool": {
+        "name": "walk_to",
+        "arguments": {
+          "place": "pantry"
+        }
+      },
+      "seq": 8,
+      "at": 1500,
+      "turn": 2
+    },
+    {
+      "kind": "walk_start",
+      "text": "Walking to pantry",
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "pantry": {
+          "apple": 1,
+          "carrot": 2
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 0
+        },
+        "carried": null,
+        "place": null,
+        "position": [
+          -4.1,
+          0.45,
+          1.6
+        ]
+      },
+      "movement": {
+        "path": [
+          [
+            -4.1,
+            0.45,
+            1.6
+          ],
+          [
+            -0.8,
+            0.45,
+            1.6
+          ],
+          [
+            -0.8,
+            0.45,
+            0
+          ],
+          [
+            -0.8,
+            1.25,
+            -1.4
+          ],
+          [
+            -0.8,
+            1.25,
+            -2.2
+          ]
+        ],
+        "duration": 4431.788817975583
+      },
+      "seq": 9,
+      "at": 1500,
+      "turn": 2
+    },
+    {
+      "kind": "walk_end",
+      "text": "Arrived at pantry",
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "pantry": {
+          "apple": 1,
+          "carrot": 2
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 0
+        },
+        "carried": null,
+        "place": "pantry",
+        "position": [
+          -0.8,
+          1.25,
+          -2.2
+        ]
+      },
+      "seq": 10,
+      "at": 5931.788817975583,
+      "turn": 2
+    },
+    {
+      "kind": "tool_result",
+      "text": "{\"ok\":true,\"place\":\"pantry\"}",
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "pantry": {
+          "apple": 1,
+          "carrot": 2
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 0
+        },
+        "carried": null,
+        "place": "pantry",
+        "position": [
+          -0.8,
+          1.25,
+          -2.2
+        ]
+      },
+      "tool": {
+        "name": "walk_to",
+        "arguments": {
+          "place": "pantry"
+        }
+      },
+      "result": {
+        "ok": true,
+        "place": "pantry"
+      },
+      "seq": 11,
+      "at": 5931.788817975583,
+      "turn": 2
+    },
+    {
+      "kind": "model_start",
+      "text": "Mock is choosing from observed messages",
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "pantry": {
+          "apple": 1,
+          "carrot": 2
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 0
+        },
+        "carried": null,
+        "place": "pantry",
+        "position": [
+          -0.8,
+          1.25,
+          -2.2
+        ]
+      },
+      "seq": 12,
+      "at": 6331.788817975583,
+      "turn": 3
+    },
+    {
+      "kind": "model_end",
+      "text": "Mock call ended",
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "pantry": {
+          "apple": 1,
+          "carrot": 2
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 0
+        },
+        "carried": null,
+        "place": "pantry",
+        "position": [
+          -0.8,
+          1.25,
+          -2.2
+        ]
+      },
+      "seq": 13,
+      "at": 6331.788817975583,
+      "turn": 3
+    },
+    {
+      "kind": "tool_start",
+      "text": "inspect_pantry({})",
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "pantry": {
+          "apple": 1,
+          "carrot": 2
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 0
+        },
+        "carried": null,
+        "place": "pantry",
+        "position": [
+          -0.8,
+          1.25,
+          -2.2
+        ]
+      },
+      "tool": {
+        "name": "inspect_pantry",
+        "arguments": {}
+      },
+      "seq": 14,
+      "at": 6331.788817975583,
+      "turn": 3
+    },
+    {
+      "kind": "inspect",
+      "text": "Looking inside the pantry",
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "pantry": {
+          "apple": 1,
+          "carrot": 2
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 0
+        },
+        "carried": null,
+        "place": "pantry",
+        "position": [
+          -0.8,
+          1.25,
+          -2.2
+        ]
+      },
+      "seq": 15,
+      "at": 6331.788817975583,
+      "turn": 3
+    },
+    {
+      "kind": "tool_result",
+      "text": "{\"ok\":true,\"pantry\":{\"apple\":1,\"carrot\":2}}",
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "pantry": {
+          "apple": 1,
+          "carrot": 2
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 0
+        },
+        "carried": null,
+        "place": "pantry",
+        "position": [
+          -0.8,
+          1.25,
+          -2.2
+        ]
+      },
+      "tool": {
+        "name": "inspect_pantry",
+        "arguments": {}
+      },
+      "result": {
+        "ok": true,
+        "pantry": {
+          "apple": 1,
+          "carrot": 2
+        }
+      },
+      "seq": 16,
+      "at": 7631.788817975583,
+      "turn": 3
+    },
+    {
+      "kind": "model_start",
+      "text": "Mock is choosing from observed messages",
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "pantry": {
+          "apple": 1,
+          "carrot": 2
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 0
+        },
+        "carried": null,
+        "place": "pantry",
+        "position": [
+          -0.8,
+          1.25,
+          -2.2
+        ]
+      },
+      "seq": 17,
+      "at": 8031.788817975583,
+      "turn": 4
+    },
+    {
+      "kind": "model_end",
+      "text": "Mock call ended",
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "pantry": {
+          "apple": 1,
+          "carrot": 2
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 0
+        },
+        "carried": null,
+        "place": "pantry",
+        "position": [
+          -0.8,
+          1.25,
+          -2.2
+        ]
+      },
+      "seq": 18,
+      "at": 8031.788817975583,
+      "turn": 4
+    },
+    {
+      "kind": "tool_start",
+      "text": "take_one({\"item\":\"carrot\"})",
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "pantry": {
+          "apple": 1,
+          "carrot": 2
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 0
+        },
+        "carried": null,
+        "place": "pantry",
+        "position": [
+          -0.8,
+          1.25,
+          -2.2
+        ]
+      },
+      "tool": {
+        "name": "take_one",
+        "arguments": {
+          "item": "carrot"
+        }
+      },
+      "seq": 19,
+      "at": 8031.788817975583,
+      "turn": 4
+    },
+    {
+      "kind": "pickup",
+      "text": "Picked up one carrot",
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "pantry": {
+          "apple": 1,
+          "carrot": 1
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 0
+        },
+        "carried": "carrot",
+        "place": "pantry",
+        "position": [
+          -0.8,
+          1.25,
+          -2.2
+        ]
+      },
+      "seq": 20,
+      "at": 8681.788817975583,
+      "turn": 4
+    },
+    {
+      "kind": "tool_result",
+      "text": "{\"ok\":true,\"item\":\"carrot\",\"carried\":\"carrot\"}",
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "pantry": {
+          "apple": 1,
+          "carrot": 1
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 0
+        },
+        "carried": "carrot",
+        "place": "pantry",
+        "position": [
+          -0.8,
+          1.25,
+          -2.2
+        ]
+      },
+      "tool": {
+        "name": "take_one",
+        "arguments": {
+          "item": "carrot"
+        }
+      },
+      "result": {
+        "ok": true,
+        "item": "carrot",
+        "carried": "carrot"
+      },
+      "seq": 21,
+      "at": 8681.788817975583,
+      "turn": 4
+    },
+    {
+      "kind": "model_start",
+      "text": "Mock is choosing from observed messages",
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "pantry": {
+          "apple": 1,
+          "carrot": 1
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 0
+        },
+        "carried": "carrot",
+        "place": "pantry",
+        "position": [
+          -0.8,
+          1.25,
+          -2.2
+        ]
+      },
+      "seq": 22,
+      "at": 9081.788817975583,
+      "turn": 5
+    },
+    {
+      "kind": "model_end",
+      "text": "Mock call ended",
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "pantry": {
+          "apple": 1,
+          "carrot": 1
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 0
+        },
+        "carried": "carrot",
+        "place": "pantry",
+        "position": [
+          -0.8,
+          1.25,
+          -2.2
+        ]
+      },
+      "seq": 23,
+      "at": 9081.788817975583,
+      "turn": 5
+    },
+    {
+      "kind": "tool_start",
+      "text": "walk_to({\"place\":\"picnic_basket\"})",
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "pantry": {
+          "apple": 1,
+          "carrot": 1
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 0
+        },
+        "carried": "carrot",
+        "place": "pantry",
+        "position": [
+          -0.8,
+          1.25,
+          -2.2
+        ]
+      },
+      "tool": {
+        "name": "walk_to",
+        "arguments": {
+          "place": "picnic_basket"
+        }
+      },
+      "seq": 24,
+      "at": 9081.788817975583,
+      "turn": 5
+    },
+    {
+      "kind": "walk_start",
+      "text": "Walking to picnic basket",
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "pantry": {
+          "apple": 1,
+          "carrot": 1
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 0
+        },
+        "carried": "carrot",
+        "place": null,
+        "position": [
+          -0.8,
+          1.25,
+          -2.2
+        ]
+      },
+      "movement": {
+        "path": [
+          [
+            -0.8,
+            1.25,
+            -2.2
+          ],
+          [
+            -0.8,
+            1.25,
+            -1.4
+          ],
+          [
+            -0.8,
+            0.45,
+            0
+          ],
+          [
+            -0.8,
+            0.45,
+            1.6
+          ],
+          [
+            1.6,
+            0.45,
+            1.6
+          ],
+          [
+            3.4,
+            0.45,
+            1.6
+          ],
+          [
+            4.5,
+            0.45,
+            1.6
+          ],
+          [
+            4.5,
+            0.45,
+            2.4
+          ]
+        ],
+        "duration": 6128.758514945279
+      },
+      "seq": 25,
+      "at": 9081.788817975583,
+      "turn": 5
+    },
+    {
+      "kind": "walk_end",
+      "text": "Arrived at picnic basket",
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "pantry": {
+          "apple": 1,
+          "carrot": 1
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 0
+        },
+        "carried": "carrot",
+        "place": "picnic_basket",
+        "position": [
+          4.5,
+          0.45,
+          2.4
+        ]
+      },
+      "seq": 26,
+      "at": 15210.547332920862,
+      "turn": 5
+    },
+    {
+      "kind": "tool_result",
+      "text": "{\"ok\":true,\"place\":\"picnic_basket\"}",
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "pantry": {
+          "apple": 1,
+          "carrot": 1
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 0
+        },
+        "carried": "carrot",
+        "place": "picnic_basket",
+        "position": [
+          4.5,
+          0.45,
+          2.4
+        ]
+      },
+      "tool": {
+        "name": "walk_to",
+        "arguments": {
+          "place": "picnic_basket"
+        }
+      },
+      "result": {
+        "ok": true,
+        "place": "picnic_basket"
+      },
+      "seq": 27,
+      "at": 15210.547332920862,
+      "turn": 5
+    },
+    {
+      "kind": "model_start",
+      "text": "Mock is choosing from observed messages",
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "pantry": {
+          "apple": 1,
+          "carrot": 1
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 0
+        },
+        "carried": "carrot",
+        "place": "picnic_basket",
+        "position": [
+          4.5,
+          0.45,
+          2.4
+        ]
+      },
+      "seq": 28,
+      "at": 15610.547332920862,
+      "turn": 6
+    },
+    {
+      "kind": "model_end",
+      "text": "Mock call ended",
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "pantry": {
+          "apple": 1,
+          "carrot": 1
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 0
+        },
+        "carried": "carrot",
+        "place": "picnic_basket",
+        "position": [
+          4.5,
+          0.45,
+          2.4
+        ]
+      },
+      "seq": 29,
+      "at": 15610.547332920862,
+      "turn": 6
+    },
+    {
+      "kind": "tool_start",
+      "text": "deliver_item({})",
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "pantry": {
+          "apple": 1,
+          "carrot": 1
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 0
+        },
+        "carried": "carrot",
+        "place": "picnic_basket",
+        "position": [
+          4.5,
+          0.45,
+          2.4
+        ]
+      },
+      "tool": {
+        "name": "deliver_item",
+        "arguments": {}
+      },
+      "seq": 30,
+      "at": 15610.547332920862,
+      "turn": 6
+    },
+    {
+      "kind": "delivery",
+      "text": "Delivered one carrot to the picnic basket",
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "pantry": {
+          "apple": 1,
+          "carrot": 1
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 1
+        },
+        "carried": null,
+        "place": "picnic_basket",
+        "position": [
+          4.5,
+          0.45,
+          2.4
+        ]
+      },
+      "seq": 31,
+      "at": 16260.547332920862,
+      "turn": 6
+    },
+    {
+      "kind": "tool_result",
+      "text": "{\"ok\":true,\"item\":\"carrot\",\"basket\":{\"apple\":0,\"carrot\":1},\"carried\":null}",
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "pantry": {
+          "apple": 1,
+          "carrot": 1
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 1
+        },
+        "carried": null,
+        "place": "picnic_basket",
+        "position": [
+          4.5,
+          0.45,
+          2.4
+        ]
+      },
+      "tool": {
+        "name": "deliver_item",
+        "arguments": {}
+      },
+      "result": {
+        "ok": true,
+        "item": "carrot",
+        "basket": {
+          "apple": 0,
+          "carrot": 1
+        },
+        "carried": null
+      },
+      "seq": 32,
+      "at": 16260.547332920862,
+      "turn": 6
+    },
+    {
+      "kind": "model_start",
+      "text": "Mock is choosing from observed messages",
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "pantry": {
+          "apple": 1,
+          "carrot": 1
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 1
+        },
+        "carried": null,
+        "place": "picnic_basket",
+        "position": [
+          4.5,
+          0.45,
+          2.4
+        ]
+      },
+      "seq": 33,
+      "at": 16660.54733292086,
+      "turn": 7
+    },
+    {
+      "kind": "model_end",
+      "text": "Mock call ended",
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "pantry": {
+          "apple": 1,
+          "carrot": 1
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 1
+        },
+        "carried": null,
+        "place": "picnic_basket",
+        "position": [
+          4.5,
+          0.45,
+          2.4
+        ]
+      },
+      "seq": 34,
+      "at": 16660.54733292086,
+      "turn": 7
+    },
+    {
+      "kind": "report",
+      "text": "I delivered one carrot to the picnic basket.",
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "pantry": {
+          "apple": 1,
+          "carrot": 1
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 1
+        },
+        "carried": null,
+        "place": "picnic_basket",
+        "position": [
+          4.5,
+          0.45,
+          2.4
+        ]
+      },
+      "seq": 35,
+      "at": 16660.54733292086,
+      "turn": 7
+    },
+    {
+      "kind": "run_end",
+      "text": "Run reported. The basket shows what actually happened.",
+      "state": {
+        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+        "pantry": {
+          "apple": 1,
+          "carrot": 1
+        },
+        "basket": {
+          "apple": 0,
+          "carrot": 1
+        },
+        "carried": null,
+        "place": "picnic_basket",
+        "position": [
+          4.5,
+          0.45,
+          2.4
+        ]
+      },
+      "seq": 36,
+      "at": 16660.54733292086,
+      "turn": 7
+    }
+  ],
+  "status": "reported",
+  "final": {
+    "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+    "pantry": {
+      "apple": 1,
+      "carrot": 1
+    },
+    "basket": {
+      "apple": 0,
+      "carrot": 1
+    },
+    "carried": null,
+    "place": "picnic_basket",
+    "position": [
+      4.5,
+      0.45,
+      2.4
+    ]
+  }
+}

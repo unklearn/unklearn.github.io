@@ -1,0 +1,27 @@
+{
+  "name": "scout-picnic",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "start": "npm run build && vite preview --host 127.0.0.1 --port 4333",
+    "dev": "vite --host 127.0.0.1 --port 4333",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host 127.0.0.1 --port 4333",
+    "test": "node --experimental-strip-types --test runtime/runtime.test.ts",
+    "record": "node --experimental-strip-types scripts/record.ts",
+    "verify:live": "node --env-file-if-exists=.env --experimental-strip-types scripts/live.ts"
+  },
+  "dependencies": {
+    "three": "0.183.2"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/three": "^0.183.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1"
+  }
+}

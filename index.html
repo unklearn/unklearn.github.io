@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#e9e8df">
+  <meta name="description" content="A little courier. A real agent loop. An interactive, isometric lesson in seeing, deciding, and doing.">
+  <title>Scout’s picnic · Unklearn</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23315b59'/%3E%3Cpath d='M18 26h28v24H18z' fill='%23bc6c50'/%3E%3Cpath d='M24 26v-7a8 8 0 0116 0v7' fill='none' stroke='%23ebd8b7' stroke-width='5'/%3E%3Ccircle cx='32' cy='36' r='4' fill='%23d5ad65'/%3E%3C/svg%3E">
+</head>
+<body>
+  <header class="masthead">
+    <a class="brand" href="./" aria-label="Unklearn home"><span class="brand-mark">u.</span> UNKLEARN <span class="brand-divider">/</span> FIELD NOTES <span class="edition">001</span></a>
+    <button id="film" class="quiet-button" aria-pressed="false"><span aria-hidden="true">↗</span> Film view</button>
+  </header>
+  <main>
+    <section class="intro" aria-labelledby="title">
+      <div><p class="eyebrow">A SMALL WORLD FOR A BIG IDEA</p><h1 id="title">A picnic, <em>with agency.</em></h1></div>
+      <p class="intro-copy">Meet Scout. Give it a job, change what’s on the shelf,<br class="wide-only"> and watch a decision become an action.</p>
+    </section>
+    <section class="workspace" aria-label="Scout’s village and controls">
+      <div class="stage" id="stage">
+        <div class="stage-top"><span class="live-location"><i></i> THE COURIER’S COURT</span><span id="mode-badge">MOCK · RUNS IN YOUR BROWSER</span></div>
+        <div class="place-label" data-place="noticeboard"><span>01</span> Noticeboard</div>
+        <div class="place-label" data-place="pantry"><span>02</span> Pantry</div>
+        <div class="place-label" data-place="picnic_basket"><span>03</span> Picnic basket</div>
+        <article class="radio" id="radio" aria-live="polite">
+          <div class="radio-top"><span class="radio-light"></span><span id="radio-source">SCOUT / MOCK PROVIDER</span><span id="radio-turn">STANDING BY</span></div>
+          <p id="radio-text">A notice, a pantry, a picnic. Scout is ready.</p>
+          <div id="radio-detail">No inference while idle.</div>
+        </article>
+        <div class="stage-bottom"><span>ISOMETRIC STUDY / 01</span><span>SEE → DECIDE → ACT → OBSERVE</span></div>
+      </div>
+      <aside class="controls" aria-label="Picnic controls">
+        <div class="control-heading"><span class="eyebrow">THE EXPERIMENT</span><span class="small-sun" aria-hidden="true">✳</span></div>
+        <div class="mode-switch" role="group" aria-label="Operating mode">
+          <button data-mode="replay" aria-pressed="false">Replay</button><button data-mode="mock" aria-pressed="true">Mock</button><button data-mode="live" aria-pressed="false">Live</button>
+        </div>
+        <p class="mode-note" id="mode-note">A deterministic provider. A real loop and real tools. Entirely in your browser.</p>
+        <form id="order-form">
+          <label for="order">01 <span>Post a notice</span></label>
+          <textarea id="order" rows="6" spellcheck="false"></textarea>
+          <label for="preset">02 <span>Stock the pantry</span></label>
+          <select id="preset"><option value="2">2 apples · 2 carrots</option><option value="1">1 apple · 2 carrots</option></select>
+          <p class="field-hint">Scout discovers the stock by inspecting it.</p>
+          <div id="live-settings" hidden>
+            <label for="transport">Connection</label><select id="transport"><option value="ollama">Local Ollama</option><option value="gateway">Provider gateway</option></select>
+            <label for="endpoint">Provider URL</label><input id="endpoint" type="url" value="http://127.0.0.1:11434">
+            <label for="model">Model</label><input id="model" value="qwen3:14b">
+          </div>
+          <button class="post-button" id="post" type="submit">Post order <span aria-hidden="true">↗</span></button>
+          <p class="field-hint reset-note">Each post starts a fresh take.</p>
+        </form>
+        <div id="replay-controls" hidden>
+          <label for="recording">Saved take</label><select id="recording"><option value="apple">Two apples → apple</option><option value="carrot">Last apple → carrot</option><option value="ollama">Ollama · took the last apple</option></select>
+          <div class="replay-buttons"><button id="play" class="post-button">Play recording <span>▷</span></button><button id="restart" class="quiet-button">↺ Restart</button></div>
+          <p class="field-hint" id="playhead">0:00 / 0:00</p>
+        </div>
+        <div class="inventories" aria-live="polite">
+          <div><span>PANTRY</span><strong id="pantry-count">2 apples · 2 carrots</strong></div>
+          <div><span>CARRYING</span><strong id="carried-count">Nothing yet</strong></div>
+          <div><span>BASKET</span><strong id="basket-count">Waiting for a delivery</strong></div>
+        </div>
+        <p class="status" id="status" role="status">Ready when you are.</p>
+        <div class="trace-actions"><button id="download" class="text-button" disabled>↓ Save trace</button><label class="text-button import-label" for="import">↑ Open trace</label><input type="file" id="import" accept="application/json,.json" class="visually-hidden"></div>
+      </aside>
+    </section>
+    <section class="lesson" aria-label="How the agent works">
+      <div class="lesson-heading"><p class="eyebrow">WHAT MAKES THIS AGENTIC?</p><h2>The next step is a decision.</h2><p>The world supplies facts. The provider chooses an action.<br>Scout’s tools make it happen, then report what changed.</p></div>
+      <ol class="loop-steps"><li><span>01 / SENSE</span><strong>Read the notice.</strong><p>The job is text in the world.</p></li><li><span>02 / DECIDE</span><strong>Ask the provider.</strong><p>Only observed facts go in.</p></li><li><span>03 / ACT</span><strong>Use a tool.</strong><p>Walk, inspect, pick up, deliver.</p></li><li><span>04 / OBSERVE</span><strong>See what changed.</strong><p>The result informs the next turn.</p></li></ol>
+    </section>
+    <details class="trace-panel"><summary>Open the field notebook <span id="event-count">0 observations</span></summary><ol id="event-log"></ol></details>
+  </main>
+  <footer><span>UNKLEARN <span class="footer-dot">•</span> LEARN BY LOOKING CLOSER</span><span>A small world. No hidden route.</span></footer>
+  <button id="exit-film" class="quiet-button" hidden>↙ Exit film view</button>
+  <dialog id="export-dialog" aria-labelledby="export-title">
+    <div class="export-heading"><h2 id="export-title">Scout’s field notebook</h2><button id="close-export" class="quiet-button" aria-label="Close trace export">✕</button></div>
+    <p>Keep this run for your article, or open it again in Replay.</p>
+    <label for="trace-json">Complete trace · JSON</label><textarea id="trace-json" readonly spellcheck="false" rows="12"></textarea>
+    <a id="trace-link" class="post-button" download>Download .json <span>↓</span></a>
+    <p class="field-hint">If your browser blocks downloads, select and copy the JSON above into a .json file.</p>
+  </dialog>
+  <script type="module" src="/scene/main.ts"></script>
+</body>
+</html>
