@@ -23,7 +23,6 @@ export interface StepMeta<Initial extends object = object> {
   title: string;
   question?: string;
   initial?: Initial & { tools?: readonly string[]; checkpoint?: string };
-  narration?: { text: string; audio?: string };
 }
 export interface Scenario<State, World, Helpers, Config, Initial> {
   createWorld(options: {

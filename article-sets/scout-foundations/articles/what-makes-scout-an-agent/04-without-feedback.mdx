@@ -14,9 +14,6 @@ export const meta = {
   question:
     'Does returning from a function make its result available to the model?',
   initial: { checkpoint: 'notice-read', tools: ['read_notice'] },
-  narration: {
-    text: 'JavaScript has the result. The model will not receive it until the harness includes it in the next request.',
-  },
 };
 
 The world changed: the notice was read. But the model’s conversation did not change. Test that boundary with another evaluation.

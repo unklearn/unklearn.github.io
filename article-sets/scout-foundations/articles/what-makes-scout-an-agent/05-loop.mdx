@@ -14,9 +14,6 @@ export const meta = {
   title: 'Closing the loop',
   question: 'What changes the next decision: another call, or new information?',
   initial: { checkpoint: 'notice-read', tools: ['read_notice'] },
-  narration: {
-    text: 'Preserve the request and append its matching observation. The next invocation can now use the notice. A loop repeats this cycle.',
-  },
 };
 
 Preserve the assistant’s request and append its matching tool result. This is the first point at which the notice becomes available to the next model evaluation.

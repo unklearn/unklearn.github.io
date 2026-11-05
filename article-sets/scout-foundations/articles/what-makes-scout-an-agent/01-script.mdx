@@ -17,9 +17,6 @@ export const meta = {
   title: 'Following a script',
   question: 'Who decides what Scout does next?',
   initial: { tools: [], notice: '' },
-  narration: {
-    text: 'First direct Scout yourself, then supply a rule for a scripted workflow. Adding a model for one decision still leaves the surrounding workflow under human control.',
-  },
 };
 
 Scout is a courier. Its job is to carry one item from the pantry, across the bridge, to the picnic basket. We will build the runtime that lets it choose what to do.
@@ -543,11 +540,11 @@ export function ScriptedWorkflow() {
         <Action onClick={resume}>Resume patrol</Action>
       )}
       {phase !== 'start' && (
-        <p>
+        <div className="lesson-step-footer">
           <Action className="quiet-action" onClick={restart}>
             Restart step
           </Action>
-        </p>
+        </div>
       )}
     </>
   );

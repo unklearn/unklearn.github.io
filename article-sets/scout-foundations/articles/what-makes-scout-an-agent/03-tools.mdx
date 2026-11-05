@@ -14,9 +14,6 @@ export const meta = {
   title: 'Connecting a tool',
   question: 'Who chooses the tool, and who executes it?',
   initial: { checkpoint: 'model-ready', tools: [] },
-  narration: {
-    text: 'A schema describes an available action. The model requests it; the harness dispatches to an executable handler.',
-  },
 };
 
 A tool schema describes an available operation. It is not the operation itself. First pass schemas to the model; then add dispatch to execute the requested handler.

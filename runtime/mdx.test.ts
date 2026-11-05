@@ -302,7 +302,6 @@ test('the authored patrol runs without inference and every step has an editable 
   );
   for (const step of article.steps) {
     assert(step.meta.question);
-    assert(step.meta.narration?.text);
   }
 });
 test('dynamic tools change on the next turn of the same runtime, retaining the pending turn selection', async () => {

@@ -13,9 +13,6 @@ export const meta = {
   title: 'Giving Scout control',
   question: 'What information does the model actually have?',
   initial: { tools: [] },
-  narration: {
-    text: 'A model can decide only from its input. A notice notification does not contain the notice itself.',
-  },
 };
 
 The AI workflow let a model choose an item inside a fixed sequence. Now we will let it choose what to do next. Start with a fresh conversation: Scout receives only a new-notice notification, without the notice text, stock, or tools. A thinking bubble marks an actual pending provider call.

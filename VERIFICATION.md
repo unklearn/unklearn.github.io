@@ -130,3 +130,11 @@ closed. The inline pickup was “Scout took 1 apple”; delivery showed basket
 terminal exposed the original read, inspection, pickup, and delivery JSON.
 Closing it retained the inline outcome. Existing 17 checks, static build, and
 formatting pass; no agent decision or physical world rules changed.
+
+## Simple lesson presentation
+
+Restart step sits at the bottom-right of the content pane. Narration/transcript
+controls and their metadata are removed from all eight steps. The typewriter
+experiment was removed; prose, instructions, and actions appear immediately.
+Browser-checked the static build and Restart placement. All 17 checks, the
+static build, and formatting pass.

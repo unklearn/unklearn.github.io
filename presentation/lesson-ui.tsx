@@ -140,19 +140,6 @@ export function LessonPages({
                   </p>
                 )}
                 <Content />
-                {step.meta.narration && (
-                  <details className="narration">
-                    <summary>Narration / transcript</summary>
-                    <p>{step.meta.narration.text}</p>
-                    {step.meta.narration.audio && (
-                      <audio
-                        controls
-                        preload="none"
-                        src={step.meta.narration.audio}
-                      />
-                    )}
-                  </details>
-                )}
               </div>
             </Context.Provider>
           </section>

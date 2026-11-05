@@ -16,9 +16,6 @@ export const meta = {
   question:
     'Which responsibilities belong to the model, and which belong to the harness?',
   initial: { checkpoint: 'picnic-complete', tools: [] },
-  narration: {
-    text: 'The model chooses an action from its current context. The harness supplies capabilities, executes the action, and carries the observation into the next decision.',
-  },
 };
 
 Scout is a **model plus a harness**. The model selects an action from the conversation and available schemas. The harness calls the provider, dispatches its request, appends the observation, and decides when to allow another turn.

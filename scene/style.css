@@ -202,11 +202,32 @@ canvas {
   white-space: nowrap;
 }
 #lesson-pages {
+  display: flex;
+  flex-direction: column;
   overflow-y: auto;
   overscroll-behavior: contain;
   flex: 1;
   padding: 0 28px;
   scroll-behavior: smooth;
+}
+#lesson-pages > article,
+.teaching-step.selected,
+.lesson-copy {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+.lesson-copy > button {
+  align-self: flex-start;
+}
+.lesson-step-footer {
+  margin-top: auto;
+  padding-top: 24px;
+  display: flex;
+  justify-content: flex-end;
+}
+.lesson-step-footer button {
+  margin: 0;
 }
 .teaching-step {
   padding: 26px 0 30px;
@@ -1110,17 +1131,6 @@ body.film::after {
   width: auto;
   margin-top: 4px;
   accent-color: #347e7a;
-}
-.narration {
-  margin-top: 24px;
-  font-size: 13px;
-  color: #68665c;
-}
-.narration summary {
-  cursor: pointer;
-}
-.narration audio {
-  max-width: 100%;
 }
 .outcomes {
   width: 100%;

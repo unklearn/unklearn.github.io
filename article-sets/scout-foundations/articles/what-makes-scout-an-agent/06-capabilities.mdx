@@ -15,9 +15,6 @@ export const meta = {
   title: 'Expanding capabilities',
   question: 'Can the same runtime do more when its available tools change?',
   initial: { checkpoint: 'observed-notice', tools: ['read_notice'] },
-  narration: {
-    text: 'Resolve available tools at the start of each turn. Adding tools then changes configuration, without replacing the runtime.',
-  },
 };
 
 The runtime will now read its available tools before each evaluation. It retains that turn’s selection for dispatch, so a request is executed against the tools the model actually saw.
