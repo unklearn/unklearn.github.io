@@ -1,0 +1,132 @@
+import { useState, useRef } from 'react';
+import { useScoutStep } from '../../authoring.ts';
+import { Action, Prediction, RuntimeChange, RuntimeExcerpt, useLessonPresentation } from '../../../../presentation/lesson-ui.tsx';
+import { blocks as reading } from './03-tools.mdx';
+
+export const meta = {"id": "context", "title": "Closing the loop", "question": "What changes the next decision: another call, or new information?", "initial": {"checkpoint": "notice-read", "tools": ["read_notice"]}, "narration": {"text": "Preserve the request and append its matching observation. The next invocation can now use the notice. A loop repeats this cycle."}};
+
+Preserve the assistant’s request and append its matching tool result. This is the first point at which the notice becomes available to the next model evaluation.
+
+<Prediction question={meta.question} choices={['Calling the model again adds knowledge', 'New observations in the input change what it can know']} />
+
+<RuntimeChange from={reading.dispatch} to={blocks.feedback} />
+
+export function CloseLoop() {
+  const s=useScoutStep(), held=useRef(null), [phase,setPhase]=useState('ready');
+  function prepare() {
+    if(s.restoreCheckpoint('notice-read')){held.current=s.data.feedback;setPhase('held');return;}
+    s.reset({tools:['read_notice']});
+    return s.act(async()=>{const runtime=s.runtime(blocks.feedback);const result=await runtime.execute(await runtime.evaluate());if(result?.value.ok && result.result.tool_name==='read_notice'){held.current=result;s.saveCheckpoint('notice-read',{feedback:result});setPhase('held');s.mark('held');}else{s.mark('no-read');}});
+  }
+  return <>
+    {phase==='ready' && <Action onClick={prepare}>Prepare the real observation</Action>}
+    {phase==='held' && <Action className="primary" onClick={()=>s.act(async()=>{
+      const runtime=s.runtime(blocks.feedback);runtime.append(held.current);s.showContext({outgoingMessages:s.messages});
+      await runtime.evaluate();s.saveCheckpoint('observed-notice');s.mark('observed');setPhase('observed');
+    })}>Append result & evaluate</Action>}
+    {['observed','looped'].includes(phase) && <>
+      <p>The next input contains the exact notice. The model can now use its instructions. We can repeat the same operations instead of driving each turn by hand.</p>
+      <RuntimeChange from={blocks.feedback} to={blocks.loop} />
+      <Action className="primary" onClick={()=>s.act(async()=>{const status=await s.runtime(blocks.loop).run();s.saveCheckpoint('observed-notice');s.mark(status);setPhase('looped');})}>Run the reading-only loop</Action>
+    </>}
+    {phase==='looped' && <p>The loop used the real conversation and stopped on the provider’s public response. It still has only a reading tool, so it cannot carry out the picnic. A loop coordinates capabilities; it does not create missing ones.</p>}
+    {s.stage==='no-read' && <p>No successful read was returned. Prepare the observation again to retry.</p>}
+  </>;
+}
+
+<CloseLoop />
+
+```ts runtime="feedback"
+import type { Feedback, RuntimeOptions } from '../../../../runtime/lesson-types.ts';
+import type { Message } from '../../../../runtime/types.ts';
+
+export class AgentRuntime {
+  constructor(public options: RuntimeOptions) {}
+
+  async evaluate() {
+    const { provider, messages, tools, signal } = this.options;
+    const schemas = tools.map(tool => tool.definition);
+    return provider(messages, schemas, signal);
+  }
+
+  async execute(request: Message): Promise<Feedback | null> {
+    const calls = request.tool_calls ?? [];
+    if (calls.length > 1) throw new Error('Choose one tool per turn.');
+    if (!calls.length) {
+      if (!request.content.trim()) throw new Error('Empty provider response');
+      return null;
+    }
+    const call = calls[0].function;
+    const { tools, signal, emit } = this.options;
+    const tool = tools.find(tool => tool.definition.function.name === call.name);
+    emit({ kind: 'tool_start', text: call.name, tool: call });
+    const value = tool ? await tool.execute(call.arguments, signal)
+      : { ok: false, reason: 'tool_unavailable' };
+    signal.throwIfAborted();
+    const result: Message = { role: 'tool', tool_name: call.name, content: JSON.stringify(value) };
+    emit({ kind: 'tool_result', text: result.content, tool: call, result: value });
+    return { request, result, value };
+  }
+
+  append({ request, result }: Feedback) {
+    const { messages, emit } = this.options;
+    messages.push(request);
+    messages.push(result);
+    emit({ kind: 'context', text: 'Request and observation appended', messages });
+  }
+}
+```
+
+```ts runtime="loop"
+import type { Feedback, RuntimeOptions } from '../../../../runtime/lesson-types.ts';
+import type { Message } from '../../../../runtime/types.ts';
+
+export class AgentRuntime {
+  constructor(public options: RuntimeOptions) {}
+
+  async evaluate() {
+    const { provider, messages, tools, signal } = this.options;
+    const schemas = tools.map(tool => tool.definition);
+    return provider(messages, schemas, signal);
+  }
+
+  async execute(request: Message): Promise<Feedback | null> {
+    const calls = request.tool_calls ?? [];
+    if (calls.length > 1) throw new Error('Choose one tool per turn.');
+    if (!calls.length) {
+      if (!request.content.trim()) throw new Error('Empty provider response');
+      return null;
+    }
+    const call = calls[0].function;
+    const { tools, signal, emit } = this.options;
+    const tool = tools.find(tool => tool.definition.function.name === call.name);
+    emit({ kind: 'tool_start', text: call.name, tool: call });
+    const value = tool ? await tool.execute(call.arguments, signal)
+      : { ok: false, reason: 'tool_unavailable' };
+    signal.throwIfAborted();
+    const result: Message = { role: 'tool', tool_name: call.name, content: JSON.stringify(value) };
+    emit({ kind: 'tool_result', text: result.content, tool: call, result: value });
+    return { request, result, value };
+  }
+
+  append({ request, result }: Feedback) {
+    const { messages, emit } = this.options;
+    messages.push(request);
+    messages.push(result);
+    emit({ kind: 'context', text: 'Request and observation appended', messages });
+  }
+
+  async run() {
+    for (let turn = 0; turn < 20; turn++) {
+      const request = await this.evaluate();
+      const feedback = await this.execute(request);
+      if (!feedback) {
+        this.options.messages.push(request);
+        return 'reported';
+      }
+      this.append(feedback);
+    }
+    return 'turn_limit';
+  }
+}
+```

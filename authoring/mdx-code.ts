@@ -3,11 +3,11 @@ import { resolve, dirname, isAbsolute } from 'node:path';
 import { transformWithEsbuild } from 'vite';
 import type { Plugin } from 'vite';
 
-export interface CodeBlock { id: string; kind: 'runtime' | 'setup'; source: string }
+export interface CodeBlock { id: string; kind: 'runtime' | 'setup' | 'experiment'; source: string }
 // Deliberately small authoring syntax: complete TypeScript modules in named fences.
 export function extractBlocks(text: string) {
   const blocks: CodeBlock[] = [];
-  const content = text.replace(/^```ts (runtime|setup)="([\w-]+)"\r?\n([\s\S]*?)^```[ \t]*$/gm, (_, kind, id, code) => {
+  const content = text.replace(/^```ts (runtime|setup|experiment)="([\w-]+)"\r?\n([\s\S]*?)^```[ \t]*$/gm, (_, kind, id, code) => {
     if (blocks.some(block => block.id === id)) throw new Error(`Duplicate MDX code block: ${id}`);
     blocks.push({ id, kind, source: code.replace(/\r\n/g, '\n').replace(/\n$/, '') });
     return ''; // The lesson explicitly chooses where and how to display this source.

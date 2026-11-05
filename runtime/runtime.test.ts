@@ -35,4 +35,10 @@ test('replay renders a trace through its playhead without a provider or tool exe
   assert.deepEqual(state, trace.final);
   replay.restart();
   assert.deepEqual(state, trace.initial);
+  let lastSeq=-1;
+  const precise=createReplay(trace,event=>{lastSeq=event.seq;});
+  const point=trace.events.find(event=>event.kind==='context')!;
+  precise.seek(point.at,point.seq);
+  assert.equal(lastSeq,point.seq,'annotations stop at the selected event even when timestamps match');
+  assert.equal(precise.playing,false);
 });

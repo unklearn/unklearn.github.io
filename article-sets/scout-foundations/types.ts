@@ -17,7 +17,7 @@ export interface Snapshot {
 
 export type TraceEvent = Event<Snapshot>;
 export type WorldEvent = Change<Snapshot>;
-export interface Trace extends Recording<Snapshot> { order: string }
+export interface Trace extends Recording<Snapshot> { order?: string }
 export const defaultOrder = 'Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.';
 export const carrotOrder = 'Deliver one carrot to the picnic basket.';
 export const places: Record<Place, Point> = {

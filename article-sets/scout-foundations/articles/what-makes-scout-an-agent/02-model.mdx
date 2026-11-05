@@ -1,0 +1,42 @@
+import { useState, useRef } from 'react';
+import { useScoutStep } from '../../authoring.ts';
+import { Action, Prediction, RuntimeChange, RuntimeExcerpt, useLessonPresentation } from '../../../../presentation/lesson-ui.tsx';
+
+export const meta = {"id": "model", "title": "Adding a model", "question": "What information does the model actually have?", "initial": {"checkpoint": "posted-board", "tools": []}, "narration": {"text": "A model can decide only from its input. A notice notification does not contain the notice itself."}};
+
+We now give Scout a model. A thinking bubble marks the time a provider call is actually pending. The model receives a notification, not the notice text.
+
+<Prediction question={meta.question} choices={['The posted order and the pantry stock', 'Only the conversation sent to it']} />
+
+<RuntimeChange to={blocks.invoke} />
+
+export function ModelTurn() {
+  const s=useScoutStep(), [done,setDone]=useState(false);
+  function run() {
+    if(!s.restoreCheckpoint('posted-board')) s.reset({tools:[]});
+    if(!s.world.snapshot().notice) s.world.postNotice();
+    s.setTools([]);
+    return s.act(async()=>{
+      await s.runtime(blocks.invoke).evaluate();
+      s.showContext({outgoingMessages:s.messages,tools:s.schemas});
+      s.showQuestion('The reading capability is absent. No handler read the notice.');
+      s.saveCheckpoint('model-ready');s.mark('needs-tool');setDone(true);
+    });
+  }
+  return <><Action className="primary" onClick={run}>Let Scout think</Action>{done && <p>The terminal contains the actual public response. Whatever it proposes, no reading handler ran. Inspect Context: the exact order and stock were never sent. The question cloud marks the missing capability, not private model reasoning.</p>}</>;
+}
+
+<ModelTurn />
+
+```ts runtime="invoke"
+import type { RuntimeOptions } from '../../../../runtime/lesson-types.ts';
+
+export class AgentRuntime {
+  constructor(public options: RuntimeOptions) {}
+
+  async evaluate() {
+    const { provider, messages, signal } = this.options;
+    return provider(messages, [], signal);
+  }
+}
+```

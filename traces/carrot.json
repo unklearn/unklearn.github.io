@@ -1,9 +1,9 @@
 {
   "version": 1,
-  "id": "1793907199408-8ftsi",
+  "id": "1793910473961-0ba95",
   "mode": "mock",
   "provider": "Mock",
-  "startedAt": "2026-11-05T19:33:19.408Z",
+  "startedAt": "2026-11-05T20:27:53.961Z",
   "initial": {
     "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
     "unread": true,
@@ -26,7 +26,7 @@
   "events": [
     {
       "kind": "runtime_selected",
-      "text": "loop",
+      "text": "dynamic",
       "state": {
         "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
         "unread": true,
@@ -2977,7 +2977,7 @@
   "lesson": {
     "article": "what-makes-scout-an-agent",
     "stepId": "picnic",
-    "step": 5,
+    "step": 7,
     "stage": "reported"
   },
   "final": {
@@ -2998,6 +2998,5 @@
       0.45,
       2.4
     ]
-  },
-  "order": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket."
+  }
 }

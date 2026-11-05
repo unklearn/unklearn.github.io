@@ -17,6 +17,12 @@ export function createReplay<State>(trace: Trace<State>, emit: (event: TraceEven
     play() { playing = true; flush(); },
     pause() { playing = false; },
     restart() { elapsed = 0; cursor = 0; playing = false; flush(); },
+    seek(at: number, seq = Infinity) {
+      elapsed = Math.max(0, Math.min(duration, at)); cursor = 0; playing = false;
+      while (cursor < trace.events.length && trace.events[cursor].at <= elapsed && trace.events[cursor].seq <= seq) {
+        const event = trace.events[cursor++]; emit(structuredClone(event), elapsed - event.at);
+      }
+    },
     advance(ms: number) {
       if (!playing) return;
       elapsed = Math.min(duration, elapsed + Math.max(0, ms));

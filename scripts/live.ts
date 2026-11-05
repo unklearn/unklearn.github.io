@@ -10,11 +10,11 @@ for (const [name,apples,order,expected] of [
 ] as const) {
   let offset=0;
   console.log(`\n${name}: ${live.model}, actual MDX runtime`);
-  const host=createLessonHost({articleId:article.id,steps:article.steps.map(step=>step.meta),settings:()=>({mode:'live',order,apples,pauseInspection:false,live}),
+  const host=createLessonHost({articleId:article.id,scenario:article.scenario,steps:article.steps.map(step=>step.meta),settings:()=>({mode:'live',order,apples,live}),
     clock:{now:()=>Date.now()+offset,sleep:async(ms,signal)=>{signal.throwIfAborted();offset+=ms;}},
     event:e=>{if(['tool_start','tool_result','assistant','error'].includes(e.kind)) console.log(`[${e.kind}] ${e.text}`);}});
   host.select(picnic);const step=host.current;
-  await step.act(async()=>{step.mark(await step.runtime(article.steps[picnic].blocks.loop).run!());});
+  await step.act(async()=>{step.mark(await step.runtime(article.runtime).run!());});
   const trace=step.trace;
   await writeFile(new URL(`../verification/${name}.json`,import.meta.url),JSON.stringify(trace,null,2));
   const correct=trace.status==='reported' && trace.final?.basket[expected]===1 && trace.final?.basket[expected==='apple'?'carrot':'apple']===0;

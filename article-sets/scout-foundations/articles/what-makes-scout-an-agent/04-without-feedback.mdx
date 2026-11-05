@@ -1,0 +1,38 @@
+import { useState, useRef } from 'react';
+import { useScoutStep } from '../../authoring.ts';
+import { Action, Prediction, RuntimeChange, RuntimeExcerpt, useLessonPresentation } from '../../../../presentation/lesson-ui.tsx';
+
+export const meta = {"id": "execute", "title": "A result outside context", "question": "Does returning from a function make its result available to the model?", "initial": {"checkpoint": "notice-read", "tools": ["read_notice"]}, "narration": {"text": "JavaScript has the result. The model will not receive it until the harness includes it in the next request."}};
+
+The world changed: the notice was read. But the model’s conversation did not change. Test that boundary with another evaluation.
+
+<Prediction question={meta.question} choices={['Yes, executing a handler is enough', 'No, its result must enter the next input']} />
+
+<RuntimeChange to={blocks.omit} />
+
+export function WithoutFeedback() {
+  const s=useScoutStep();
+  return <><Action className="primary" onClick={()=>blocks.omit.module.run(s)}>Evaluate without feedback</Action>{s.stage==='unobserved' && <p>The next input still lacks the notice, even though JavaScript holds its exact text. Mock requests another read. Live may say something different; inspect the actual response and outgoing input rather than treating its wording as proof of knowledge.</p>}{s.stage==='no-read' && <p>No successful notice observation was available. Run again or return to Connecting a tool.</p>}</>;
+}
+
+<WithoutFeedback />
+
+```ts experiment="omit"
+import type { ScoutStep } from '../../session.ts';
+import type { Feedback } from '../../../../runtime/lesson-types.ts';
+import { blocks as reading } from './03-tools.mdx';
+export async function run(s: ScoutStep) {
+  if (!s.restoreCheckpoint('notice-read')) s.reset({ tools: ['read_notice'] });
+  await s.act(async () => {
+    const runtime = s.runtime(reading.dispatch);
+    const feedback = s.data.feedback as Feedback | undefined
+      ?? await runtime.execute!(await runtime.evaluate());
+    if (!feedback?.value.ok || feedback.result.tool_name !== 'read_notice') { s.mark('no-read'); return; }
+    const input = structuredClone(s.messages);
+    const response = await runtime.evaluate(); // No append: the input still lacks the result.
+    s.showContext({ input, heldOutsideModelInput: feedback.result, actualResponse: response });
+    s.saveCheckpoint('notice-read', { feedback });
+    s.mark('unobserved');
+  });
+}
+```

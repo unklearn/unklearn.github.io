@@ -1,0 +1,43 @@
+import { useState, useRef } from 'react';
+import { useScoutStep } from '../../authoring.ts';
+import { Action, Prediction, RuntimeChange, RuntimeExcerpt, useLessonPresentation } from '../../../../presentation/lesson-ui.tsx';
+import { blocks as expanded } from './06-capabilities.mdx';
+
+export const meta = {"id": "picnic", "title": "Autonomous picnic", "question": "Why can the same order produce different item choices?", "initial": {"checkpoint": "expanded", "tools": ["read_notice", "walk_to", "inspect_pantry", "take_one", "deliver_item"]}, "narration": {"text": "One run, one fresh conversation, one order. Let Scout finish without intervening. Then change only the starting apple count."}};
+
+The runtime is complete for this task. Let Scout read, navigate, inspect, choose, pick up, and deliver without an intermediate Continue button.
+
+<Prediction question={meta.question} choices={['The route fixes which item Scout takes', 'Observed stock changes the decision under the same instruction']} />
+
+export function AutonomousPicnic() {
+  const s=useScoutStep(), [apples,setApples]=useState(2);
+  const runs=[s.recall('picnic-2'),s.recall('picnic-1')].filter(Boolean);
+  return <>
+    <p>The posted order is:</p><blockquote>{s.settings.order}</blockquote>
+    <fieldset className="preset-choice"><legend>Starting pantry</legend>{[2,1].map(n=><label key={n}><input type="radio" name="picnic-apples" checked={apples===n} onChange={()=>setApples(n)} />{n} apple{n===1?'':'s'}, 2 carrots</label>)}</fieldset>
+    <Action className="primary" onClick={()=>blocks.autonomous.module.run(s,apples)}>Run picnic</Action>
+    <p>Run with two apples. Then change only the starting apples to one and run again. Each run resets Scout’s world, hands, basket, and conversation. Settings is available for manually posting a different order.</p>
+    <RuntimeChange to={blocks.autonomous} />
+    {runs.length>0 && <><h2 className="outcome-title">Observed outcomes</h2><table className="outcomes"><thead><tr><th>Starting apples</th><th>Basket</th><th>Pantry left</th></tr></thead><tbody>{runs.map(run=><tr key={run.id}><td>{run.initial.pantry.apple}</td><td>{run.final.basket.apple} apple, {run.final.basket.carrot} carrot</td><td>{run.final.pantry.apple} apple, {run.final.pantry.carrot} carrot</td></tr>)}</tbody></table><p>These are actual inventories, not expected-answer fixtures. Open History to follow inspection, pickup, and delivery. Live can make a different choice; the world and trace preserve it.</p></>}
+    <p>Mock learns stock only from <code>inspect_pantry</code>. With the default notice it takes an apple from two, and a carrot when only one apple remains. Taking the last apple is legal: preserving it is the model’s instruction, not a physical rule.</p>
+  </>;
+}
+
+<AutonomousPicnic />
+
+```ts experiment="autonomous"
+import type { ScoutStep } from '../../session.ts';
+import { blocks as expanded } from './06-capabilities.mdx';
+export async function run(s: ScoutStep, apples = 2) {
+  s.reset({ pantry: { apple: apples, carrot: 2 }, tools: expanded.picnic.module.tools });
+  await s.act(async () => {
+    const runtime = s.runtime(expanded.dynamic);
+    s.mark(await runtime.run!()); // No scripted route, item choice, or intermediate pause.
+  });
+  if (s.trace.final && s.trace.status !== 'cancelled') {
+    s.saveCheckpoint('picnic-complete');
+    s.remember('picnic-latest', s.trace);
+    s.remember(`picnic-${apples}`, s.trace);
+  }
+}
+```

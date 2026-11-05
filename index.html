@@ -4,7 +4,7 @@
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#e9e8df">
   <meta name="description" content="Teach an agent runtime by giving Scout, a village courier, tools and feedback.">
-  <title>Scout Foundations · Unklearn</title>
+  <title>From a Model to an AI Agent · Unklearn</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23315b59'/%3E%3Cpath d='M18 26h28v24H18z' fill='%23bc6c50'/%3E%3Cpath d='M24 26v-7a8 8 0 0116 0v7' fill='none' stroke='%23ebd8b7' stroke-width='5'/%3E%3C/svg%3E">
 </head>
 <body>
@@ -36,7 +36,7 @@
       <div id="replay-bar" hidden><span id="replay-time">Recorded activity</span><button id="replay-play">Play</button><button id="replay-restart">Restart</button></div>
     </div>
     <aside id="lesson" aria-label="Lesson">
-      <header class="lesson-header"><span id="step-count">1 / 5</span><button id="toc-open" aria-haspopup="dialog" aria-controls="toc-panel">TOC ☰</button></header>
+      <header class="lesson-header"><span id="step-count">1 / 8</span><button id="toc-open" aria-haspopup="dialog" aria-controls="toc-panel">TOC ☰</button></header>
       <div id="lesson-pages"><!-- lesson-slides --></div>
       <footer class="lesson-navigation"><button id="previous">← Previous</button><button id="next">Next →</button></footer>
     </aside>
@@ -48,7 +48,6 @@
     <p id="mode-note">Mock runs the real loop and tools in your browser.</p>
     <form id="order-form"><label for="order">Notice</label><textarea id="order" rows="5"></textarea>
       <label for="preset">Starting pantry</label><select id="preset"><option value="2">2 apples · 2 carrots</option><option value="1">1 apple · 2 carrots</option></select>
-      <label class="check-label"><input id="pause-inspection" type="checkbox" checked> Pause after the first pantry inspection</label>
       <button type="submit" class="primary" id="post-order">Post order</button>
     </form>
     <div id="live-settings" hidden><label for="transport">Connection</label><select id="transport"><option value="ollama">Local Ollama</option><option value="gateway">Provider gateway</option></select><label for="endpoint">Provider URL</label><input id="endpoint" type="url" value="http://127.0.0.1:11434"><label for="model">Model</label><input id="model" value="qwen3:14b"><p>Live calls your provider directly. Errors stay visible. <a href="https://docs.ollama.com/faq#how-can-i-allow-additional-web-origins-to-access-ollama" target="_blank" rel="noreferrer">Configure Ollama’s allowed browser origins</a>.</p></div>

@@ -1,0 +1,94 @@
+import { useState, useRef } from 'react';
+import { useScoutStep } from '../../authoring.ts';
+import { Action, Prediction, RuntimeChange, RuntimeExcerpt, useLessonPresentation } from '../../../../presentation/lesson-ui.tsx';
+import { blocks as previous } from './02-model.mdx';
+
+export const meta = {"id": "tool", "title": "Connecting a tool", "question": "Who chooses the tool, and who executes it?", "initial": {"checkpoint": "model-ready", "tools": []}, "narration": {"text": "A schema describes an available action. The model requests it; the harness dispatches to an executable handler."}};
+
+A tool schema describes an available operation. It is not the operation itself. First pass schemas to the model; then add dispatch to execute the requested handler.
+
+<Prediction question={meta.question} choices={['The model selects; the harness executes', 'The harness selects; the model executes']} />
+
+<RuntimeChange from={previous.invoke} to={blocks.offer} />
+
+export function ConnectReader() {
+  const s=useScoutStep(), ui=useLessonPresentation(), request=useRef(null);
+  const [phase,setPhase]=useState('ready');
+  function approve() {
+    if(!s.restoreCheckpoint('model-ready'))s.reset({tools:[]});
+    s.setTools(blocks.reader.module.tools);s.clearQuestion();s.mark('approved');setPhase('approved');
+    s.showContext(s.schemas);ui.renderSystemTerminal(<p>Reading is available. Approval made no provider call and executed no handler.</p>);
+  }
+  return <>
+    <p>Approving the tool changes configuration; it does not invoke the model or read the board.</p>
+    <RuntimeChange from={blocks.empty} to={blocks.reader} />
+    <Action onClick={approve}>Approve reading tool</Action>
+    {phase!=='ready' && <details><summary>Actual reading schema</summary><pre>{JSON.stringify(s.schemas,null,2)}</pre></details>}
+    {phase==='approved' && <Action className="primary" onClick={()=>s.act(async()=>{request.current=await s.runtime(blocks.offer).evaluate();s.showContext({requested:request.current,noticeRead:!s.world.snapshot().unread});s.mark('requested');setPhase('requested');})}>Ask for an action</Action>}
+    {phase==='requested' && <><p>The terminal shows the actual response. A requested function has not run yet. The board light is still on.</p><RuntimeChange from={blocks.offer} to={blocks.dispatch} /><Action className="primary" onClick={()=>s.act(async()=>{
+      const result=await s.runtime(blocks.dispatch).execute(request.current);
+      if(result?.result.tool_name==='read_notice' && result.value.ok){s.saveCheckpoint('notice-read',{feedback:result});s.showContext({heldOutsideModelInput:result.result});s.mark('held');setPhase('held');}
+      else{s.mark('no-read');setPhase('no-read');}
+    })}>Execute the request</Action></>}
+    {phase==='held' && <p>The handler really read the board, so its amber light is off. The returned text is held in JavaScript. It has not entered model context.</p>}
+    {phase==='no-read' && <p>No notice was returned. The trace preserves the provider’s actual choice. Approve again to start another attempt.</p>}
+  </>;
+}
+
+<ConnectReader />
+
+```ts runtime="offer"
+import type { RuntimeOptions } from '../../../../runtime/lesson-types.ts';
+
+export class AgentRuntime {
+  constructor(public options: RuntimeOptions) {}
+
+  async evaluate() {
+    const { provider, messages, tools, signal } = this.options;
+    const schemas = tools.map(tool => tool.definition);
+    return provider(messages, schemas, signal);
+  }
+}
+```
+
+```ts runtime="dispatch"
+import type { Feedback, RuntimeOptions } from '../../../../runtime/lesson-types.ts';
+import type { Message } from '../../../../runtime/types.ts';
+
+export class AgentRuntime {
+  constructor(public options: RuntimeOptions) {}
+
+  async evaluate() {
+    const { provider, messages, tools, signal } = this.options;
+    const schemas = tools.map(tool => tool.definition);
+    return provider(messages, schemas, signal);
+  }
+
+  async execute(request: Message): Promise<Feedback | null> {
+    const calls = request.tool_calls ?? [];
+    if (calls.length > 1) throw new Error('Choose one tool per turn.');
+    if (!calls.length) {
+      if (!request.content.trim()) throw new Error('Empty provider response');
+      return null;
+    }
+    const call = calls[0].function;
+    const { tools, signal, emit } = this.options;
+    const tool = tools.find(tool => tool.definition.function.name === call.name);
+    emit({ kind: 'tool_start', text: call.name, tool: call });
+    const value = tool ? await tool.execute(call.arguments, signal)
+      : { ok: false, reason: 'tool_unavailable' };
+    signal.throwIfAborted();
+    const result: Message = { role: 'tool', tool_name: call.name, content: JSON.stringify(value) };
+    emit({ kind: 'tool_result', text: result.content, tool: call, result: value });
+    return { request, result, value };
+  }
+}
+```
+
+```ts setup="empty"
+export const tools = [];
+```
+
+```ts setup="reader"
+export const tools = ['read_notice'];
+```

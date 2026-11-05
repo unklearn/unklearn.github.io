@@ -1,4 +1,4 @@
-# Scout Foundations · Unklearn
+# Lesson 01 — From a Model to an AI Agent
 
 A static, interactive article about building an agent runtime. The browser owns
 Scout’s world, provider calls, tools, and conversation. Mock and Replay need no
@@ -47,15 +47,17 @@ export function Walk() {
 <Walk />
 ```
 
-Import `useState` from React and `Action`, `useScoutStep`, `RuntimeChange`, and
-`useLessonPresentation` from `presentation/lesson-ui.tsx` using the relative path
-shown in the existing lessons. Helpers are session-scoped, not globals.
+Import `useState` from React, `useScoutStep` from the Foundations `authoring.ts`,
+and UI helpers from `presentation/lesson-ui.tsx`, using the paths in existing
+steps. Helpers are session-scoped, not globals.
 
 ### Executable code blocks
 
 A fence beginning with **`ts runtime="invoke"`** contains a complete TypeScript
 module exporting `AgentRuntime`. A **`ts setup="reader"`** fence contains executable
-configuration, such as `export const tools = ['read_notice'];`.
+configuration, such as `export const tools = ['read_notice'];`. A
+**`ts experiment="patrol"`** fence exports `run(session)` for an authored experiment;
+its displayed script is also its executed implementation.
 
 The build extracts each named block into a module and exposes it inside the MDX:
 
@@ -73,10 +75,21 @@ an expandable full snapshot. Write the explanation next to it. Blocks do not
 render automatically. Complete snapshots are authoritative; diffs are visual
 only. Import `blocks` from an earlier MDX file to reuse a runtime or compare it.
 
-The five steps add invocation → schemas → dispatch → feedback → looping.
-The first runtime has no dispatch, append, or loop methods. Adding another tool
-changes configuration rather than runtime code. Only the selected snapshot runs.
+The eight steps form one article: script → model → tool request and dispatch →
+held result → feedback and loop → dynamic capabilities → autonomous picnic →
+model and harness review. Predictions are optional and never execute actions.
+The first runtime has no dispatch, append, or loop methods. The final snapshot
+resolves `getTools()` before each evaluation and retains that selection for
+matching dispatch. Adding a tool changes configuration on the same instance.
+Only the selected snapshot runs; the session host never fills in missing logic.
 The build type-checks every stored TypeScript block before bundling it.
+
+`runtime/session.ts` is generic infrastructure. The article manifest supplies
+`scenario`, defined in Foundations `scenario.ts`: world creation, authoritative
+tool bindings, initial conversation, typed helpers, and history-driven Mock.
+Future article sets can supply another scenario without teaching the host new
+tool names. `article.ts` also owns lesson number/title, ordering, final runtime,
+and recording aliases. Existing article URL and stable step identities remain.
 
 ### Helpers
 
@@ -90,6 +103,7 @@ The build type-checks every stored TypeScript block before bundling it.
   Reset the component’s local React state in the same Reset handler.
 - `saveCheckpoint(name, data)` and `restoreCheckpoint(name)` preserve the world,
   conversation, selected tools, and held feedback. They do not evaluate a model.
+- `remember(name, value)` / `recall(name)` retain actual comparison runs across steps.
 - `showContext(value)`, `showQuestion(text)`, `clearQuestion()`, and `mark(stage)`.
 - `useLessonPresentation().renderSystemTerminal(ReactNode)` displays authored UI.
   Public provider speech and actual tool results are recorded separately.
@@ -101,20 +115,21 @@ actions and only renders recordings; it never constructs a runtime.
 
 ## Picnic comparison
 
-TOC → **Complete the picnic**. Keep Mock and the default notice:
+TOC → **07 Autonomous picnic**. Keep Mock and the default notice:
 
 > Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.
 
-1. Settings → **2 apples · 2 carrots** → close. Run picnic → Continue after inspection.
+1. Select **2 apples, 2 carrots** inline → **Run picnic**. It finishes autonomously.
    Basket: one apple. Pantry: one apple, two carrots.
-2. Change only the starting apples to **1**. Run picnic → Continue.
+2. Change only the inline starting apples to **1** → **Run picnic**.
    Basket: one carrot. Pantry: one apple, one carrot.
-3. Use two apples, post **Deliver one carrot to the picnic basket.**, then Run picnic.
+3. For the third check, Settings → use two apples and post
+   **Deliver one carrot to the picnic basket.** Then Run picnic with two apples.
    Basket: one carrot. Pantry: two apples, one carrot.
 
-Each Run starts a clean take. After inspection, Empty apple shelf then Continue
-shows stale observations: pickup fails, the failure enters context, and Mock
-inspects again. Taking the last apple is legal in the world.
+Each Run starts a clean world and conversation. The comparison table uses saved
+actual inventories. Step 8 replays and annotates your latest execution without
+inference or tool execution. Taking the last apple is legal in the world.
 
 Settings, Status, and History are behind icons. History exports/imports JSON;
 Replay plays saved or bundled traces. Thinking bubbles mark actual provider calls.
@@ -132,7 +147,7 @@ that limitation. Live retains the model’s actual decisions.
 ## Verification
 
 `npm test` checks world rules, the extracted MDX runtimes, feedback boundaries,
-three picnic outcomes, stale stock, cancellation, and Replay. `npm run build`
+three picnic outcomes, dynamic tool selection, cancellation, and Replay. `npm run build`
 type-checks the MDX blocks and pre-renders the lesson without executing actions.
 The plain TypeScript world remains usable from Node with an injectable clock.
 

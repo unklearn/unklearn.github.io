@@ -10,7 +10,7 @@ const parsed = ts.parseJsonConfigFileContent(config.config, ts.sys, '.');
 const host = ts.createCompilerHost(parsed.options), readFile = host.readFile.bind(host), fileExists = host.fileExists.bind(host);
 host.readFile = name => virtual.get(resolve(name)) ?? readFile(name);
 host.fileExists = name => virtual.has(resolve(name)) || fileExists(name);
-const program = ts.createProgram([...virtual.keys()], {...parsed.options, erasableSyntaxOnly: false}, host);
+const program = ts.createProgram([...virtual.keys(), resolve('scene/env.d.ts')], {...parsed.options, erasableSyntaxOnly: false}, host);
 const errors = ts.getPreEmitDiagnostics(program);
 if (errors.length) { console.error(ts.formatDiagnosticsWithColorAndContext(errors,{getCanonicalFileName:n=>n,getCurrentDirectory:()=>process.cwd(),getNewLine:()=> '\n'})); process.exitCode=1; }
 else console.log(`Checked ${virtual.size} executable MDX blocks`);
