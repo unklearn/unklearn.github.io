@@ -1143,3 +1143,19 @@ body.film::after {
 .outcome-title {
   font-size: 16px;
 }
+
+.lesson-copy .prediction-feedback {
+  margin: 16px 0 0;
+  padding: 10px 14px;
+  border-left: 3px solid #89877b;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.lesson-copy .prediction-feedback.correct {
+  border-left-color: #347957;
+  background: #3479570b;
+}
+.lesson-copy .prediction-feedback.incorrect {
+  border-left-color: #b44a40;
+  background: #b44a400b;
+}

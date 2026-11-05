@@ -72,6 +72,19 @@ Import `useState` from React, `useScoutStep` from the Foundations `authoring.ts`
 and UI helpers from `presentation/lesson-ui.tsx`, using the paths in existing
 steps. Helpers are session-scoped, not globals.
 
+### Predictions
+
+Each MDX interaction owns its prediction in React state and passes `value` and
+`onChange` to `Prediction`. Choices require `{ id, label, explanation }`.
+After the experiment settles, pass the observed choice ID as `outcome`; use
+`null` while pending, cancelled, or inconclusive.
+
+The component shows the **observed choice’s explanation**, with a green
+blockquote border for a matching prediction and red for a different prediction.
+Without a prediction it shows neutral outcome feedback. Changing an answer only
+updates React state; it never executes the experiment. See `01-script.mdx` for
+an example driven by actual patrol and notice events.
+
 ### Executable code blocks
 
 A fence beginning with **`ts runtime="invoke"`** contains a complete TypeScript

@@ -21,20 +21,32 @@ export const meta = {
 
 The world changed: the notice was read. But the model’s conversation did not change. Test that boundary with another evaluation.
 
-<Prediction
-  question={meta.question}
-  choices={[
-    'Yes, executing a handler is enough',
-    'No, its result must enter the next input',
-  ]}
-/>
-
-<RuntimeChange to={blocks.omit} />
-
 export function WithoutFeedback() {
+  const [prediction, setPrediction] = useState(null);
   const s = useScoutStep();
   return (
     <>
+      <Prediction
+        question={meta.question}
+        choices={[
+          {
+            id: 'automatic',
+            label: 'Yes, executing a handler is enough',
+            explanation:
+              'The observation was present in the next model input. Check whether the harness appended it; a JavaScript return alone cannot put data into model context.',
+          },
+          {
+            id: 'needs-context',
+            label: 'No, its result must enter the next input',
+            explanation:
+              'The handler returned the real notice to JavaScript, but the next provider input still lacked it. The model needs the result in its conversation, even though the board light is already off.',
+          },
+        ]}
+        value={prediction}
+        onChange={setPrediction}
+        outcome={!s.busy && s.stage === 'unobserved' ? 'needs-context' : null}
+      />
+      <RuntimeChange to={blocks.omit} />
       <Action className="primary" onClick={() => blocks.omit.module.run(s)}>
         Evaluate without feedback
       </Action>

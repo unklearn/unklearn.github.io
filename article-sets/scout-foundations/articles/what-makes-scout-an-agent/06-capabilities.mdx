@@ -22,17 +22,8 @@ export const meta = {
 
 The runtime will now read its available tools before each evaluation. It retains that turn’s selection for dispatch, so a request is executed against the tools the model actually saw.
 
-<Prediction
-  question={meta.question}
-  choices={[
-    'Every new tool needs a new runtime',
-    'The runtime can use a changed tool configuration',
-  ]}
-/>
-
-<RuntimeChange from={previous.loop} to={blocks.dynamic} />
-
 export function Capabilities() {
+  const [prediction, setPrediction] = useState(null);
   const s = useScoutStep(),
     ui = useLessonPresentation(),
     runtime = useRef(null),
@@ -51,6 +42,38 @@ export function Capabilities() {
   }
   return (
     <>
+      <Prediction
+        question={meta.question}
+        choices={[
+          {
+            id: 'new-runtime',
+            label: 'Every new tool needs a new runtime',
+            explanation:
+              'Replacing the runtime would be a code or construction change. Here the same runtime can resolve a different tool configuration on its next turn.',
+          },
+          {
+            id: 'configuration',
+            label: 'The runtime can use a changed tool configuration',
+            explanation:
+              'The same runtime instance received the expanded schemas on its next turn and executed a newly available handler. Only the tool configuration changed.',
+          },
+        ]}
+        value={prediction}
+        onChange={setPrediction}
+        outcome={
+          !s.busy &&
+          s.stage === 'expanded' &&
+          s.trace.events.some(
+            (e) =>
+              e.kind === 'tool_result' &&
+              e.tool?.name !== 'read_notice' &&
+              e.result?.ok,
+          )
+            ? 'configuration'
+            : null
+        }
+      />
+      <RuntimeChange from={previous.loop} to={blocks.dynamic} />
       <Action onClick={begin}>Try the current tools</Action>
       {phase !== 'ready' && (
         <>

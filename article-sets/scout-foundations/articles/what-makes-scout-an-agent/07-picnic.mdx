@@ -12,7 +12,8 @@ import { blocks as expanded } from './06-capabilities.mdx';
 export const meta = {
   id: 'picnic',
   title: 'Autonomous picnic',
-  question: 'Why can the same order produce different item choices?',
+  question:
+    'Will changing only the starting apple count change Scout’s item choice?',
   initial: {
     checkpoint: 'expanded',
     tools: [
@@ -30,20 +31,59 @@ export const meta = {
 
 The runtime is complete for this task. Let Scout read, navigate, inspect, choose, pick up, and deliver without an intermediate Continue button.
 
-<Prediction
-  question={meta.question}
-  choices={[
-    'The route fixes which item Scout takes',
-    'Observed stock changes the decision under the same instruction',
-  ]}
-/>
-
 export function AutonomousPicnic() {
+  const [prediction, setPrediction] = useState(null);
   const s = useScoutStep(),
     [apples, setApples] = useState(2);
   const runs = [s.recall('picnic-2'), s.recall('picnic-1')].filter(Boolean);
+  const two = s.recall('picnic-2'),
+    one = s.recall('picnic-1');
+  const inspected = (run) =>
+    run?.status === 'reported' &&
+    run.events.some(
+      (e) =>
+        e.kind === 'tool_result' &&
+        e.tool?.name === 'inspect_pantry' &&
+        e.result?.ok,
+    );
+  const delivered = (run) =>
+    run?.final?.basket.apple === 1 && run.final.basket.carrot === 0
+      ? 'apple'
+      : run?.final?.basket.carrot === 1 && run.final.basket.apple === 0
+        ? 'carrot'
+        : null;
+  const comparison =
+    inspected(two) &&
+    inspected(one) &&
+    two.initial.notice === one.initial.notice &&
+    delivered(two) &&
+    delivered(one)
+      ? delivered(two) === delivered(one)
+        ? 'same-item'
+        : 'different-items'
+      : null;
   return (
     <>
+      <Prediction
+        question={meta.question}
+        choices={[
+          {
+            id: 'same-item',
+            label: 'Scout will deliver the same item in both runs',
+            explanation:
+              'Both completed runs delivered the same item despite their different observed stock. These are the actual outcomes; a Live model may interpret the order differently. Matching choices do not prove that the route was scripted.',
+          },
+          {
+            id: 'different-items',
+            label: 'Scout will deliver different items after inspecting stock',
+            explanation:
+              'The same order produced different delivered items after different stock observations. Inspection results entered the conversation before pickup; the world did not enforce leaving the last apple.',
+          },
+        ]}
+        value={prediction}
+        onChange={setPrediction}
+        outcome={!s.busy ? comparison : null}
+      />
       <p>The posted order is:</p>
       <blockquote>{s.settings.order}</blockquote>
       <fieldset className="preset-choice">

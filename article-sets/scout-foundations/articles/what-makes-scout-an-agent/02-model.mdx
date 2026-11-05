@@ -20,17 +20,8 @@ export const meta = {
 
 We now give Scout a model. A thinking bubble marks the time a provider call is actually pending. The model receives a notification, not the notice text.
 
-<Prediction
-  question={meta.question}
-  choices={[
-    'The posted order and the pantry stock',
-    'Only the conversation sent to it',
-  ]}
-/>
-
-<RuntimeChange to={blocks.invoke} />
-
 export function ModelTurn() {
+  const [prediction, setPrediction] = useState(null);
   const s = useScoutStep(),
     [done, setDone] = useState(false);
   function run() {
@@ -50,6 +41,27 @@ export function ModelTurn() {
   }
   return (
     <>
+      <Prediction
+        question={meta.question}
+        choices={[
+          {
+            id: 'world',
+            label: 'The posted order and the pantry stock',
+            explanation:
+              'The input contained observations of the order and stock. Models can use information that is included in their conversation.',
+          },
+          {
+            id: 'conversation',
+            label: 'Only the conversation sent to it',
+            explanation:
+              'The outgoing input contained a new-notice notification, not the notice text or pantry stock. Running the model did not supply the missing observations.',
+          },
+        ]}
+        value={prediction}
+        onChange={setPrediction}
+        outcome={!s.busy && s.stage === 'needs-tool' ? 'conversation' : null}
+      />
+      <RuntimeChange to={blocks.invoke} />
       <Action className="primary" onClick={run}>
         Let Scout think
       </Action>

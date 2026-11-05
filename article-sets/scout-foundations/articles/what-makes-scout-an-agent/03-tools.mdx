@@ -21,17 +21,8 @@ export const meta = {
 
 A tool schema describes an available operation. It is not the operation itself. First pass schemas to the model; then add dispatch to execute the requested handler.
 
-<Prediction
-  question={meta.question}
-  choices={[
-    'The model selects; the harness executes',
-    'The harness selects; the model executes',
-  ]}
-/>
-
-<RuntimeChange from={previous.invoke} to={blocks.offer} />
-
 export function ConnectReader() {
+  const [prediction, setPrediction] = useState(null);
   const s = useScoutStep(),
     ui = useLessonPresentation(),
     request = useRef(null);
@@ -52,6 +43,38 @@ export function ConnectReader() {
   }
   return (
     <>
+      <Prediction
+        question={meta.question}
+        choices={[
+          {
+            id: 'model-selects',
+            label: 'The model selects; the harness executes',
+            explanation:
+              'The provider requested read_notice. Dispatch then ran the real reading handler and cleared the board light. Approving availability alone did neither.',
+          },
+          {
+            id: 'harness-selects',
+            label: 'The harness selects; the model executes',
+            explanation:
+              'A scripted action would be selected by the harness. Tool handlers still run in JavaScript, not inside the model.',
+          },
+        ]}
+        value={prediction}
+        onChange={setPrediction}
+        outcome={
+          !s.busy &&
+          s.stage === 'held' &&
+          s.trace.events.some(
+            (e) =>
+              e.kind === 'tool_result' &&
+              e.tool?.name === 'read_notice' &&
+              e.result?.ok,
+          )
+            ? 'model-selects'
+            : null
+        }
+      />
+      <RuntimeChange from={previous.invoke} to={blocks.offer} />
       <p>
         Approving the tool changes configuration; it does not invoke the model
         or read the board.

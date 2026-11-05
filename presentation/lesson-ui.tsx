@@ -1,10 +1,4 @@
-import {
-  createContext,
-  useContext,
-  useSyncExternalStore,
-  useState,
-  useId,
-} from 'react';
+import { createContext, useContext, useSyncExternalStore, useId } from 'react';
 import type { ReactNode, ComponentType } from 'react';
 import type { StepMeta } from '../runtime/session.ts';
 import type { Trace } from '../runtime/types.ts';
@@ -245,30 +239,61 @@ export function RuntimeChange({
   );
 }
 
+export interface PredictionChoice {
+  id: string;
+  label: string;
+  explanation: ReactNode;
+}
+
 export function Prediction({
   question,
   choices,
+  value,
+  onChange,
+  outcome,
 }: {
   question: string;
-  choices: readonly string[];
+  choices: readonly PredictionChoice[];
+  value: string | null;
+  onChange: (choice: string) => void;
+  outcome?: string | null;
 }) {
-  const [answer, setAnswer] = useState(''),
-    id = useId();
+  const id = useId();
+  const observed = choices.find((choice) => choice.id === outcome);
+  const verdict = !value
+    ? 'observed'
+    : value === outcome
+      ? 'correct'
+      : 'incorrect';
   return (
     <fieldset className="prediction">
       <legend>{question}</legend>
       {choices.map((choice) => (
-        <label key={choice}>
+        <label key={choice.id}>
           <input
             type="radio"
             name={id}
-            value={choice}
-            checked={answer === choice}
-            onChange={() => setAnswer(choice)}
+            value={choice.id}
+            checked={value === choice.id}
+            onChange={() => onChange(choice.id)}
           />
-          {choice}
+          {choice.label}
         </label>
       ))}
+      <div aria-live="polite" aria-atomic="true">
+        {observed && (
+          <blockquote className={`prediction-feedback ${verdict}`}>
+            <strong>
+              {verdict === 'correct'
+                ? 'Prediction matched.'
+                : verdict === 'incorrect'
+                  ? 'Prediction did not match.'
+                  : 'Observed outcome.'}
+            </strong>{' '}
+            {observed.explanation}
+          </blockquote>
+        )}
+      </div>
     </fieldset>
   );
 }

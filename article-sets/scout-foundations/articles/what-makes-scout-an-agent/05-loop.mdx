@@ -21,17 +21,8 @@ export const meta = {
 
 Preserve the assistant’s request and append its matching tool result. This is the first point at which the notice becomes available to the next model evaluation.
 
-<Prediction
-  question={meta.question}
-  choices={[
-    'Calling the model again adds knowledge',
-    'New observations in the input change what it can know',
-  ]}
-/>
-
-<RuntimeChange from={reading.dispatch} to={blocks.feedback} />
-
 export function CloseLoop() {
+  const [prediction, setPrediction] = useState(null);
   const s = useScoutStep(),
     held = useRef(null),
     [phase, setPhase] = useState('ready');
@@ -57,6 +48,38 @@ export function CloseLoop() {
   }
   return (
     <>
+      <Prediction
+        question={meta.question}
+        choices={[
+          {
+            id: 'another-call',
+            label: 'Calling the model again adds knowledge',
+            explanation:
+              'Another invocation received new information only if its input changed. Repeating an unchanged conversation does not supply a new observation.',
+          },
+          {
+            id: 'feedback',
+            label: 'New observations in the input change what it can know',
+            explanation:
+              'The next evaluation received the assistant request and matching notice result. That new input made the order available; the loop repeats this feedback cycle.',
+          },
+        ]}
+        value={prediction}
+        onChange={setPrediction}
+        outcome={
+          !s.busy &&
+          s.trace.events.some(
+            (e) =>
+              e.kind === 'model_start' &&
+              e.messages?.some(
+                (m) => m.role === 'tool' && m.tool_name === 'read_notice',
+              ),
+          )
+            ? 'feedback'
+            : null
+        }
+      />
+      <RuntimeChange from={reading.dispatch} to={blocks.feedback} />
       {phase === 'ready' && (
         <Action onClick={prepare}>Prepare the real observation</Action>
       )}

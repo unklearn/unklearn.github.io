@@ -20,19 +20,44 @@ export const meta = {
 
 Scout is a courier. Its job is to carry one item from the pantry, across the bridge, to the picnic basket. We will build the runtime that lets it choose what to do.
 
-<Prediction
-  question={meta.question}
-  choices={['Scout will read the notice', 'Scout will follow its route']}
-/>
-
 export function ScriptedPatrol() {
+  const [prediction, setPrediction] = useState(null);
   const s = useScoutStep(),
     [phase, setPhase] = useState('ready');
   return (
     <>
+      <Prediction
+        question={meta.question}
+        choices={[
+          {
+            id: 'reads',
+            label: 'Scout will read the notice',
+            explanation:
+              'Scout read the notice. The notice-read event, rather than movement alone, is evidence of reading.',
+          },
+          {
+            id: 'patrol',
+            label: 'Scout will follow its route',
+            explanation:
+              'Scout followed its authored path and left the posted notice unread. The patrol script never checked the board; posting a notice did not change its behavior.',
+          },
+        ]}
+        value={prediction}
+        onChange={setPrediction}
+        outcome={
+          !s.busy &&
+          s.stage === 'passed' &&
+          s.trace.events.some((e) => e.kind === 'notice_posted')
+            ? s.world.snapshot().unread
+              ? 'patrol'
+              : 'reads'
+            : null
+        }
+      />
       <p>
-        Start the patrol, then post a picnic notice while Scout walks. The amber
-        light means a notice is waiting.
+        {phase === 'walking'
+          ? 'Post a picnic notice while Scout walks. The amber light means a notice is waiting.'
+          : 'Start the patrol'}
       </p>
       <div className="actions">
         <Action

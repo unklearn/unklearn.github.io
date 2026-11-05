@@ -4,7 +4,7 @@ The pending in-world terminal toggle was committed first as `9ee988c`.
 
 ## Executable teaching boundaries
 
-`npm test`: 11 focused checks pass. `npm run build`: TypeScript, all 12 stored
+`npm test`: 13 focused checks pass. `npm run build`: TypeScript, all 12 stored
 MDX runtime/configuration/experiment blocks, Vite static bundling, and lesson
 HTML pre-rendering pass. Vite reports its existing large Three.js bundle warning.
 
@@ -65,3 +65,17 @@ carrot-order}.json`. Live retains actual provider outcomes without Mock fallback
 the default order. Select **2 apples, 2 carrots**, Run picnic. Then select
 **1 apple, 2 carrots**, Run picnic. Both finish without an intermediate action.
 Use `npm run dev` for editing; `npm run build` for static hosting.
+
+## Prediction feedback
+
+Choices now require an ID, label, and explanation. Each MDX interaction owns its
+selected answer and supplies its settled observed outcome. Feedback renders the
+observed choice’s explanation with green/red blockquote borders for matching/
+differing predictions, or neutral feedback when unanswered. No outcome means no
+verdict. The picnic comparison derives its outcome from both saved completed
+runs, including actual Live differences.
+
+Browser-checked red and green feedback in the real patrol experiment, retained
+selection across navigation, and zero provider calls/tools after changing
+predictions. Two focused rendering checks cover correct/incorrect, pending,
+unanswered, and unsupported outcomes. Formatting and static build pass.

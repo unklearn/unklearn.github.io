@@ -23,15 +23,9 @@ export const meta = {
 
 Scout is a **model plus a harness**. The model selects an action from the conversation and available schemas. The harness calls the provider, dispatches its request, appends the observation, and decides when to allow another turn.
 
-<Prediction
-  question={meta.question}
-  choices={[
-    'The model executes functions and updates the world',
-    'The model selects actions; the harness executes and returns observations',
-  ]}
-/>
-
 export function UnderstandAgent() {
+  const [prediction, setPrediction] = useState(null);
+  const [reviewed, setReviewed] = useState(false);
   const s = useScoutStep(),
     ui = useLessonPresentation(),
     [focus, setFocus] = useState('evaluate');
@@ -70,6 +64,31 @@ export function UnderstandAgent() {
     : [];
   return (
     <>
+      <Prediction
+        question={meta.question}
+        choices={[
+          {
+            id: 'model-executes',
+            label: 'The model executes functions and updates the world',
+            explanation:
+              'The model returns a response or tool request. Updating this browser world still requires an executable handler in the harness.',
+          },
+          {
+            id: 'model-harness',
+            label:
+              'The model selects actions; the harness executes and returns observations',
+            explanation:
+              'The recording separates the provider request, JavaScript handler, observed result, and next model input. The model selected actions; the harness executed them and carried feedback forward.',
+          },
+        ]}
+        value={prediction}
+        onChange={setPrediction}
+        outcome={
+          reviewed && run?.events.some((e) => e.kind === 'tool_result')
+            ? 'model-harness'
+            : null
+        }
+      />
       {run ? (
         <>
           <p>
@@ -82,7 +101,12 @@ export function UnderstandAgent() {
             inspection below to see the stock observation available to the next
             decision.
           </p>
-          <Action onClick={() => ui.reviewTrace(run)}>
+          <Action
+            onClick={() => {
+              ui.reviewTrace(run);
+              setReviewed(true);
+            }}
+          >
             Replay this execution
           </Action>
           <div className="trace-points">
@@ -91,6 +115,7 @@ export function UnderstandAgent() {
                 key={point.label}
                 onClick={() => {
                   setFocus(point.method);
+                  setReviewed(true);
                   s.showContext(point.event);
                   ui.reviewTrace(run, point.event.at, point.event.seq);
                 }}
