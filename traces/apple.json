@@ -1,10 +1,9 @@
 {
   "version": 1,
-  "id": "1793899081293-okdlw",
+  "id": "1793907199404-hvcj6",
   "mode": "mock",
   "provider": "Mock",
-  "startedAt": "2026-11-05T17:18:01.293Z",
-  "order": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
+  "startedAt": "2026-11-05T19:33:19.404Z",
   "initial": {
     "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
     "unread": true,
@@ -26,8 +25,8 @@
   },
   "events": [
     {
-      "kind": "run_start",
-      "text": "Fresh checkpoint beside the noticeboard",
+      "kind": "runtime_selected",
+      "text": "loop",
       "state": {
         "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
         "unread": true,
@@ -174,11 +173,11 @@
     {
       "kind": "assistant",
       "text": "Tool requested",
-      "turn": 1,
       "tool": {
         "name": "read_notice",
         "arguments": {}
       },
+      "turn": 1,
       "state": {
         "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
         "unread": true,
@@ -199,7 +198,7 @@
         ]
       },
       "seq": 2,
-      "at": 0
+      "at": 650
     },
     {
       "kind": "model_end",
@@ -225,16 +224,15 @@
         ]
       },
       "seq": 3,
-      "at": 0
+      "at": 650
     },
     {
       "kind": "tool_start",
-      "text": "read_notice({})",
+      "text": "read_notice",
       "tool": {
         "name": "read_notice",
         "arguments": {}
       },
-      "turn": 1,
       "state": {
         "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
         "unread": true,
@@ -255,7 +253,7 @@
         ]
       },
       "seq": 4,
-      "at": 0
+      "at": 650
     },
     {
       "kind": "read",
@@ -280,7 +278,7 @@
         ]
       },
       "seq": 5,
-      "at": 0
+      "at": 650
     },
     {
       "kind": "notice_read",
@@ -305,7 +303,7 @@
         ]
       },
       "seq": 6,
-      "at": 1100
+      "at": 1750
     },
     {
       "kind": "tool_result",
@@ -318,7 +316,6 @@
         "ok": true,
         "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket."
       },
-      "turn": 1,
       "state": {
         "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
         "unread": false,
@@ -339,11 +336,11 @@
         ]
       },
       "seq": 7,
-      "at": 1100
+      "at": 1750
     },
     {
       "kind": "context",
-      "text": "Tool request and observation appended to the next input",
+      "text": "Request and observation appended",
       "messages": [
         {
           "role": "system",
@@ -367,11 +364,10 @@
         },
         {
           "role": "tool",
-          "tool_name": "read_notice",
-          "content": "{\"ok\":true,\"notice\":\"Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.\"}"
+          "content": "{\"ok\":true,\"notice\":\"Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.\"}",
+          "tool_name": "read_notice"
         }
       ],
-      "turn": 1,
       "state": {
         "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
         "unread": false,
@@ -392,7 +388,7 @@
         ]
       },
       "seq": 8,
-      "at": 1100
+      "at": 1750
     },
     {
       "kind": "model_start",
@@ -421,8 +417,8 @@
         },
         {
           "role": "tool",
-          "tool_name": "read_notice",
-          "content": "{\"ok\":true,\"notice\":\"Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.\"}"
+          "content": "{\"ok\":true,\"notice\":\"Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.\"}",
+          "tool_name": "read_notice"
         }
       ],
       "schemas": [
@@ -530,18 +526,18 @@
         ]
       },
       "seq": 9,
-      "at": 1100
+      "at": 1750
     },
     {
       "kind": "assistant",
       "text": "Tool requested",
-      "turn": 2,
       "tool": {
         "name": "walk_to",
         "arguments": {
           "place": "pantry"
         }
       },
+      "turn": 2,
       "state": {
         "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
         "unread": false,
@@ -562,7 +558,7 @@
         ]
       },
       "seq": 10,
-      "at": 1100
+      "at": 2400
     },
     {
       "kind": "model_end",
@@ -588,18 +584,17 @@
         ]
       },
       "seq": 11,
-      "at": 1100
+      "at": 2400
     },
     {
       "kind": "tool_start",
-      "text": "walk_to({\"place\":\"pantry\"})",
+      "text": "walk_to",
       "tool": {
         "name": "walk_to",
         "arguments": {
           "place": "pantry"
         }
       },
-      "turn": 2,
       "state": {
         "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
         "unread": false,
@@ -620,7 +615,7 @@
         ]
       },
       "seq": 12,
-      "at": 1100
+      "at": 2400
     },
     {
       "kind": "walk_start",
@@ -675,7 +670,7 @@
         "duration": 4431.788817975583
       },
       "seq": 13,
-      "at": 1100
+      "at": 2400
     },
     {
       "kind": "walk_end",
@@ -700,7 +695,7 @@
         ]
       },
       "seq": 14,
-      "at": 5531.788817975583
+      "at": 6831.788817975583
     },
     {
       "kind": "tool_result",
@@ -715,7 +710,6 @@
         "ok": true,
         "place": "pantry"
       },
-      "turn": 2,
       "state": {
         "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
         "unread": false,
@@ -736,11 +730,11 @@
         ]
       },
       "seq": 15,
-      "at": 5531.788817975583
+      "at": 6831.788817975583
     },
     {
       "kind": "context",
-      "text": "Tool request and observation appended to the next input",
+      "text": "Request and observation appended",
       "messages": [
         {
           "role": "system",
@@ -764,8 +758,8 @@
         },
         {
           "role": "tool",
-          "tool_name": "read_notice",
-          "content": "{\"ok\":true,\"notice\":\"Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.\"}"
+          "content": "{\"ok\":true,\"notice\":\"Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.\"}",
+          "tool_name": "read_notice"
         },
         {
           "role": "assistant",
@@ -783,11 +777,10 @@
         },
         {
           "role": "tool",
-          "tool_name": "walk_to",
-          "content": "{\"ok\":true,\"place\":\"pantry\"}"
+          "content": "{\"ok\":true,\"place\":\"pantry\"}",
+          "tool_name": "walk_to"
         }
       ],
-      "turn": 2,
       "state": {
         "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
         "unread": false,
@@ -808,7 +801,7 @@
         ]
       },
       "seq": 16,
-      "at": 5531.788817975583
+      "at": 6831.788817975583
     },
     {
       "kind": "model_start",
@@ -837,8 +830,8 @@
         },
         {
           "role": "tool",
-          "tool_name": "read_notice",
-          "content": "{\"ok\":true,\"notice\":\"Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.\"}"
+          "content": "{\"ok\":true,\"notice\":\"Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.\"}",
+          "tool_name": "read_notice"
         },
         {
           "role": "assistant",
@@ -856,8 +849,8 @@
         },
         {
           "role": "tool",
-          "tool_name": "walk_to",
-          "content": "{\"ok\":true,\"place\":\"pantry\"}"
+          "content": "{\"ok\":true,\"place\":\"pantry\"}",
+          "tool_name": "walk_to"
         }
       ],
       "schemas": [
@@ -965,16 +958,16 @@
         ]
       },
       "seq": 17,
-      "at": 5531.788817975583
+      "at": 6831.788817975583
     },
     {
       "kind": "assistant",
       "text": "Tool requested",
-      "turn": 3,
       "tool": {
         "name": "inspect_pantry",
         "arguments": {}
       },
+      "turn": 3,
       "state": {
         "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
         "unread": false,
@@ -995,7 +988,7 @@
         ]
       },
       "seq": 18,
-      "at": 5531.788817975583
+      "at": 7481.788817975583
     },
     {
       "kind": "model_end",
@@ -1021,16 +1014,15 @@
         ]
       },
       "seq": 19,
-      "at": 5531.788817975583
+      "at": 7481.788817975583
     },
     {
       "kind": "tool_start",
-      "text": "inspect_pantry({})",
+      "text": "inspect_pantry",
       "tool": {
         "name": "inspect_pantry",
         "arguments": {}
       },
-      "turn": 3,
       "state": {
         "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
         "unread": false,
@@ -1051,7 +1043,7 @@
         ]
       },
       "seq": 20,
-      "at": 5531.788817975583
+      "at": 7481.788817975583
     },
     {
       "kind": "inspect",
@@ -1076,7 +1068,7 @@
         ]
       },
       "seq": 21,
-      "at": 5531.788817975583
+      "at": 7481.788817975583
     },
     {
       "kind": "tool_result",
@@ -1092,7 +1084,6 @@
           "carrot": 2
         }
       },
-      "turn": 3,
       "state": {
         "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
         "unread": false,
@@ -1113,11 +1104,11 @@
         ]
       },
       "seq": 22,
-      "at": 6831.788817975583
+      "at": 8781.788817975583
     },
     {
       "kind": "context",
-      "text": "Tool request and observation appended to the next input",
+      "text": "Request and observation appended",
       "messages": [
         {
           "role": "system",
@@ -1141,8 +1132,8 @@
         },
         {
           "role": "tool",
-          "tool_name": "read_notice",
-          "content": "{\"ok\":true,\"notice\":\"Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.\"}"
+          "content": "{\"ok\":true,\"notice\":\"Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.\"}",
+          "tool_name": "read_notice"
         },
         {
           "role": "assistant",
@@ -1160,8 +1151,8 @@
         },
         {
           "role": "tool",
-          "tool_name": "walk_to",
-          "content": "{\"ok\":true,\"place\":\"pantry\"}"
+          "content": "{\"ok\":true,\"place\":\"pantry\"}",
+          "tool_name": "walk_to"
         },
         {
           "role": "assistant",
@@ -1177,11 +1168,10 @@
         },
         {
           "role": "tool",
-          "tool_name": "inspect_pantry",
-          "content": "{\"ok\":true,\"pantry\":{\"apple\":2,\"carrot\":2}}"
+          "content": "{\"ok\":true,\"pantry\":{\"apple\":2,\"carrot\":2}}",
+          "tool_name": "inspect_pantry"
         }
       ],
-      "turn": 3,
       "state": {
         "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
         "unread": false,
@@ -1202,7 +1192,7 @@
         ]
       },
       "seq": 23,
-      "at": 6831.788817975583
+      "at": 8781.788817975583
     },
     {
       "kind": "model_start",
@@ -1231,8 +1221,8 @@
         },
         {
           "role": "tool",
-          "tool_name": "read_notice",
-          "content": "{\"ok\":true,\"notice\":\"Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.\"}"
+          "content": "{\"ok\":true,\"notice\":\"Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.\"}",
+          "tool_name": "read_notice"
         },
         {
           "role": "assistant",
@@ -1250,8 +1240,8 @@
         },
         {
           "role": "tool",
-          "tool_name": "walk_to",
-          "content": "{\"ok\":true,\"place\":\"pantry\"}"
+          "content": "{\"ok\":true,\"place\":\"pantry\"}",
+          "tool_name": "walk_to"
         },
         {
           "role": "assistant",
@@ -1267,8 +1257,8 @@
         },
         {
           "role": "tool",
-          "tool_name": "inspect_pantry",
-          "content": "{\"ok\":true,\"pantry\":{\"apple\":2,\"carrot\":2}}"
+          "content": "{\"ok\":true,\"pantry\":{\"apple\":2,\"carrot\":2}}",
+          "tool_name": "inspect_pantry"
         }
       ],
       "schemas": [
@@ -1376,18 +1366,18 @@
         ]
       },
       "seq": 24,
-      "at": 6831.788817975583
+      "at": 8781.788817975583
     },
     {
       "kind": "assistant",
       "text": "Tool requested",
-      "turn": 4,
       "tool": {
         "name": "take_one",
         "arguments": {
           "item": "apple"
         }
       },
+      "turn": 4,
       "state": {
         "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
         "unread": false,
@@ -1408,7 +1398,7 @@
         ]
       },
       "seq": 25,
-      "at": 6831.788817975583
+      "at": 9431.788817975583
     },
     {
       "kind": "model_end",
@@ -1434,18 +1424,17 @@
         ]
       },
       "seq": 26,
-      "at": 6831.788817975583
+      "at": 9431.788817975583
     },
     {
       "kind": "tool_start",
-      "text": "take_one({\"item\":\"apple\"})",
+      "text": "take_one",
       "tool": {
         "name": "take_one",
         "arguments": {
           "item": "apple"
         }
       },
-      "turn": 4,
       "state": {
         "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
         "unread": false,
@@ -1466,7 +1455,7 @@
         ]
       },
       "seq": 27,
-      "at": 6831.788817975583
+      "at": 9431.788817975583
     },
     {
       "kind": "pickup",
@@ -1491,7 +1480,7 @@
         ]
       },
       "seq": 28,
-      "at": 7481.788817975583
+      "at": 10081.788817975583
     },
     {
       "kind": "tool_result",
@@ -1507,7 +1496,6 @@
         "item": "apple",
         "carried": "apple"
       },
-      "turn": 4,
       "state": {
         "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
         "unread": false,
@@ -1528,11 +1516,11 @@
         ]
       },
       "seq": 29,
-      "at": 7481.788817975583
+      "at": 10081.788817975583
     },
     {
       "kind": "context",
-      "text": "Tool request and observation appended to the next input",
+      "text": "Request and observation appended",
       "messages": [
         {
           "role": "system",
@@ -1556,8 +1544,8 @@
         },
         {
           "role": "tool",
-          "tool_name": "read_notice",
-          "content": "{\"ok\":true,\"notice\":\"Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.\"}"
+          "content": "{\"ok\":true,\"notice\":\"Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.\"}",
+          "tool_name": "read_notice"
         },
         {
           "role": "assistant",
@@ -1575,8 +1563,8 @@
         },
         {
           "role": "tool",
-          "tool_name": "walk_to",
-          "content": "{\"ok\":true,\"place\":\"pantry\"}"
+          "content": "{\"ok\":true,\"place\":\"pantry\"}",
+          "tool_name": "walk_to"
         },
         {
           "role": "assistant",
@@ -1592,8 +1580,8 @@
         },
         {
           "role": "tool",
-          "tool_name": "inspect_pantry",
-          "content": "{\"ok\":true,\"pantry\":{\"apple\":2,\"carrot\":2}}"
+          "content": "{\"ok\":true,\"pantry\":{\"apple\":2,\"carrot\":2}}",
+          "tool_name": "inspect_pantry"
         },
         {
           "role": "assistant",
@@ -1611,11 +1599,10 @@
         },
         {
           "role": "tool",
-          "tool_name": "take_one",
-          "content": "{\"ok\":true,\"item\":\"apple\",\"carried\":\"apple\"}"
+          "content": "{\"ok\":true,\"item\":\"apple\",\"carried\":\"apple\"}",
+          "tool_name": "take_one"
         }
       ],
-      "turn": 4,
       "state": {
         "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
         "unread": false,
@@ -1636,7 +1623,7 @@
         ]
       },
       "seq": 30,
-      "at": 7481.788817975583
+      "at": 10081.788817975583
     },
     {
       "kind": "model_start",
@@ -1665,8 +1652,8 @@
         },
         {
           "role": "tool",
-          "tool_name": "read_notice",
-          "content": "{\"ok\":true,\"notice\":\"Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.\"}"
+          "content": "{\"ok\":true,\"notice\":\"Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.\"}",
+          "tool_name": "read_notice"
         },
         {
           "role": "assistant",
@@ -1684,8 +1671,8 @@
         },
         {
           "role": "tool",
-          "tool_name": "walk_to",
-          "content": "{\"ok\":true,\"place\":\"pantry\"}"
+          "content": "{\"ok\":true,\"place\":\"pantry\"}",
+          "tool_name": "walk_to"
         },
         {
           "role": "assistant",
@@ -1701,8 +1688,8 @@
         },
         {
           "role": "tool",
-          "tool_name": "inspect_pantry",
-          "content": "{\"ok\":true,\"pantry\":{\"apple\":2,\"carrot\":2}}"
+          "content": "{\"ok\":true,\"pantry\":{\"apple\":2,\"carrot\":2}}",
+          "tool_name": "inspect_pantry"
         },
         {
           "role": "assistant",
@@ -1720,8 +1707,8 @@
         },
         {
           "role": "tool",
-          "tool_name": "take_one",
-          "content": "{\"ok\":true,\"item\":\"apple\",\"carried\":\"apple\"}"
+          "content": "{\"ok\":true,\"item\":\"apple\",\"carried\":\"apple\"}",
+          "tool_name": "take_one"
         }
       ],
       "schemas": [
@@ -1829,18 +1816,18 @@
         ]
       },
       "seq": 31,
-      "at": 7481.788817975583
+      "at": 10081.788817975583
     },
     {
       "kind": "assistant",
       "text": "Tool requested",
-      "turn": 5,
       "tool": {
         "name": "walk_to",
         "arguments": {
           "place": "picnic_basket"
         }
       },
+      "turn": 5,
       "state": {
         "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
         "unread": false,
@@ -1861,7 +1848,7 @@
         ]
       },
       "seq": 32,
-      "at": 7481.788817975583
+      "at": 10731.788817975583
     },
     {
       "kind": "model_end",
@@ -1887,18 +1874,17 @@
         ]
       },
       "seq": 33,
-      "at": 7481.788817975583
+      "at": 10731.788817975583
     },
     {
       "kind": "tool_start",
-      "text": "walk_to({\"place\":\"picnic_basket\"})",
+      "text": "walk_to",
       "tool": {
         "name": "walk_to",
         "arguments": {
           "place": "picnic_basket"
         }
       },
-      "turn": 5,
       "state": {
         "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
         "unread": false,
@@ -1919,7 +1905,7 @@
         ]
       },
       "seq": 34,
-      "at": 7481.788817975583
+      "at": 10731.788817975583
     },
     {
       "kind": "walk_start",
@@ -1989,7 +1975,7 @@
         "duration": 6128.758514945279
       },
       "seq": 35,
-      "at": 7481.788817975583
+      "at": 10731.788817975583
     },
     {
       "kind": "walk_end",
@@ -2014,7 +2000,7 @@
         ]
       },
       "seq": 36,
-      "at": 13610.547332920862
+      "at": 16860.54733292086
     },
     {
       "kind": "tool_result",
@@ -2029,7 +2015,6 @@
         "ok": true,
         "place": "picnic_basket"
       },
-      "turn": 5,
       "state": {
         "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
         "unread": false,
@@ -2050,11 +2035,11 @@
         ]
       },
       "seq": 37,
-      "at": 13610.547332920862
+      "at": 16860.54733292086
     },
     {
       "kind": "context",
-      "text": "Tool request and observation appended to the next input",
+      "text": "Request and observation appended",
       "messages": [
         {
           "role": "system",
@@ -2078,8 +2063,8 @@
         },
         {
           "role": "tool",
-          "tool_name": "read_notice",
-          "content": "{\"ok\":true,\"notice\":\"Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.\"}"
+          "content": "{\"ok\":true,\"notice\":\"Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.\"}",
+          "tool_name": "read_notice"
         },
         {
           "role": "assistant",
@@ -2097,8 +2082,8 @@
         },
         {
           "role": "tool",
-          "tool_name": "walk_to",
-          "content": "{\"ok\":true,\"place\":\"pantry\"}"
+          "content": "{\"ok\":true,\"place\":\"pantry\"}",
+          "tool_name": "walk_to"
         },
         {
           "role": "assistant",
@@ -2114,8 +2099,8 @@
         },
         {
           "role": "tool",
-          "tool_name": "inspect_pantry",
-          "content": "{\"ok\":true,\"pantry\":{\"apple\":2,\"carrot\":2}}"
+          "content": "{\"ok\":true,\"pantry\":{\"apple\":2,\"carrot\":2}}",
+          "tool_name": "inspect_pantry"
         },
         {
           "role": "assistant",
@@ -2133,8 +2118,8 @@
         },
         {
           "role": "tool",
-          "tool_name": "take_one",
-          "content": "{\"ok\":true,\"item\":\"apple\",\"carried\":\"apple\"}"
+          "content": "{\"ok\":true,\"item\":\"apple\",\"carried\":\"apple\"}",
+          "tool_name": "take_one"
         },
         {
           "role": "assistant",
@@ -2152,11 +2137,10 @@
         },
         {
           "role": "tool",
-          "tool_name": "walk_to",
-          "content": "{\"ok\":true,\"place\":\"picnic_basket\"}"
+          "content": "{\"ok\":true,\"place\":\"picnic_basket\"}",
+          "tool_name": "walk_to"
         }
       ],
-      "turn": 5,
       "state": {
         "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
         "unread": false,
@@ -2177,7 +2161,7 @@
         ]
       },
       "seq": 38,
-      "at": 13610.547332920862
+      "at": 16860.54733292086
     },
     {
       "kind": "model_start",
@@ -2206,8 +2190,8 @@
         },
         {
           "role": "tool",
-          "tool_name": "read_notice",
-          "content": "{\"ok\":true,\"notice\":\"Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.\"}"
+          "content": "{\"ok\":true,\"notice\":\"Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.\"}",
+          "tool_name": "read_notice"
         },
         {
           "role": "assistant",
@@ -2225,8 +2209,8 @@
         },
         {
           "role": "tool",
-          "tool_name": "walk_to",
-          "content": "{\"ok\":true,\"place\":\"pantry\"}"
+          "content": "{\"ok\":true,\"place\":\"pantry\"}",
+          "tool_name": "walk_to"
         },
         {
           "role": "assistant",
@@ -2242,8 +2226,8 @@
         },
         {
           "role": "tool",
-          "tool_name": "inspect_pantry",
-          "content": "{\"ok\":true,\"pantry\":{\"apple\":2,\"carrot\":2}}"
+          "content": "{\"ok\":true,\"pantry\":{\"apple\":2,\"carrot\":2}}",
+          "tool_name": "inspect_pantry"
         },
         {
           "role": "assistant",
@@ -2261,8 +2245,8 @@
         },
         {
           "role": "tool",
-          "tool_name": "take_one",
-          "content": "{\"ok\":true,\"item\":\"apple\",\"carried\":\"apple\"}"
+          "content": "{\"ok\":true,\"item\":\"apple\",\"carried\":\"apple\"}",
+          "tool_name": "take_one"
         },
         {
           "role": "assistant",
@@ -2280,8 +2264,8 @@
         },
         {
           "role": "tool",
-          "tool_name": "walk_to",
-          "content": "{\"ok\":true,\"place\":\"picnic_basket\"}"
+          "content": "{\"ok\":true,\"place\":\"picnic_basket\"}",
+          "tool_name": "walk_to"
         }
       ],
       "schemas": [
@@ -2389,16 +2373,16 @@
         ]
       },
       "seq": 39,
-      "at": 13610.547332920862
+      "at": 16860.54733292086
     },
     {
       "kind": "assistant",
       "text": "Tool requested",
-      "turn": 6,
       "tool": {
         "name": "deliver_item",
         "arguments": {}
       },
+      "turn": 6,
       "state": {
         "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
         "unread": false,
@@ -2419,7 +2403,7 @@
         ]
       },
       "seq": 40,
-      "at": 13610.547332920862
+      "at": 17510.54733292086
     },
     {
       "kind": "model_end",
@@ -2445,16 +2429,15 @@
         ]
       },
       "seq": 41,
-      "at": 13610.547332920862
+      "at": 17510.54733292086
     },
     {
       "kind": "tool_start",
-      "text": "deliver_item({})",
+      "text": "deliver_item",
       "tool": {
         "name": "deliver_item",
         "arguments": {}
       },
-      "turn": 6,
       "state": {
         "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
         "unread": false,
@@ -2475,7 +2458,7 @@
         ]
       },
       "seq": 42,
-      "at": 13610.547332920862
+      "at": 17510.54733292086
     },
     {
       "kind": "delivery",
@@ -2500,7 +2483,7 @@
         ]
       },
       "seq": 43,
-      "at": 14260.547332920862
+      "at": 18160.54733292086
     },
     {
       "kind": "tool_result",
@@ -2518,7 +2501,6 @@
         },
         "carried": null
       },
-      "turn": 6,
       "state": {
         "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
         "unread": false,
@@ -2539,11 +2521,11 @@
         ]
       },
       "seq": 44,
-      "at": 14260.547332920862
+      "at": 18160.54733292086
     },
     {
       "kind": "context",
-      "text": "Tool request and observation appended to the next input",
+      "text": "Request and observation appended",
       "messages": [
         {
           "role": "system",
@@ -2567,8 +2549,8 @@
         },
         {
           "role": "tool",
-          "tool_name": "read_notice",
-          "content": "{\"ok\":true,\"notice\":\"Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.\"}"
+          "content": "{\"ok\":true,\"notice\":\"Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.\"}",
+          "tool_name": "read_notice"
         },
         {
           "role": "assistant",
@@ -2586,8 +2568,8 @@
         },
         {
           "role": "tool",
-          "tool_name": "walk_to",
-          "content": "{\"ok\":true,\"place\":\"pantry\"}"
+          "content": "{\"ok\":true,\"place\":\"pantry\"}",
+          "tool_name": "walk_to"
         },
         {
           "role": "assistant",
@@ -2603,8 +2585,8 @@
         },
         {
           "role": "tool",
-          "tool_name": "inspect_pantry",
-          "content": "{\"ok\":true,\"pantry\":{\"apple\":2,\"carrot\":2}}"
+          "content": "{\"ok\":true,\"pantry\":{\"apple\":2,\"carrot\":2}}",
+          "tool_name": "inspect_pantry"
         },
         {
           "role": "assistant",
@@ -2622,8 +2604,8 @@
         },
         {
           "role": "tool",
-          "tool_name": "take_one",
-          "content": "{\"ok\":true,\"item\":\"apple\",\"carried\":\"apple\"}"
+          "content": "{\"ok\":true,\"item\":\"apple\",\"carried\":\"apple\"}",
+          "tool_name": "take_one"
         },
         {
           "role": "assistant",
@@ -2641,8 +2623,8 @@
         },
         {
           "role": "tool",
-          "tool_name": "walk_to",
-          "content": "{\"ok\":true,\"place\":\"picnic_basket\"}"
+          "content": "{\"ok\":true,\"place\":\"picnic_basket\"}",
+          "tool_name": "walk_to"
         },
         {
           "role": "assistant",
@@ -2658,11 +2640,10 @@
         },
         {
           "role": "tool",
-          "tool_name": "deliver_item",
-          "content": "{\"ok\":true,\"item\":\"apple\",\"basket\":{\"apple\":1,\"carrot\":0},\"carried\":null}"
+          "content": "{\"ok\":true,\"item\":\"apple\",\"basket\":{\"apple\":1,\"carrot\":0},\"carried\":null}",
+          "tool_name": "deliver_item"
         }
       ],
-      "turn": 6,
       "state": {
         "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
         "unread": false,
@@ -2683,7 +2664,7 @@
         ]
       },
       "seq": 45,
-      "at": 14260.547332920862
+      "at": 18160.54733292086
     },
     {
       "kind": "model_start",
@@ -2712,8 +2693,8 @@
         },
         {
           "role": "tool",
-          "tool_name": "read_notice",
-          "content": "{\"ok\":true,\"notice\":\"Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.\"}"
+          "content": "{\"ok\":true,\"notice\":\"Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.\"}",
+          "tool_name": "read_notice"
         },
         {
           "role": "assistant",
@@ -2731,8 +2712,8 @@
         },
         {
           "role": "tool",
-          "tool_name": "walk_to",
-          "content": "{\"ok\":true,\"place\":\"pantry\"}"
+          "content": "{\"ok\":true,\"place\":\"pantry\"}",
+          "tool_name": "walk_to"
         },
         {
           "role": "assistant",
@@ -2748,8 +2729,8 @@
         },
         {
           "role": "tool",
-          "tool_name": "inspect_pantry",
-          "content": "{\"ok\":true,\"pantry\":{\"apple\":2,\"carrot\":2}}"
+          "content": "{\"ok\":true,\"pantry\":{\"apple\":2,\"carrot\":2}}",
+          "tool_name": "inspect_pantry"
         },
         {
           "role": "assistant",
@@ -2767,8 +2748,8 @@
         },
         {
           "role": "tool",
-          "tool_name": "take_one",
-          "content": "{\"ok\":true,\"item\":\"apple\",\"carried\":\"apple\"}"
+          "content": "{\"ok\":true,\"item\":\"apple\",\"carried\":\"apple\"}",
+          "tool_name": "take_one"
         },
         {
           "role": "assistant",
@@ -2786,8 +2767,8 @@
         },
         {
           "role": "tool",
-          "tool_name": "walk_to",
-          "content": "{\"ok\":true,\"place\":\"picnic_basket\"}"
+          "content": "{\"ok\":true,\"place\":\"picnic_basket\"}",
+          "tool_name": "walk_to"
         },
         {
           "role": "assistant",
@@ -2803,8 +2784,8 @@
         },
         {
           "role": "tool",
-          "tool_name": "deliver_item",
-          "content": "{\"ok\":true,\"item\":\"apple\",\"basket\":{\"apple\":1,\"carrot\":0},\"carried\":null}"
+          "content": "{\"ok\":true,\"item\":\"apple\",\"basket\":{\"apple\":1,\"carrot\":0},\"carried\":null}",
+          "tool_name": "deliver_item"
         }
       ],
       "schemas": [
@@ -2912,7 +2893,7 @@
         ]
       },
       "seq": 46,
-      "at": 14260.547332920862
+      "at": 18160.54733292086
     },
     {
       "kind": "assistant",
@@ -2938,7 +2919,7 @@
         ]
       },
       "seq": 47,
-      "at": 14260.547332920862
+      "at": 18810.54733292086
     },
     {
       "kind": "model_end",
@@ -2964,33 +2945,7 @@
         ]
       },
       "seq": 48,
-      "at": 14260.547332920862
-    },
-    {
-      "kind": "report",
-      "text": "I delivered one apple to the picnic basket.",
-      "turn": 7,
-      "state": {
-        "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
-        "unread": false,
-        "pantry": {
-          "apple": 1,
-          "carrot": 2
-        },
-        "basket": {
-          "apple": 1,
-          "carrot": 0
-        },
-        "carried": null,
-        "place": "picnic_basket",
-        "position": [
-          4.5,
-          0.45,
-          2.4
-        ]
-      },
-      "seq": 49,
-      "at": 14260.547332920862
+      "at": 18810.54733292086
     },
     {
       "kind": "run_end",
@@ -3014,14 +2969,16 @@
           2.4
         ]
       },
-      "seq": 50,
-      "at": 14260.547332920862
+      "seq": 49,
+      "at": 18810.54733292086
     }
   ],
   "status": "reported",
   "lesson": {
-    "step": 7,
-    "stage": "ready"
+    "article": "what-makes-scout-an-agent",
+    "stepId": "picnic",
+    "step": 5,
+    "stage": "reported"
   },
   "final": {
     "notice": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.",
@@ -3041,5 +2998,6 @@
       0.45,
       2.4
     ]
-  }
+  },
+  "order": "Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket."
 }

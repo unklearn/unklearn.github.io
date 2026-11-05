@@ -2,12 +2,10 @@ import type { Tool, ToolDefinition } from '../../runtime/types.ts';
 import type { World } from './world.ts';
 
 const emptyArgs = { type: 'object', properties: {}, additionalProperties: false };
-// @excerpt read-schema start
 const readNotice: ToolDefinition = { type: 'function', function: {
   name: 'read_notice', description: 'Read the nearby noticeboard. Returns its exact text.',
   parameters: { type: 'object', properties: {}, additionalProperties: false },
 } };
-// @excerpt read-schema end
 const definitions = [
   readNotice,
   { type: 'function', function: { name: 'walk_to', description: 'Walk a named path; returns after arrival.', parameters: { type: 'object', properties: { place: { type: 'string', enum: ['noticeboard', 'pantry', 'picnic_basket'] } }, required: ['place'], additionalProperties: false } } },

@@ -29,11 +29,11 @@ export function createView(container: HTMLElement) {
   const noticeLabel = container.querySelector<HTMLElement>('#notice-light-label')!;
   const projected = new THREE.Vector3();
   const bubble = container.querySelector<HTMLElement>('#scout-bubble')!;
-  let thinking = false, confused = false;
+  let thinking = false, confused = false, recorded = false;
   function bubbleState() {
     bubble.hidden = !thinking && !confused;
     bubble.classList.toggle('confused', !thinking && confused);
-    container.querySelector('#bubble-label')!.textContent = thinking ? 'Scout is thinking · provider call pending' : confused ? 'Scout needs a tool that is not available' : '';
+    container.querySelector('#bubble-label')!.textContent = thinking ? recorded ? 'Recorded thinking activity' : 'Scout is thinking · provider call pending' : confused ? 'Scout needs a tool that is not available' : '';
   }
   function resize() {
     const width = container.clientWidth, height = container.clientHeight;
@@ -70,8 +70,9 @@ export function createView(container: HTMLElement) {
       if (event.kind === 'model_start') { thinking = true; confused = false; }
       if (['model_end','run_end','error'].includes(event.kind)) thinking = false;
       if (event.kind === 'capability_missing' || (event.kind === 'tool_result' && event.result?.reason === 'tool_unavailable')) confused = true;
-      if (event.kind === 'lesson_approval') confused = false;
+      if (['lesson_approval','capability_available'].includes(event.kind)) confused = false;
       bubbleState(); village.update(event.state); noticeLabel.hidden = !event.state.unread; scout.apply(event, elapsed); },
+    recorded(value: boolean) { recorded = value; bubbleState(); },
     pause(value: boolean) { paused = value; },
     idle(value: boolean) { idle = value; },
     onFrame(callback: (dt: number) => void) { onFrame = callback; },

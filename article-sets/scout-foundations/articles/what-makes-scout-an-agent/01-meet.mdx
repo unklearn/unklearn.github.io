@@ -1,0 +1,49 @@
+import { useState, useRef } from 'react';
+import { useScoutStep, useLessonPresentation, Action, RuntimeChange } from '../../../../presentation/lesson-ui.tsx';
+
+export const meta = { id: 'meet', title: 'Meet Scout', initial: { notice: '', tools: [] } };
+
+Scout is a courier. It can carry one item from the pantry, across the bridge, to the picnic basket. There is a notice board next to Scout, with an amber light to indicate that a notice is waiting to be read.
+
+export function Patrol() {
+  const s = useScoutStep();
+  const [phase, setPhase] = useState('ready');
+  function start() {
+    s.reset({ notice: '', tools: [] }); setPhase('patrolling');
+    return s.act(async () => {
+      do { await s.world.patrol(); } while (!s.world.snapshot().unread);
+      setPhase('think'); s.mark('passed');
+    });
+  }
+  return <>
+    {phase === 'ready' && <><p>Start Scout’s patrol. Then we’ll give it a job.</p><Action className="primary" onClick={start}>Start lesson</Action></>}
+    {phase === 'patrolling' && <><p>Scout follows its route. Post a notice while it walks.</p><Action concurrent onClick={() => { s.world.postNotice(); setPhase('posted'); }}>Post a notice</Action></>}
+    {phase === 'posted' && <p>The amber light is on. Scout will pass without reading the notice.</p>}
+    {['think','done'].includes(phase) && <>
+      <p>Give Scout a model invocation. The model receives only “A new notice has been posted on the noticeboard.” The notice text is absent.</p>
+      <RuntimeChange to={blocks.invoke} />
+      <Action className="primary" onClick={() => s.act(async () => {
+        await s.runtime(blocks.invoke).evaluate();
+        s.showQuestion('No reading tool is available. The notice is still unread.');
+        s.mark('needs-tool'); setPhase('done');
+      })}>Let Scout think</Action>
+      {phase === 'done' && <p>The reply is an intention. Nothing read the board. Next, give Scout a reading tool.</p>}
+    </>}
+    {phase !== 'ready' && !s.busy && <Action onClick={() => { s.reset({ notice: '', tools: [] }); setPhase('ready'); }}>Reset</Action>}
+  </>;
+}
+
+<Patrol />
+
+```ts runtime="invoke"
+import type { RuntimeOptions } from '../../../../runtime/lesson-types.ts';
+
+export class AgentRuntime {
+  constructor(public options: RuntimeOptions) {}
+
+  async evaluate() {
+    const { provider, messages, signal } = this.options;
+    return provider(messages, [], signal);
+  }
+}
+```

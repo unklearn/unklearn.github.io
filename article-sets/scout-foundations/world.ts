@@ -85,16 +85,15 @@ export function createWorld({ notice, pantry, clock = realClock, emit = () => {}
     state.notice = text; state.unread = true;
     show('notice_posted', 'New notice posted; amber light on');
   }
+  function setPantry(stock: Inventory) { state.pantry = { ...stock }; show('shelf_change', 'Reader changed the pantry. Scout has not observed this change.'); }
   function emptyApples() { state.pantry.apple = 0; show('shelf_change', 'Reader emptied the apple shelf. Scout has not observed this change.'); }
   async function patrol(signal: AbortSignal) {
-    // @excerpt patrol start
     const path: Point[] = [[-4.1, .45, 1.6], [-2.2, .45, 2.5], [-4.6, .45, 3.1], [-4.1, .45, 1.6]];
     show('walk_start', 'Scripted patrol', { path, duration: 7000 });
     await clock.sleep(7000, signal);
-    // @excerpt patrol end
     show('patrol_pass', 'Scout passed the noticeboard without reading.');
   }
-  return { snapshot, execute, postNotice, emptyApples, patrol };
+  return { snapshot, execute, postNotice, setPantry, emptyApples, patrol };
 }
 
 export type World = ReturnType<typeof createWorld>;

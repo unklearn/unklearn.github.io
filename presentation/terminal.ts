@@ -18,7 +18,9 @@ function show(selected = tab, inspect = false) {
 }
 function hide() { terminal.hidden = true; manual = false; screen.render(); }
 export const screen = {
+  present() { document.querySelector<HTMLElement>('#terminal-custom')!.hidden = false; show('scout'); },
   reset(label: string) {
+    document.querySelector<HTMLElement>('#terminal-custom')!.hidden = true;
     entries = []; pending = false; manual = false; unread = 0; contextText = ''; contextKey = ''; source = label;
     terminal.hidden = true; this.render();
   },
@@ -36,7 +38,7 @@ export const screen = {
       if (!quiet) {
         if (!manual) unread++;
         // Public speech can appear briefly; JSON observations wait behind a badge.
-        if (!manual && event.kind === 'assistant' && !event.tool && text.length <= 220) show('scout');
+        if (event.kind === 'error' || (!manual && event.kind === 'assistant' && !event.tool && text.length <= 220)) show('scout');
         else if (!manual && event.kind === 'tool_result') terminal.hidden = true;
       }
     }
@@ -56,7 +58,7 @@ export const screen = {
     launcher.hidden = !pending && !entries.length && !contextText;
     launcher.setAttribute('aria-expanded', String(!terminal.hidden));
     badge.hidden = unread === 0; badge.textContent = String(unread);
-    launcher.setAttribute('aria-label', `Scout activity and experiment context${unread ? ` · ${unread} unread` : ''}${pending ? ' · provider call pending' : ''}`);
+    launcher.setAttribute('aria-label', `Scout activity and experiment context${unread ? ` · ${unread} unread` : ''}${pending ? source.includes('RECORDED') ? ' · recorded provider activity' : ' · provider call pending' : ''}`);
     document.querySelector('#terminal-source')!.textContent = source;
     document.querySelector('#terminal-activity')!.textContent = pending ? source.includes('RECORDED') ? 'Recorded provider activity' : source.includes('LIVE') ? 'Live inference pending…' : 'Mock provider call pending…' : 'No provider call pending';
     lines.replaceChildren(...entries.slice(-8).map(entry => {

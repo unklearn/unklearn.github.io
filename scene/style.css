@@ -21,3 +21,4 @@
 @keyframes think{50%{transform:translateY(-4px);opacity:.4}}
 @media(max-width:700px){.lesson-header{padding:8px 20px 0}.brand span{display:none}.terminal #experiment-context{max-height:100px}.activity-tabs{padding:3px 10px}.teaching-step{padding-top:10px}}
 @media(prefers-reduced-motion:reduce){.thinking-dots i,.notification-button.pending>span{animation:none}}
+.runtime-change .removal{background:#f2dccc;border-left:2px solid #b37658;padding-left:7px;margin-left:-8px}.runtime-change>pre{max-height:265px}.runtime-change summary{cursor:pointer;font-size:11px;color:var(--teal);padding:8px 0}.runtime-change figcaption{margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em}.lesson-copy>p{margin-bottom:17px}.lesson-copy button{font-size:12px;margin:0 6px 14px 0}#terminal-custom{padding:0 13px;font:12px/1.6 ui-monospace,monospace}#terminal-custom p{margin:8px 0}

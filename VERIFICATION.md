@@ -141,3 +141,33 @@ static build load article manifests from `article-sets/registry.ts`.
   the unread badge, and the held notice is inspectable in the Context tab.
 - `npm test`: seven focused checks pass, now using the actual authored steps for
   the patrol/approval boundary. `npm run build` passes.
+
+### MDX runtime evolution (November 5, 2026)
+
+- Checkpoint commit before migration: `3101d5e`.
+- Replaced the split Markdown/stage/driver workflow with five MDX files. Their
+  eight named TypeScript blocks are compiled and type-checked at build time;
+  tests compare displayed source with the exact text given to the compiler.
+- Eight focused checks cover early runtime capabilities, held versus appended
+  feedback, schema/dispatch selection, all three picnic outcomes, stale stock,
+  cancellation/reset, private-field redaction, physical rules, and Replay.
+- The CLI recording and Live verification commands now use the final runtime
+  extracted from MDX, rather than a parallel implementation of the agent loop.
+- Real Ollama `qwen3:14b` completed all three checks using that runtime:
+  two apples → apple (1 apple/2 carrots remain); one apple → carrot
+  (1 apple/1 carrot remain); explicit carrot order with two apples → carrot
+  (2 apples/1 carrot remain). Ordered outputs are in ignored `verification/`.
+- Browser checked patrol/direct posting, invocation-only thinking, tool approval
+  without evaluation or execution, actual notice reading, checkpoint restoration,
+  and appending feedback before evaluating again.
+- Served only `dist/` on port 4334 and confirmed its script URL is a bundled
+  relative asset, with no Vite client. Both Mock stock presets delivered the
+  expected item. The one-apple delivery continued with Ollama suspended.
+- Exported that actual browser run, imported its JSON through History, played it
+  in Replay while Ollama was suspended, and compared final stock and basket:
+  pantry 1 apple/1 carrot; basket 1 carrot. Ollama was resumed afterward.
+- Added a temporary sixth MDX file and one manifest entry. Its custom button
+  posted a notice and advanced local React state; that state survived moving away
+  and back. A prose edit refreshed in dev mode. The probe was then removed.
+- Full snapshots remain expandable; ordinary lesson text explains computed
+  additions/removals and distinguishes configuration changes from runtime code.

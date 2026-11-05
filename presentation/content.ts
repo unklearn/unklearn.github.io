@@ -1,4 +1,4 @@
-export { escape } from './lesson-markup.ts';
+export const escape = (value: unknown) => String(value).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
 const paths: Record<string, string> = {
   settings: '<path d="m9 3 1-1h4l1 3 3 1 2 2-1 3 1 3-2 2-3 1-1 3h-4l-1-3-3-1-2-2 1-3-1-3 2-2 3-1Z"/><circle cx="12" cy="11" r="3"/>',
   status: '<path d="M5 3h14v18H5zM8 8h8M8 12h5M8 16h8"/>',

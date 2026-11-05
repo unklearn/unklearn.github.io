@@ -1,0 +1,82 @@
+import { useState, useRef } from 'react';
+import { useScoutStep, useLessonPresentation, Action, RuntimeChange } from '../../../../presentation/lesson-ui.tsx';
+import { blocks as previous } from './03-execute.mdx';
+
+export const meta = { id: 'context', title: 'Put the result into context', initial: { tools: ['read_notice'] } };
+
+The handler returned a value to JavaScript. The model receives it only when the assistant’s request and matching tool result become part of its next input.
+
+<RuntimeChange from={previous.dispatch} to={blocks.feedback} />
+
+export function PutInContext() {
+  const s = useScoutStep(), held = useRef(null);
+  const [phase, setPhase] = useState('ready');
+  function prepare() {
+    if (s.restoreCheckpoint('notice-read')) {
+      held.current = s.data.feedback; s.showContext(held.current); setPhase('held'); return;
+    }
+    s.reset({ tools: ['read_notice'] });
+    return s.act(async () => {
+      const runtime = s.runtime(blocks.feedback);
+      const observation = await runtime.execute(await runtime.evaluate());
+      if (!observation?.value.ok || observation.result.tool_name !== 'read_notice') { setPhase('no-read'); return; }
+      held.current = observation; s.showContext(observation); setPhase('held'); s.mark('held');
+    });
+  }
+  return <>
+    {['ready','no-read'].includes(phase) && <><p>Load the returned notice from the previous step. If you skipped that step, Scout will read it now.</p><Action onClick={prepare}>Prepare the observation</Action></>}
+    {phase === 'held' && <><p>The observation is still outside context. Append it before the next evaluation.</p><Action className="primary" onClick={() => s.act(async () => {
+      const runtime = s.runtime(blocks.feedback);
+      runtime.append(held.current);
+      s.showContext({ outgoingMessages: s.messages });
+      await runtime.evaluate();
+      s.showQuestion('Movement and pantry tools are not available yet.');
+      setPhase('done'); s.mark('observed');
+    })}>Append result & evaluate</Action></>}
+    {phase === 'done' && <p>Scout’s next input contains the exact notice. Inspect Context to see the actual outgoing messages. Next, add the loop and the picnic tools.</p>}
+    {phase !== 'ready' && <Action onClick={() => { s.reset({ tools: ['read_notice'] }); held.current = null; setPhase('ready'); }}>Reset</Action>}
+  </>;
+}
+
+<PutInContext />
+
+```ts runtime="feedback"
+import type { Feedback, RuntimeOptions } from '../../../../runtime/lesson-types.ts';
+import type { Message } from '../../../../runtime/types.ts';
+
+export class AgentRuntime {
+  constructor(public options: RuntimeOptions) {}
+
+  async evaluate() {
+    const { provider, messages, tools, signal } = this.options;
+    const schemas = tools.map(tool => tool.definition);
+    return provider(messages, schemas, signal);
+  }
+
+  async execute(request: Message): Promise<Feedback | null> {
+    const calls = request.tool_calls ?? [];
+    if (calls.length > 1) throw new Error('Choose one tool per turn.');
+    if (!calls.length) {
+      if (!request.content.trim()) throw new Error('Empty provider response');
+      return null;
+    }
+    const call = calls[0].function;
+    const { tools, signal, emit } = this.options;
+    const tool = tools.find(tool => tool.definition.function.name === call.name);
+    emit({ kind: 'tool_start', text: call.name, tool: call });
+    const value = tool ? await tool.execute(call.arguments, signal)
+      : { ok: false, reason: 'tool_unavailable' };
+    signal.throwIfAborted();
+    const result: Message = { role: 'tool', tool_name: call.name, content: JSON.stringify(value) };
+    emit({ kind: 'tool_result', text: result.content, tool: call, result: value });
+    return { request, result, value };
+  }
+
+  append({ request, result }: Feedback) {
+    const { messages, emit } = this.options;
+    messages.push(request);
+    messages.push(result);
+    emit({ kind: 'context', text: 'Request and observation appended', messages });
+  }
+}
+```
