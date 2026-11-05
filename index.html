@@ -12,7 +12,6 @@
     <a class="brand" href="./">u.<span>SCOUT FOUNDATIONS</span></a>
     <nav aria-label="World controls">
       <button class="icon-button" id="lesson-toggle" title="Hide lesson" aria-label="Hide lesson" aria-controls="lesson" aria-expanded="true"></button>
-      <button class="icon-button notification-button" id="activity-button" title="Scout activity and experiment context" aria-label="Scout activity and experiment context" aria-controls="terminal" aria-expanded="false"><span aria-hidden="true">☷</span><sup id="activity-count" hidden></sup></button>
       <button class="icon-button" id="settings-button" title="Settings" aria-label="Settings"></button>
       <button class="icon-button" id="status-button" title="Status" aria-label="Status"></button>
       <button class="icon-button" id="history-button" title="History" aria-label="History"></button>
@@ -25,6 +24,7 @@
         <div id="scout-bubble" role="status" hidden><span class="thinking-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="question-mark" aria-hidden="true">?</span><span class="sr-only" id="bubble-label"></span></div>
         <div id="notice-light-label" hidden>New notice</div>
       </div>
+      <button class="notification-button world-terminal-toggle" id="activity-button" title="Show system terminal" aria-label="Show system terminal" aria-controls="terminal" aria-expanded="false"><span aria-hidden="true">⌃</span><strong>System terminal</strong><sup id="activity-count" hidden></sup></button>
       <section id="terminal" class="terminal" aria-label="Scout terminal" hidden>
         <header><span class="activity-light"></span><span id="terminal-source">SCOUT / MOCK</span><button id="terminal-close" aria-label="Dismiss terminal">−</button></header>
         <div id="terminal-activity" role="status">Ready</div>

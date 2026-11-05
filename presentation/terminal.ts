@@ -55,10 +55,11 @@ export const screen = {
   },
   render() {
     terminal.classList.toggle('pending', pending); launcher.classList.toggle('pending', pending);
-    launcher.hidden = !pending && !entries.length && !contextText;
+    launcher.hidden = false;
+    launcher.title = terminal.hidden ? 'Show system terminal' : 'Hide system terminal';
     launcher.setAttribute('aria-expanded', String(!terminal.hidden));
     badge.hidden = unread === 0; badge.textContent = String(unread);
-    launcher.setAttribute('aria-label', `Scout activity and experiment context${unread ? ` · ${unread} unread` : ''}${pending ? source.includes('RECORDED') ? ' · recorded provider activity' : ' · provider call pending' : ''}`);
+    launcher.setAttribute('aria-label', `${launcher.title}${unread ? ` · ${unread} unread` : ''}${pending ? source.includes('RECORDED') ? ' · recorded provider activity' : ' · provider call pending' : ''}`);
     document.querySelector('#terminal-source')!.textContent = source;
     document.querySelector('#terminal-activity')!.textContent = pending ? source.includes('RECORDED') ? 'Recorded provider activity' : source.includes('LIVE') ? 'Live inference pending…' : 'Mock provider call pending…' : 'No provider call pending';
     lines.replaceChildren(...entries.slice(-8).map(entry => {
