@@ -167,8 +167,12 @@ and recording aliases. Existing article URL and stable step identities remain.
   conversation, selected tools, and held feedback. They do not evaluate a model.
 - `remember(name, value)` / `recall(name)` retain actual comparison runs across steps.
 - `showContext(value)`, `showQuestion(text)`, `clearQuestion()`, and `mark(stage)`.
-- `useLessonPresentation().renderSystemTerminal(ReactNode)` displays authored UI.
-  Public provider speech and actual tool results are recorded separately.
+- `useLessonPresentation().renderSystemTerminal(ReactNode)` queues authored UI
+  behind the terminal's notification badge. The learner opens System terminal
+  explicitly; provider calls, script results, and errors never open it.
+  Show important outcomes inline in MDX; keep raw results in the terminal and
+  complete trace in History. Public provider speech and actual results remain
+  recorded separately.
 
 Leaving a step cancels unfinished work. Visited components stay mounted, retaining
 mini-step progress and settled state. A canceled action can be restarted using
@@ -218,3 +222,8 @@ runtime. `npm run verify:live` runs all three orders against local Ollama using
 that same snapshot and writes actual results to the ignored `verification/`
 folder. It supports `OLLAMA_URL`, `OLLAMA_MODEL`, `OLLAMA_THINK`, and
 `OLLAMA_TIMEOUT_MS` from `.env` or the environment.
+
+The guided workflow shows its latest completed result inline: exact notice text,
+pickup, delivery, and inventories. These summaries come from real handler
+results. Model public responses and execution errors are also shown in the
+lesson; the terminal remains available for deeper inspection.

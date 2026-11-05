@@ -4,6 +4,7 @@ import type { StepMeta } from '../runtime/session.ts';
 import type { Trace } from '../runtime/types.ts';
 interface PresentationStep {
   busy: boolean;
+  error?: string;
   showContext(value: unknown): void;
   showQuestion(text: string): void;
 }
@@ -133,6 +134,11 @@ export function LessonPages({
               }}
             >
               <div className="lesson-copy">
+                {host.get(step.meta.id).error && (
+                  <p className="lesson-error" role="alert">
+                    {host.get(step.meta.id).error}
+                  </p>
+                )}
                 <Content />
                 {step.meta.narration && (
                   <details className="narration">

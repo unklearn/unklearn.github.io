@@ -135,7 +135,7 @@ let customRoot: Root | undefined;
 function renderSystemTerminal(content: ReactNode) {
   if (!customRoot) customRoot = createRoot($('terminal-custom'));
   customRoot.render(content);
-  screen.present();
+  screen.contentReady();
 }
 function renderLesson() {
   const content = createElement(LessonPages, {

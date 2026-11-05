@@ -37,9 +37,10 @@ function hide() {
   screen.render();
 }
 export const screen = {
-  present() {
+  contentReady() {
     document.querySelector<HTMLElement>('#terminal-custom')!.hidden = false;
-    show('scout');
+    if (!manual) unread++;
+    this.render();
   },
   reset(label: string) {
     document.querySelector<HTMLElement>('#terminal-custom')!.hidden = true;
@@ -62,7 +63,7 @@ export const screen = {
     if (event.kind === 'lesson_approval' && !quiet) {
       document.querySelector('#context-notice')!.textContent =
         'Reading tool available. No handler has executed.';
-      show('context');
+      if (!manual) unread++;
     }
     if (event.kind === 'report' && entries.at(-1)?.text === event.text) {
       this.render();
@@ -84,20 +85,7 @@ export const screen = {
       entries.push({ kind: event.kind, text });
       if (!quiet) {
         if (!manual) unread++;
-        // Public speech can appear briefly; JSON observations wait behind a badge.
-        if (
-          event.kind === 'error' ||
-          (!manual &&
-            event.kind === 'assistant' &&
-            !event.tool &&
-            text.length <= 220)
-        )
-          show('scout');
-        else if (
-          !manual &&
-          ['tool_result', 'scripted_result'].includes(event.kind)
-        )
-          terminal.hidden = true;
+        // Activity stays behind the badge until the learner opens the terminal.
       }
     }
     this.render();

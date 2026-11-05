@@ -107,10 +107,17 @@ export function ConnectReader() {
       )}
       {phase === 'requested' && (
         <>
-          <p>
-            The terminal shows the actual response. A requested function has not
-            run yet. The board light is still on.
-          </p>
+          {request.current?.tool_calls?.length ? (
+            <p>
+              Scout requested{' '}
+              <code>{request.current.tool_calls[0].function.name}</code>. The
+              function has not run yet; the board light is still on.
+            </p>
+          ) : (
+            <blockquote className="public-response">
+              {request.current?.content}
+            </blockquote>
+          )}
           <RuntimeChange from={blocks.offer} to={blocks.dispatch} />
           <Action
             className="primary"
@@ -139,10 +146,16 @@ export function ConnectReader() {
         </>
       )}
       {phase === 'held' && (
-        <p>
-          The handler really read the board, so its amber light is off. The
-          returned text is held in JavaScript. It has not entered model context.
-        </p>
+        <>
+          <blockquote className="notice-output">
+            {s.data.feedback?.value.notice}
+          </blockquote>
+          <p>
+            The handler really read the board, so its amber light is off. The
+            returned text is held in JavaScript. It has not entered model
+            context.
+          </p>
+        </>
       )}
       {phase === 'no-read' && (
         <p>

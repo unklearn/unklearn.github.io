@@ -30,8 +30,8 @@ export function ScriptedWorkflow() {
   const [phase, setPhase] = useState('start'),
     [example, setExample] = useState(0),
     [answer, setAnswer] = useState(null);
-  const [inspection, setInspection] = useState(null),
-    [taken, setTaken] = useState(null);
+  const [taken, setTaken] = useState(null);
+  const [outcome, setOutcome] = useState(null);
   const patrol = useRef(null),
     policy = useRef('manual'),
     initialPantry = useRef(null),
@@ -51,6 +51,7 @@ export function ScriptedWorkflow() {
     }
   }
   async function read(signal) {
+    setOutcome(null);
     await observe('walk_to noticeboard', () =>
       s.world.walkTo('noticeboard', signal),
     );
@@ -58,15 +59,16 @@ export function ScriptedWorkflow() {
       s.world.readNotice(signal),
     );
     notice.current = result.notice;
-    ui.renderSystemTerminal(<p>{result.notice}</p>);
+    setOutcome({ kind: 'notice', notice: result.notice });
   }
   async function inspect(signal) {
+    setOutcome(null);
     await observe('walk_to pantry', () => s.world.walkTo('pantry', signal));
     const result = await observe('inspect_pantry', () =>
       s.world.inspectPantry(signal),
     );
     observed.current = result.pantry;
-    setInspection(result.pantry);
+    setOutcome({ kind: 'inspection', pantry: result.pantry });
   }
   async function takeByRule(signal) {
     const item = picnicRule(observed.current);
@@ -81,13 +83,26 @@ export function ScriptedWorkflow() {
       s.world.takeOne(item, signal),
     );
     setTaken(result.item);
+    setOutcome({
+      kind: 'pickup',
+      item: result.item,
+      pantry: s.world.snapshot().pantry,
+    });
   }
   async function deliverAndReturn(signal, ai = false) {
     if (s.world.snapshot().carried) {
       await observe('walk_to picnic basket', () =>
         s.world.walkTo('picnic_basket', signal),
       );
-      await observe('deliver_item', () => s.world.deliverItem(signal));
+      const result = await observe('deliver_item', () =>
+        s.world.deliverItem(signal),
+      );
+      setOutcome({
+        kind: 'delivery',
+        item: result.item,
+        basket: result.basket,
+        pantry: s.world.snapshot().pantry,
+      });
     }
     advance(ai ? 'ai-returning' : 'human-returning');
     await observe('walk_to noticeboard', () =>
@@ -133,6 +148,7 @@ export function ScriptedWorkflow() {
     });
   }
   function start() {
+    setOutcome(null);
     s.reset({ notice: '', tools: [] });
     initialPantry.current = s.world.snapshot().pantry;
     policy.current = 'manual';
@@ -167,6 +183,7 @@ export function ScriptedWorkflow() {
     });
   }
   function postAnother() {
+    setOutcome(null);
     s.world.postNotice(defaultOrder);
     s.event({
       kind: 'workflow_trigger',
@@ -189,8 +206,8 @@ export function ScriptedWorkflow() {
     s.reset({ notice: '', pantry: initialPantry.current, tools: [] });
     observed.current = null;
     notice.current = '';
-    setInspection(null);
     setTaken(null);
+    setOutcome(null);
     policy.current = 'ai';
     advance('ai-waiting');
     startPatrol();
@@ -200,6 +217,7 @@ export function ScriptedWorkflow() {
     return s.act(async () => {
       const item = await chooseAndTake(s, notice.current, observed.current);
       setTaken(item);
+      setOutcome({ kind: 'pickup', item, pantry: s.world.snapshot().pantry });
       advance('ai-delivering');
       await deliverAndReturn(undefined, true);
       startPatrol();
@@ -243,12 +261,14 @@ export function ScriptedWorkflow() {
     initialPantry.current = null;
     observed.current = null;
     notice.current = '';
-    setInspection(null);
     setTaken(null);
+    setOutcome(null);
     setExample(0);
     setAnswer(null);
     setPhase('start');
   }
+  const counts = (stock) =>
+    `${stock.apple} apple${stock.apple === 1 ? '' : 's'}, ${stock.carrot} carrot${stock.carrot === 1 ? '' : 's'}`;
   const current = ruleExamples[example],
     correct = answer === current.item;
   const interrupted = s.interrupted && !s.busy;
@@ -303,12 +323,38 @@ export function ScriptedWorkflow() {
           ? 'A notice is waiting. Scout will handle it when the patrol reaches the board.'
           : instructions[phase]}
       </blockquote>
-      {s.stage === 'error' && (
-        <p role="status">
-          {s.trace.events.findLast((e) => e.kind === 'error')?.text} The
-          workflow stopped; no alternate choice was substituted.
-        </p>
-      )}
+      <div
+        className="workflow-outcome"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {outcome?.kind === 'notice' && (
+          <>
+            <p>Scout read the notice:</p>
+            <blockquote>{outcome.notice}</blockquote>
+          </>
+        )}
+        {outcome?.kind === 'inspection' && (
+          <p>
+            Scout inspected the pantry.
+            {phase === 'examples'
+              ? ''
+              : ` Actual stock: ${counts(outcome.pantry)}.`}
+          </p>
+        )}
+        {outcome?.kind === 'pickup' && (
+          <p>
+            Scout took 1 {outcome.item}. Pantry now: {counts(outcome.pantry)}.
+          </p>
+        )}
+        {outcome?.kind === 'delivery' && (
+          <p>
+            Scout delivered 1 {outcome.item} to the picnic basket. Basket:{' '}
+            {counts(outcome.basket)}. Pantry left: {counts(outcome.pantry)}.
+          </p>
+        )}
+      </div>
       {phase === 'start' && (
         <Action className="primary" onClick={start}>
           Start patrol
@@ -399,15 +445,12 @@ export function ScriptedWorkflow() {
       )}
       {['take', 'deliver'].includes(phase) && (
         <>
-          <p>
-            Scout will now follow the rule you supplied: take an apple when more
-            than one is available; otherwise take a carrot if one is available.
-            You configured a rule; these examples did not train an AI model.
-          </p>
-          {inspection && (
+          {phase === 'take' && (
             <p>
-              Actual pantry observation: {inspection.apple} apples,{' '}
-              {inspection.carrot} carrots.
+              Scout will now follow the rule you supplied: take an apple when
+              more than one is available; otherwise take a carrot if one is
+              available. You configured a rule; these examples did not train an
+              AI model.
             </p>
           )}
           {phase === 'take' ? (
@@ -416,11 +459,6 @@ export function ScriptedWorkflow() {
             </Action>
           ) : (
             <>
-              <p>
-                Scout picked up one {taken}. The pantry now holds{' '}
-                {s.world.snapshot().pantry.apple} apples and{' '}
-                {s.world.snapshot().pantry.carrot} carrots.
-              </p>
               <Action className="primary" onClick={deliver}>
                 Deliver to picnic basket
               </Action>
@@ -483,10 +521,6 @@ export function ScriptedWorkflow() {
       )}
       {phase === 'ai-take' && (
         <>
-          <p>
-            Actual pantry observation: {inspection?.apple} apples,{' '}
-            {inspection?.carrot} carrots.
-          </p>
           <Action className="primary" onClick={aiTakeItem}>
             Take item
           </Action>
@@ -494,11 +528,6 @@ export function ScriptedWorkflow() {
       )}
       {phase === 'ai-done' && (
         <>
-          <p>
-            The provider chose one {taken}. The basket now contains{' '}
-            {s.world.snapshot().basket.apple} apples and{' '}
-            {s.world.snapshot().basket.carrot} carrots.
-          </p>
           <p>
             This is an AI workflow. A human-designed sequence still decided when
             Scout read, inspected, asked for a decision, and delivered. The

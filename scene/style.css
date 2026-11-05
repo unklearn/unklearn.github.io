@@ -1205,3 +1205,27 @@ body.film::after {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+
+.workflow-outcome {
+  margin: 14px 0;
+  font-size: 14px;
+  line-height: 1.65;
+}
+.workflow-outcome:empty {
+  display: none;
+}
+.workflow-outcome p {
+  margin: 0 0 10px;
+}
+.lesson-copy .workflow-outcome blockquote,
+.lesson-copy .public-response,
+.lesson-copy .notice-output {
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.65;
+  margin: 10px 0 18px;
+}
+.lesson-error {
+  border-left: 3px solid #b44a40;
+  padding-left: 12px;
+}

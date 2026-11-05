@@ -114,3 +114,19 @@ delivered. Give Scout control opened Step 2 without inference. Returning retaine
 Step 1 progress and offered explicit Resume patrol. Bundled Replay completed
 with the original final inventories and zero new provider/tool executions.
 Ollama was restored afterward.
+
+## Inline outcomes and manual terminal
+
+Important results now stay in the lesson: the exact notice, inspected pantry,
+actual pickup, delivery, and inventories. Step 1 keeps one current outcome
+instead of opening a terminal or accumulating a log in the slide. Model public
+responses, reading requests/results, and execution errors are also shown inline.
+System terminal activity only updates its badge; opening is an explicit learner
+action. Raw results and the ordered History trace remain available.
+
+Browser-checked reading, inspection, pickup, and delivery with the terminal
+closed. The inline pickup was “Scout took 1 apple”; delivery showed basket
+1 apple / 0 carrots and pantry 1 apple / 2 carrots. Explicitly opening the
+terminal exposed the original read, inspection, pickup, and delivery JSON.
+Closing it retained the inline outcome. Existing 17 checks, static build, and
+formatting pass; no agent decision or physical world rules changed.

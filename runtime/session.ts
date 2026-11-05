@@ -440,6 +440,12 @@ export function createSessionHost<
       get trace() {
         return recording.trace;
       },
+      get error() {
+        return stage === 'error'
+          ? recording.trace.events.findLast((event) => event.kind === 'error')
+              ?.text
+          : undefined;
+      },
       get busy() {
         return busy;
       },
