@@ -2,13 +2,29 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createWorld } from '../article-sets/scout-foundations/world.ts';
 import { createReplay } from './replay.ts';
-import type { Snapshot, Trace } from '../article-sets/scout-foundations/types.ts';
+import type {
+  Snapshot,
+  Trace,
+} from '../article-sets/scout-foundations/types.ts';
 import { readFileSync } from 'node:fs';
-const instantClock = () => { let now=0; return {now:()=>now,sleep:async(ms:number)=>{now+=ms;}}; };
+const instantClock = () => {
+  let now = 0;
+  return {
+    now: () => now,
+    sleep: async (ms: number) => {
+      now += ms;
+    },
+  };
+};
 test('world enforces physical rules, conserves items, and permits taking the last apple', async () => {
-  const world = createWorld({ notice: ' exact text\n', pantry: { apple: 1, carrot: 2 }, clock: instantClock() });
+  const world = createWorld({
+    notice: ' exact text\n',
+    pantry: { apple: 1, carrot: 2 },
+    clock: instantClock(),
+  });
   const signal = new AbortController().signal;
-  const tool = (name: string, args = {}) => world.execute({ name, arguments: args }, signal);
+  const tool = (name: string, args = {}) =>
+    world.execute({ name, arguments: args }, signal);
   assert.equal((await tool('read_notice')).notice, ' exact text\n');
   assert.equal((await tool('take_one', { item: 'apple' })).ok, false);
   await tool('walk_to', { place: 'pantry' });
@@ -24,21 +40,37 @@ test('world enforces physical rules, conserves items, and permits taking the las
 });
 
 test('replay renders a trace through its playhead without a provider or tool executor', async () => {
-  const trace = JSON.parse(readFileSync(new URL('../traces/apple.json', import.meta.url), 'utf8')) as Trace;
+  const trace = JSON.parse(
+    readFileSync(new URL('../traces/apple.json', import.meta.url), 'utf8'),
+  ) as Trace;
   let state: Snapshot | undefined;
-  const replay = createReplay<Snapshot>(JSON.parse(JSON.stringify(trace)), event => { state = event.state; });
-  replay.play(); replay.advance(replay.duration / 2); replay.pause();
+  const replay = createReplay<Snapshot>(
+    JSON.parse(JSON.stringify(trace)),
+    (event) => {
+      state = event.state;
+    },
+  );
+  replay.play();
+  replay.advance(replay.duration / 2);
+  replay.pause();
   const pausedAt = replay.elapsed;
   replay.advance(99999);
   assert.equal(replay.elapsed, pausedAt);
-  replay.play(); replay.advance(99999);
+  replay.play();
+  replay.advance(99999);
   assert.deepEqual(state, trace.final);
   replay.restart();
   assert.deepEqual(state, trace.initial);
-  let lastSeq=-1;
-  const precise=createReplay(trace,event=>{lastSeq=event.seq;});
-  const point=trace.events.find(event=>event.kind==='context')!;
-  precise.seek(point.at,point.seq);
-  assert.equal(lastSeq,point.seq,'annotations stop at the selected event even when timestamps match');
-  assert.equal(precise.playing,false);
+  let lastSeq = -1;
+  const precise = createReplay(trace, (event) => {
+    lastSeq = event.seq;
+  });
+  const point = trace.events.find((event) => event.kind === 'context')!;
+  precise.seek(point.at, point.seq);
+  assert.equal(
+    lastSeq,
+    point.seq,
+    'annotations stop at the selected event even when timestamps match',
+  );
+  assert.equal(precise.playing, false);
 });

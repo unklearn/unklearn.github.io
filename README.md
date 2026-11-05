@@ -17,6 +17,19 @@ Use `npm run dev` when editing: MDX changes refresh the browser and reset the ta
 `npm run build` produces the independently hostable static site with relative URLs
 and pre-rendered lesson HTML. Serve it over HTTP; `file://` is unsupported.
 
+## Formatting
+
+Prettier formats TypeScript, React, CSS, HTML, Markdown, and MDX, including the
+lessons’ executable code blocks.
+
+```sh
+npm run format        # Format the repository
+npm run format:check  # Check formatting without changing files
+```
+
+Generated builds, saved traces, verification recordings, and the lockfile are
+excluded in `.prettierignore`.
+
 ## Contribute a step
 
 Open `article-sets/scout-foundations/articles/what-makes-scout-an-agent/`.
@@ -31,17 +44,25 @@ many local mini-steps as the lesson needs.
 
 A small authored interaction looks like this inside MDX:
 
-```jsx
+```mdx
 export function Walk() {
   const scout = useScoutStep();
   const [arrived, setArrived] = useState(false);
-  return <>
-    <Action onClick={() => scout.act(async () => {
-      await scout.world.walkTo('pantry');
-      setArrived(true);
-    })}>Walk to the pantry</Action>
-    {arrived && <p>Scout has arrived. This movement was scripted.</p>}
-  </>;
+  return (
+    <>
+      <Action
+        onClick={() =>
+          scout.act(async () => {
+            await scout.world.walkTo('pantry');
+            setArrived(true);
+          })
+        }
+      >
+        Walk to the pantry
+      </Action>
+      {arrived && <p>Scout has arrived. This movement was scripted.</p>}
+    </>
+  );
 }
 
 <Walk />
@@ -61,7 +82,7 @@ its displayed script is also its executed implementation.
 
 The build extracts each named block into a module and exposes it inside the MDX:
 
-```jsx
+```mdx
 const runtime = scout.runtime(blocks.invoke);
 await runtime.evaluate();
 scout.setTools(blocks.reader.module.tools);

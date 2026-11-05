@@ -13,5 +13,13 @@
     "erasableSyntaxOnly": true,
     "skipLibCheck": true
   },
-  "include": ["runtime", "scene", "presentation", "article-sets", "scripts", "vite.config.ts", "authoring"]
+  "include": [
+    "runtime",
+    "scene",
+    "presentation",
+    "article-sets",
+    "scripts",
+    "vite.config.ts",
+    "authoring"
+  ]
 }

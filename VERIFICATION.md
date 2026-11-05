@@ -19,11 +19,11 @@ redaction, and pure Replay including exact sequence seeking.
 All three final-runtime cases completed autonomously through real inspection,
 pickup, and delivery:
 
-| Order | Initial apples / carrots | Basket | Remaining apples / carrots |
-| --- | --- | --- | --- |
-| Default picnic | 2 / 2 | apple | 1 / 2 |
-| Same default | 1 / 2 | carrot | 1 / 1 |
-| Explicit carrot | 2 / 2 | carrot | 2 / 1 |
+| Order           | Initial apples / carrots | Basket | Remaining apples / carrots |
+| --------------- | ------------------------ | ------ | -------------------------- |
+| Default picnic  | 2 / 2                    | apple  | 1 / 2                      |
+| Same default    | 1 / 2                    | carrot | 1 / 1                      |
+| Explicit carrot | 2 / 2                    | carrot | 2 / 1                      |
 
 The first two runs have identical initial provider messages. Stock enters model
 history through the inspection result, before stock-informed selection.

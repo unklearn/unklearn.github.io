@@ -1,4 +1,9 @@
-import type { Trace as Recording, TraceEvent as Event, WorldEvent as Change, Movement } from '../../runtime/types.ts';
+import type {
+  Trace as Recording,
+  TraceEvent as Event,
+  WorldEvent as Change,
+  Movement,
+} from '../../runtime/types.ts';
 export type { Movement };
 export type Item = 'apple' | 'carrot';
 export type Place = 'noticeboard' | 'pantry' | 'picnic_basket';
@@ -17,8 +22,11 @@ export interface Snapshot {
 
 export type TraceEvent = Event<Snapshot>;
 export type WorldEvent = Change<Snapshot>;
-export interface Trace extends Recording<Snapshot> { order?: string }
-export const defaultOrder = 'Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.';
+export interface Trace extends Recording<Snapshot> {
+  order?: string;
+}
+export const defaultOrder =
+  'Pack one item for the picnic. Prefer an apple, but leave at least one apple in the pantry. Otherwise take one carrot. Deliver it to the picnic basket.';
 export const carrotOrder = 'Deliver one carrot to the picnic basket.';
 export const places: Record<Place, Point> = {
   noticeboard: [-4.1, 0.45, 1.6],
@@ -30,7 +38,13 @@ export const hub: Point = [-0.8, 0.45, 1.6];
 export const paths: Record<Place, Point[]> = {
   noticeboard: [hub, places.noticeboard],
   pantry: [hub, [-0.8, 0.45, 0], [-0.8, 1.25, -1.4], places.pantry],
-  picnic_basket: [hub, [1.6, 0.45, 1.6], [3.4, 0.45, 1.6], [4.5, 0.45, 1.6], places.picnic_basket],
+  picnic_basket: [
+    hub,
+    [1.6, 0.45, 1.6],
+    [3.4, 0.45, 1.6],
+    [4.5, 0.45, 1.6],
+    places.picnic_basket,
+  ],
 };
-export const distance = (a: Point, b: Point) => Math.hypot(...a.map((v, i) => v - b[i]));
-
+export const distance = (a: Point, b: Point) =>
+  Math.hypot(...a.map((v, i) => v - b[i]));

@@ -1,7 +1,14 @@
 import type { Message, Provider, RuntimeEvent, Tool } from './types.ts';
-export interface Feedback { request: Message; result: Message; value: Record<string, unknown> }
+export interface Feedback {
+  request: Message;
+  result: Message;
+  value: Record<string, unknown>;
+}
 export interface RuntimeOptions {
-  provider: Provider; messages: Message[]; tools: readonly Tool[]; signal: AbortSignal;
+  provider: Provider;
+  messages: Message[];
+  tools: readonly Tool[];
+  signal: AbortSignal;
   getTools?: () => readonly Tool[];
   emit: (event: RuntimeEvent) => void;
 }
@@ -12,6 +19,12 @@ export interface RuntimeInstance {
   run?(): Promise<string>;
 }
 export interface StoredCode {
-  id: string; kind: 'runtime' | 'setup' | 'experiment'; source: string;
-  module: { AgentRuntime?: new (options: RuntimeOptions) => RuntimeInstance; tools?: readonly string[]; run?: (session: unknown, ...args: unknown[]) => Promise<unknown> };
+  id: string;
+  kind: 'runtime' | 'setup' | 'experiment';
+  source: string;
+  module: {
+    AgentRuntime?: new (options: RuntimeOptions) => RuntimeInstance;
+    tools?: readonly string[];
+    run?: (session: unknown, ...args: unknown[]) => Promise<unknown>;
+  };
 }

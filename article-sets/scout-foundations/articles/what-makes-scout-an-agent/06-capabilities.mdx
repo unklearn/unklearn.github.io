@@ -1,40 +1,127 @@
 import { useState, useRef } from 'react';
 import { useScoutStep } from '../../authoring.ts';
-import { Action, Prediction, RuntimeChange, RuntimeExcerpt, useLessonPresentation } from '../../../../presentation/lesson-ui.tsx';
+import {
+  Action,
+  Prediction,
+  RuntimeChange,
+  RuntimeExcerpt,
+  useLessonPresentation,
+} from '../../../../presentation/lesson-ui.tsx';
 import { blocks as previous } from './05-loop.mdx';
 import { blocks as reading } from './03-tools.mdx';
 
-export const meta = {"id": "capabilities", "title": "Expanding capabilities", "question": "Can the same runtime do more when its available tools change?", "initial": {"checkpoint": "observed-notice", "tools": ["read_notice"]}, "narration": {"text": "Resolve available tools at the start of each turn. Adding tools then changes configuration, without replacing the runtime."}};
+export const meta = {
+  id: 'capabilities',
+  title: 'Expanding capabilities',
+  question: 'Can the same runtime do more when its available tools change?',
+  initial: { checkpoint: 'observed-notice', tools: ['read_notice'] },
+  narration: {
+    text: 'Resolve available tools at the start of each turn. Adding tools then changes configuration, without replacing the runtime.',
+  },
+};
 
 The runtime will now read its available tools before each evaluation. It retains that turn’s selection for dispatch, so a request is executed against the tools the model actually saw.
 
-<Prediction question={meta.question} choices={['Every new tool needs a new runtime', 'The runtime can use a changed tool configuration']} />
+<Prediction
+  question={meta.question}
+  choices={[
+    'Every new tool needs a new runtime',
+    'The runtime can use a changed tool configuration',
+  ]}
+/>
 
 <RuntimeChange from={previous.loop} to={blocks.dynamic} />
 
 export function Capabilities() {
-  const s=useScoutStep(), ui=useLessonPresentation(), runtime=useRef(null), [phase,setPhase]=useState('ready');
+  const s = useScoutStep(),
+    ui = useLessonPresentation(),
+    runtime = useRef(null),
+    [phase, setPhase] = useState('ready');
   async function begin() {
-    if(!s.restoreCheckpoint('observed-notice'))s.reset({tools:['read_notice']});s.setTools(['read_notice']);
-    await s.act(async()=>{runtime.current=s.runtime(blocks.dynamic);await runtime.current.run();s.showQuestion('Movement and pantry tools have not been exposed.');s.mark('limited');setPhase('limited');});
+    if (!s.restoreCheckpoint('observed-notice'))
+      s.reset({ tools: ['read_notice'] });
+    s.setTools(['read_notice']);
+    await s.act(async () => {
+      runtime.current = s.runtime(blocks.dynamic);
+      await runtime.current.run();
+      s.showQuestion('Movement and pantry tools have not been exposed.');
+      s.mark('limited');
+      setPhase('limited');
+    });
   }
-  return <>
-    <Action onClick={begin}>Try the current tools</Action>
-    {phase!=='ready' && <><p>Now change the tool configuration. This does not invoke the model, execute a tool, or construct another runtime.</p><RuntimeChange from={reading.reader} to={blocks.picnic} />
-    <Action disabled={phase!=='limited'} onClick={()=>{s.setTools(blocks.picnic.module.tools);s.clearQuestion();s.showContext(s.schemas);setPhase('enabled');ui.renderSystemTerminal(<p>Delivery tools are available for the next turn. The runtime instance is unchanged.</p>);}}>Enable delivery tools</Action></>}
-    {phase==='enabled' && <Action className="primary" onClick={()=>s.act(async()=>{
-      const feedback=await runtime.current.execute(await runtime.current.evaluate());if(feedback)runtime.current.append(feedback);
-      s.showContext({available:s.schemas,observation:feedback?.result});s.saveCheckpoint('expanded');s.mark('expanded');setPhase('acted');
-    })}>Run the next turn</Action>}
-    {phase==='acted' && <p>The terminal and world show the action actually requested and executed. In Mock, Scout walks to the pantry. Its next choice will still require an inspection; granting a tool did not reveal the stock.</p>}
-    <p>Tool availability is configuration. The model still chooses whether to read, where to walk, when to inspect, and what to carry.</p>
-  </>;
+  return (
+    <>
+      <Action onClick={begin}>Try the current tools</Action>
+      {phase !== 'ready' && (
+        <>
+          <p>
+            Now change the tool configuration. This does not invoke the model,
+            execute a tool, or construct another runtime.
+          </p>
+          <RuntimeChange from={reading.reader} to={blocks.picnic} />
+          <Action
+            disabled={phase !== 'limited'}
+            onClick={() => {
+              s.setTools(blocks.picnic.module.tools);
+              s.clearQuestion();
+              s.showContext(s.schemas);
+              setPhase('enabled');
+              ui.renderSystemTerminal(
+                <p>
+                  Delivery tools are available for the next turn. The runtime
+                  instance is unchanged.
+                </p>,
+              );
+            }}
+          >
+            Enable delivery tools
+          </Action>
+        </>
+      )}
+      {phase === 'enabled' && (
+        <Action
+          className="primary"
+          onClick={() =>
+            s.act(async () => {
+              const feedback = await runtime.current.execute(
+                await runtime.current.evaluate(),
+              );
+              if (feedback) runtime.current.append(feedback);
+              s.showContext({
+                available: s.schemas,
+                observation: feedback?.result,
+              });
+              s.saveCheckpoint('expanded');
+              s.mark('expanded');
+              setPhase('acted');
+            })
+          }
+        >
+          Run the next turn
+        </Action>
+      )}
+      {phase === 'acted' && (
+        <p>
+          The terminal and world show the action actually requested and
+          executed. In Mock, Scout walks to the pantry. Its next choice will
+          still require an inspection; granting a tool did not reveal the stock.
+        </p>
+      )}
+      <p>
+        Tool availability is configuration. The model still chooses whether to
+        read, where to walk, when to inspect, and what to carry.
+      </p>
+    </>
+  );
 }
 
 <Capabilities />
 
 ```ts runtime="dynamic"
-import type { Feedback, RuntimeOptions } from '../../../../runtime/lesson-types.ts';
+import type {
+  Feedback,
+  RuntimeOptions,
+} from '../../../../runtime/lesson-types.ts';
 import type { Tool } from '../../../../runtime/types.ts';
 import type { Message } from '../../../../runtime/types.ts';
 
@@ -45,7 +132,7 @@ export class AgentRuntime {
   async evaluate() {
     const { provider, messages, signal, getTools } = this.options;
     this.turnTools = getTools ? getTools() : this.options.tools;
-    const schemas = this.turnTools.map(tool => tool.definition);
+    const schemas = this.turnTools.map((tool) => tool.definition);
     return provider(messages, schemas, signal);
   }
 
@@ -58,13 +145,25 @@ export class AgentRuntime {
     }
     const call = calls[0].function;
     const { signal, emit } = this.options;
-    const tool = this.turnTools.find(tool => tool.definition.function.name === call.name);
+    const tool = this.turnTools.find(
+      (tool) => tool.definition.function.name === call.name,
+    );
     emit({ kind: 'tool_start', text: call.name, tool: call });
-    const value = tool ? await tool.execute(call.arguments, signal)
+    const value = tool
+      ? await tool.execute(call.arguments, signal)
       : { ok: false, reason: 'tool_unavailable' };
     signal.throwIfAborted();
-    const result: Message = { role: 'tool', tool_name: call.name, content: JSON.stringify(value) };
-    emit({ kind: 'tool_result', text: result.content, tool: call, result: value });
+    const result: Message = {
+      role: 'tool',
+      tool_name: call.name,
+      content: JSON.stringify(value),
+    };
+    emit({
+      kind: 'tool_result',
+      text: result.content,
+      tool: call,
+      result: value,
+    });
     return { request, result, value };
   }
 
@@ -72,7 +171,11 @@ export class AgentRuntime {
     const { messages, emit } = this.options;
     messages.push(request);
     messages.push(result);
-    emit({ kind: 'context', text: 'Request and observation appended', messages });
+    emit({
+      kind: 'context',
+      text: 'Request and observation appended',
+      messages,
+    });
   }
 
   async run() {
@@ -91,5 +194,11 @@ export class AgentRuntime {
 ```
 
 ```ts setup="picnic"
-export const tools = ['read_notice', 'walk_to', 'inspect_pantry', 'take_one', 'deliver_item'];
+export const tools = [
+  'read_notice',
+  'walk_to',
+  'inspect_pantry',
+  'take_one',
+  'deliver_item',
+];
 ```

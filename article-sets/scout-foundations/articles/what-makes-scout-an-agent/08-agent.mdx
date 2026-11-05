@@ -1,36 +1,124 @@
 import { useState, useRef } from 'react';
 import { useScoutStep } from '../../authoring.ts';
-import { Action, Prediction, RuntimeChange, RuntimeExcerpt, useLessonPresentation } from '../../../../presentation/lesson-ui.tsx';
+import {
+  Action,
+  Prediction,
+  RuntimeChange,
+  RuntimeExcerpt,
+  useLessonPresentation,
+} from '../../../../presentation/lesson-ui.tsx';
 import { blocks as expanded } from './06-capabilities.mdx';
 import { blocks as picnic } from './07-picnic.mdx';
 
-export const meta = {"id": "agent", "title": "Understanding the agent", "question": "Which responsibilities belong to the model, and which belong to the harness?", "initial": {"checkpoint": "picnic-complete", "tools": []}, "narration": {"text": "The model chooses an action from its current context. The harness supplies capabilities, executes the action, and carries the observation into the next decision."}};
+export const meta = {
+  id: 'agent',
+  title: 'Understanding the agent',
+  question:
+    'Which responsibilities belong to the model, and which belong to the harness?',
+  initial: { checkpoint: 'picnic-complete', tools: [] },
+  narration: {
+    text: 'The model chooses an action from its current context. The harness supplies capabilities, executes the action, and carries the observation into the next decision.',
+  },
+};
 
 Scout is a **model plus a harness**. The model selects an action from the conversation and available schemas. The harness calls the provider, dispatches its request, appends the observation, and decides when to allow another turn.
 
-<Prediction question={meta.question} choices={['The model executes functions and updates the world', 'The model selects actions; the harness executes and returns observations']} />
+<Prediction
+  question={meta.question}
+  choices={[
+    'The model executes functions and updates the world',
+    'The model selects actions; the harness executes and returns observations',
+  ]}
+/>
 
 export function UnderstandAgent() {
-  const s=useScoutStep(), ui=useLessonPresentation(), [focus,setFocus]=useState('evaluate');
-  const run=s.recall('picnic-latest');
-  const observation=run?.events.find(e=>e.kind==='tool_result' && e.tool?.name==='inspect_pantry');
-  const points=run ? [
-    {label:'Model chooses',method:'evaluate',event:run.events.find(e=>e.kind==='assistant' && e.tool)},
-    {label:'Harness executes',method:'execute',event:run.events.find(e=>e.kind==='tool_start')},
-    {label:'Observation returns',method:'execute',event:observation},
-    {label:'Feedback enters context',method:'append',event:run.events.find(e=>e.kind==='context' && e.seq>(observation?.seq??0))},
-    {label:'Next decision',method:'run',event:run.events.find(e=>e.kind==='model_start' && e.seq>(observation?.seq??0))},
-  ].filter(point=>point.event) : [];
-  return <>
-    {run ? <>
-      <p>Review your actual run. These controls render recorded events and snapshots. They do not call a provider or execute tools.</p>
-      <p>Your run ended with {run.final.basket.apple} apple and {run.final.basket.carrot} carrot in the basket. Follow the inspection below to see the stock observation available to the next decision.</p>
-      <Action onClick={()=>ui.reviewTrace(run)}>Replay this execution</Action>
-      <div className="trace-points">{points.map(point=><Action key={point.label} onClick={()=>{setFocus(point.method);s.showContext(point.event);ui.reviewTrace(run,point.event.at,point.event.seq);}}>{point.label}</Action>)}</div>
-    </> : <><p>There is no completed picnic to review yet. Complete Step 7, or create a real execution here.</p><Action onClick={()=>picnic.autonomous.module.run(s,2)}>Run a picnic for review</Action></>}
-    <RuntimeExcerpt code={expanded.dynamic} method={focus} />
-    <p>The inspection result explains what informed the later item choice. The route was not a list of instructions in the harness: each requested tool came from another provider evaluation.</p>
-  </>;
+  const s = useScoutStep(),
+    ui = useLessonPresentation(),
+    [focus, setFocus] = useState('evaluate');
+  const run = s.recall('picnic-latest');
+  const observation = run?.events.find(
+    (e) => e.kind === 'tool_result' && e.tool?.name === 'inspect_pantry',
+  );
+  const points = run
+    ? [
+        {
+          label: 'Model chooses',
+          method: 'evaluate',
+          event: run.events.find((e) => e.kind === 'assistant' && e.tool),
+        },
+        {
+          label: 'Harness executes',
+          method: 'execute',
+          event: run.events.find((e) => e.kind === 'tool_start'),
+        },
+        { label: 'Observation returns', method: 'execute', event: observation },
+        {
+          label: 'Feedback enters context',
+          method: 'append',
+          event: run.events.find(
+            (e) => e.kind === 'context' && e.seq > (observation?.seq ?? 0),
+          ),
+        },
+        {
+          label: 'Next decision',
+          method: 'run',
+          event: run.events.find(
+            (e) => e.kind === 'model_start' && e.seq > (observation?.seq ?? 0),
+          ),
+        },
+      ].filter((point) => point.event)
+    : [];
+  return (
+    <>
+      {run ? (
+        <>
+          <p>
+            Review your actual run. These controls render recorded events and
+            snapshots. They do not call a provider or execute tools.
+          </p>
+          <p>
+            Your run ended with {run.final.basket.apple} apple and{' '}
+            {run.final.basket.carrot} carrot in the basket. Follow the
+            inspection below to see the stock observation available to the next
+            decision.
+          </p>
+          <Action onClick={() => ui.reviewTrace(run)}>
+            Replay this execution
+          </Action>
+          <div className="trace-points">
+            {points.map((point) => (
+              <Action
+                key={point.label}
+                onClick={() => {
+                  setFocus(point.method);
+                  s.showContext(point.event);
+                  ui.reviewTrace(run, point.event.at, point.event.seq);
+                }}
+              >
+                {point.label}
+              </Action>
+            ))}
+          </div>
+        </>
+      ) : (
+        <>
+          <p>
+            There is no completed picnic to review yet. Complete Step 7, or
+            create a real execution here.
+          </p>
+          <Action onClick={() => picnic.autonomous.module.run(s, 2)}>
+            Run a picnic for review
+          </Action>
+        </>
+      )}
+      <RuntimeExcerpt code={expanded.dynamic} method={focus} />
+      <p>
+        The inspection result explains what informed the later item choice. The
+        route was not a list of instructions in the harness: each requested tool
+        came from another provider evaluation.
+      </p>
+    </>
+  );
 }
 
 <UnderstandAgent />
@@ -38,4 +126,3 @@ export function UnderstandAgent() {
 **ReAct** describes interleaving reasoning and actions so that observations can inform subsequent decisions. Your execution shows the action–observation–next-decision cycle. A generic tool loop is not, by itself, evidence of a model’s private reasoning process.
 
 The thinking bubble indicates an actual provider call. Mock intent is authored dialogue; Live speech is public provider output. Neither is a transcript of hidden reasoning. See the [original ReAct paper](https://arxiv.org/abs/2210.03629).
-

@@ -1,22 +1,71 @@
 import { useState, useRef } from 'react';
 import { useScoutStep } from '../../authoring.ts';
-import { Action, Prediction, RuntimeChange, RuntimeExcerpt, useLessonPresentation } from '../../../../presentation/lesson-ui.tsx';
+import {
+  Action,
+  Prediction,
+  RuntimeChange,
+  RuntimeExcerpt,
+  useLessonPresentation,
+} from '../../../../presentation/lesson-ui.tsx';
 
-export const meta = {"id": "meet", "title": "Following a script", "question": "Will posting a notice change a scripted patrol?", "initial": {"tools": [], "notice": ""}, "narration": {"text": "Meet Scout, the courier. A patrol can move its body, but it does not interpret the job on a notice."}};
+export const meta = {
+  id: 'meet',
+  title: 'Following a script',
+  question: 'Will posting a notice change a scripted patrol?',
+  initial: { tools: [], notice: '' },
+  narration: {
+    text: 'Meet Scout, the courier. A patrol can move its body, but it does not interpret the job on a notice.',
+  },
+};
 
 Scout is a courier. Its job is to carry one item from the pantry, across the bridge, to the picnic basket. We will build the runtime that lets it choose what to do.
 
-<Prediction question={meta.question} choices={['Scout will read the notice', 'Scout will follow its route']} />
+<Prediction
+  question={meta.question}
+  choices={['Scout will read the notice', 'Scout will follow its route']}
+/>
 
 export function ScriptedPatrol() {
-  const s=useScoutStep(), [phase,setPhase]=useState('ready');
-  return <>
-    <p>Start the patrol, then post a picnic notice while Scout walks. The amber light means a notice is waiting.</p>
-    <div className="actions"><Action className="primary" onClick={async()=>{setPhase('walking');await blocks.patrol.module.run(s);if(s.stage==='passed')setPhase('passed');}}>Start patrol</Action>
-    <Action concurrent disabled={phase==='ready'} onClick={()=>s.world.postNotice()}>Post a notice</Action></div>
-    {phase==='passed' && <p>Scout finished its authored path. {s.world.snapshot().unread?'The notice is still unread.':'Post a notice, then continue.'} Movement alone did not interpret a job. This experiment made no model calls and executed no tools.</p>}
-    <RuntimeChange to={blocks.patrol} />
-  </>;
+  const s = useScoutStep(),
+    [phase, setPhase] = useState('ready');
+  return (
+    <>
+      <p>
+        Start the patrol, then post a picnic notice while Scout walks. The amber
+        light means a notice is waiting.
+      </p>
+      <div className="actions">
+        <Action
+          className="primary"
+          onClick={async () => {
+            setPhase('walking');
+            await blocks.patrol.module.run(s);
+            if (s.stage === 'passed') setPhase('passed');
+          }}
+        >
+          Start patrol
+        </Action>
+        <Action
+          concurrent
+          disabled={phase === 'ready'}
+          onClick={() => s.world.postNotice()}
+        >
+          Post a notice
+        </Action>
+      </div>
+      {phase === 'passed' && (
+        <p>
+          Scout finished its authored path.{' '}
+          {s.world.snapshot().unread
+            ? 'The notice is still unread.'
+            : 'Post a notice, then continue.'}{' '}
+          Movement alone did not interpret a job. This experiment made no model
+          calls and executed no tools.
+        </p>
+      )}
+      <RuntimeChange to={blocks.patrol} />
+    </>
+  );
 }
 
 <ScriptedPatrol />

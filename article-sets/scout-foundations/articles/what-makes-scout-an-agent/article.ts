@@ -9,7 +9,21 @@ import * as s7 from './08-agent.mdx';
 import type { LessonArticle } from '../../../../presentation/lesson-ui.tsx';
 import { picnicScenario } from '../../scenario.ts';
 export const article: LessonArticle<typeof picnicScenario> = {
- id:'what-makes-scout-an-agent', number:1, title:'From a Model to an AI Agent', scenario:picnicScenario,
- steps:[s0,s1,s2,s3,s4,s5,s6,s7], runtime:s5.blocks.dynamic, replayStepId:'picnic',
- legacyStepIds:['meet','turn','repeat','tool','execute','context','picnic'], stepAliases:{turn:'model',repeat:'model'},
+  id: 'what-makes-scout-an-agent',
+  number: 1,
+  title: 'From a Model to an AI Agent',
+  scenario: picnicScenario,
+  steps: [s0, s1, s2, s3, s4, s5, s6, s7],
+  runtime: s5.blocks.dynamic,
+  replayStepId: 'picnic',
+  legacyStepIds: [
+    'meet',
+    'turn',
+    'repeat',
+    'tool',
+    'execute',
+    'context',
+    'picnic',
+  ],
+  stepAliases: { turn: 'model', repeat: 'model' },
 };
