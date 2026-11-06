@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { useScoutStep } from '../../authoring.ts';
 import {
   Action,
+  useMiniSteps,
   useLessonPresentation,
 } from '../../../../presentation/lesson-ui.tsx';
 import { defaultOrder } from '../../types.ts';
@@ -19,14 +20,17 @@ export const meta = {
   initial: { tools: [], notice: '' },
 };
 
-Scout is a courier. Its job is to carry one item from the pantry, across the bridge, to the picnic basket. We will build the runtime that lets it choose what to do.
-
 export function ScriptedWorkflow() {
   const s = useScoutStep(),
     ui = useLessonPresentation();
-  const [phase, setPhase] = useState('start'),
-    [example, setExample] = useState(0),
-    [answer, setAnswer] = useState(null);
+  const [phase, setPhase] = useState('start');
+  const [answers, setAnswers] = useState([null, null, null]);
+  const [unlocked, setUnlocked] = useState(0);
+  const [results, setResults] = useState({});
+  const [providerUsed, setProviderUsed] = useState(null);
+  const [page, setPage] = useMiniSteps(12, {
+    canNext: (index) => index < unlocked,
+  });
   const [taken, setTaken] = useState(null);
   const [outcome, setOutcome] = useState(null);
   const patrol = useRef(null),
@@ -34,6 +38,18 @@ export function ScriptedWorkflow() {
     initialPantry = useRef(null),
     notice = useRef(''),
     observed = useRef(null);
+  function reveal(target, from = target - 1) {
+    setUnlocked((value) => Math.max(value, target));
+    setPage((value) => (value === from ? target : value));
+  }
+  function recordOutcome(value) {
+    setOutcome(value);
+    const lane = policy.current === 'manual' ? 'guided' : policy.current;
+    setResults((saved) => ({
+      ...saved,
+      [lane]: { ...saved[lane], [value.kind]: value },
+    }));
+  }
   const advance = (value) => {
     setPhase(value);
     s.mark(value);
@@ -56,7 +72,7 @@ export function ScriptedWorkflow() {
       s.world.readNotice(signal),
     );
     notice.current = result.notice;
-    setOutcome({ kind: 'notice', notice: result.notice });
+    recordOutcome({ kind: 'notice', notice: result.notice });
   }
   async function inspect(signal) {
     setOutcome(null);
@@ -65,7 +81,7 @@ export function ScriptedWorkflow() {
       s.world.inspectPantry(signal),
     );
     observed.current = result.pantry;
-    setOutcome({ kind: 'inspection', pantry: result.pantry });
+    recordOutcome({ kind: 'inspection', pantry: result.pantry });
   }
   async function takeByRule(signal) {
     const item = picnicRule(observed.current);
@@ -80,13 +96,14 @@ export function ScriptedWorkflow() {
       s.world.takeOne(item, signal),
     );
     setTaken(result.item);
-    setOutcome({
+    recordOutcome({
       kind: 'pickup',
       item: result.item,
       pantry: s.world.snapshot().pantry,
     });
   }
   async function deliverAndReturn(signal, ai = false) {
+    const guided = policy.current === 'manual';
     if (s.world.snapshot().carried) {
       await observe('walk_to picnic basket', () =>
         s.world.walkTo('picnic_basket', signal),
@@ -94,7 +111,7 @@ export function ScriptedWorkflow() {
       const result = await observe('deliver_item', () =>
         s.world.deliverItem(signal),
       );
-      setOutcome({
+      recordOutcome({
         kind: 'delivery',
         item: result.item,
         basket: result.basket,
@@ -106,6 +123,8 @@ export function ScriptedWorkflow() {
       s.world.walkTo('noticeboard', signal),
     );
     advance(ai ? 'ai-done' : 'human-done');
+    if (ai) reveal(11, 10);
+    else if (guided) reveal(8, 7);
   }
   function startPatrol() {
     if (patrol.current?.running && !patrol.current.signal.aborted) return;
@@ -150,6 +169,7 @@ export function ScriptedWorkflow() {
     initialPantry.current = s.world.snapshot().pantry;
     policy.current = 'manual';
     advance('waiting');
+    reveal(1, 0);
     startPatrol();
     delayedNotice();
   }
@@ -158,18 +178,21 @@ export function ScriptedWorkflow() {
       await stopPatrol();
       await read();
       advance('inspect');
+      reveal(2, 1);
     });
   }
   function inspectPantry() {
     return s.act(async () => {
       await inspect();
       advance('examples');
+      reveal(3, 2);
     });
   }
   function takeItem() {
     return s.act(async () => {
       await takeByRule();
       advance('deliver');
+      reveal(7, 6);
     });
   }
   function deliver() {
@@ -191,6 +214,7 @@ export function ScriptedWorkflow() {
   function addAI() {
     ui.selectProvider('mock');
     advance('provider');
+    reveal(9, 8);
   }
   async function startAI() {
     let prepared = false;
@@ -205,8 +229,11 @@ export function ScriptedWorkflow() {
     notice.current = '';
     setTaken(null);
     setOutcome(null);
+    setResults((saved) => ({ ...saved, ai: {} }));
+    setProviderUsed(s.settings.mode);
     policy.current = 'ai';
     advance('ai-waiting');
+    reveal(10, 9);
     startPatrol();
     delayedNotice(true);
   }
@@ -214,7 +241,11 @@ export function ScriptedWorkflow() {
     return s.act(async () => {
       const item = await chooseAndTake(s, notice.current, observed.current);
       setTaken(item);
-      setOutcome({ kind: 'pickup', item, pantry: s.world.snapshot().pantry });
+      recordOutcome({
+        kind: 'pickup',
+        item,
+        pantry: s.world.snapshot().pantry,
+      });
       advance('ai-delivering');
       await deliverAndReturn(undefined, true);
       startPatrol();
@@ -260,18 +291,26 @@ export function ScriptedWorkflow() {
     notice.current = '';
     setTaken(null);
     setOutcome(null);
-    setExample(0);
-    setAnswer(null);
+    setAnswers([null, null, null]);
+    setResults({});
+    setProviderUsed(null);
+    setUnlocked(0);
+    setPage(0);
     setPhase('start');
   }
-  const counts = (stock) =>
-    `${stock.apple} apple${stock.apple === 1 ? '' : 's'}, ${stock.carrot} carrot${stock.carrot === 1 ? '' : 's'}`;
+  const guided = results.guided ?? {};
+  const example = Math.max(0, Math.min(2, page - 3));
   const current = ruleExamples[example],
+    answer = answers[example],
     correct = answer === current.item;
   const interrupted = s.interrupted && !s.busy;
   const humanReady =
     phase === 'human-done' ||
     (phase === 'human-working' && s.stage === 'error');
+  const humanWorking =
+    policy.current === 'human' &&
+    ['human-working', 'human-returning'].includes(phase);
+  const aiWorking = phase.startsWith('ai-') && phase !== 'ai-done';
   const waiting = [
     'waiting',
     'ai-waiting',
@@ -281,21 +320,22 @@ export function ScriptedWorkflow() {
     'ai-returning',
     'ai-delivering',
   ].includes(phase);
-  const instructions = {
-    start: 'Click Start patrol to send Scout around the courtyard.',
+  const resumePage = phase.startsWith('ai-')
+    ? 10
+    : phase === 'waiting'
+      ? 1
+      : policy.current === 'manual'
+        ? 7
+        : 8;
+  const activeInstruction = {
     waiting:
       'Scout is following an authored patrol. A picnic notice will arrive shortly.',
     notice:
       'Click Read notice to bring Scout to the board and read the posted notice.',
-    inspect: 'Scout needs to inspect the pantry. Click Inspect pantry.',
-    examples:
-      'Supply the decision rule. Choose an item for each hypothetical pantry, following the posted picnic instruction.',
-    take: 'Ask Scout to make a decision using the rule you supplied. Click Take item.',
-    deliver: `Scout must take one ${taken ?? s.world.snapshot().carried ?? 'item'} to the picnic basket. Click Deliver to picnic basket.`,
-    'human-done':
-      'Scout follows your workflow now. Post another notice to watch it repeat, or add a model for the item decision.',
-    provider:
-      'Choose Mock or Live, then click Start AI workflow. Only the item decision will use the provider.',
+    'human-working':
+      'The scripted workflow is reading, inspecting, choosing by your rule, and delivering.',
+    'human-returning':
+      'Scout is walking back to the noticeboard before resuming patrol.',
     'ai-waiting':
       'Scout will read the next notice and inspect the pantry using the fixed workflow.',
     'ai-preparing':
@@ -304,79 +344,93 @@ export function ScriptedWorkflow() {
       'The workflow has supplied the notice and observed stock. Click Take item to ask the provider for one item choice.',
     'ai-delivering':
       'The provider selected an item. The scripted workflow is delivering it.',
-    'human-working':
-      'The scripted workflow is reading, inspecting, choosing by your rule, and delivering.',
-    'human-returning':
-      'Scout is walking back to the noticeboard before resuming patrol.',
     'ai-returning':
       'Scout is walking back to the noticeboard before resuming patrol.',
-    'ai-done':
-      'AI supplied an item decision inside the workflow. Give Scout control to explore an agent.',
   };
+  const instructions = [
+    phase === 'start'
+      ? 'Click Start patrol to send Scout around the courtyard.'
+      : 'You started an authored patrol around the courtyard.',
+    ['waiting', 'notice'].includes(phase)
+      ? activeInstruction[phase]
+      : 'You brought Scout to the board and asked it to read the notice.',
+    phase === 'inspect'
+      ? 'Scout needs to inspect the pantry. Click Inspect pantry.'
+      : 'Scout returned the exact notice below. You then sent it to inspect the pantry.',
+    phase === 'examples' && !correct
+      ? 'Choose an item for this hypothetical pantry, following the picnic instruction.'
+      : 'Review the hypothetical pantry and the choice you supplied.',
+    phase === 'examples' && !correct
+      ? 'Choose an item for this hypothetical pantry, following the picnic instruction.'
+      : 'Review the hypothetical pantry and the choice you supplied.',
+    phase === 'examples' && !correct
+      ? 'Choose an item for this hypothetical pantry, following the picnic instruction.'
+      : 'Review the hypothetical pantry and the choice you supplied.',
+    phase === 'take'
+      ? 'Ask Scout to make a decision using the rule you supplied. Click Take item.'
+      : 'Scout used your rule to choose from the stock it had inspected.',
+    phase === 'deliver'
+      ? `Scout must take one ${guided.pickup?.item ?? taken ?? 'item'} to the picnic basket. Click Deliver to picnic basket.`
+      : phase === 'human-returning' && policy.current === 'manual'
+        ? activeInstruction[phase]
+        : 'You asked Scout to carry its chosen item to the picnic basket.',
+    humanWorking
+      ? activeInstruction[phase]
+      : humanReady
+        ? s.world.snapshot().unread
+          ? 'A notice is waiting. Scout will handle it when the patrol reaches the board.'
+          : 'Post another notice to repeat your workflow, or add a model for the item decision.'
+        : 'You supplied the route, the notice trigger, and the decision rule.',
+    phase === 'provider'
+      ? 'Choose Mock or Live, then click Start AI workflow. Only the item decision will use the provider.'
+      : 'You selected a provider for one decision inside the workflow.',
+    aiWorking
+      ? activeInstruction[phase]
+      : 'The workflow supplied the notice and inspected stock for the provider’s item decision.',
+    'AI supplied an item decision inside the workflow. Give Scout control to explore an agent.',
+  ];
   return (
     <>
+      {page === 0 && (
+        <p>
+          Scout is a courier. Its job is to carry one item from the pantry,
+          across the bridge, to the picnic basket. We will build the runtime
+          that lets it choose what to do.
+        </p>
+      )}
       <blockquote className="workflow-instruction" aria-live="polite">
-        {phase === 'human-done' && s.world.snapshot().unread
-          ? 'A notice is waiting. Scout will handle it when the patrol reaches the board.'
-          : instructions[phase]}
+        {instructions[page]}
       </blockquote>
-      <div
-        className="workflow-outcome"
-        role="status"
-        aria-live="polite"
-        aria-atomic="true"
-      >
-        {outcome?.kind === 'notice' && (
-          <>
-            <p>Scout read the notice:</p>
-            <blockquote>{outcome.notice}</blockquote>
-          </>
-        )}
-        {outcome?.kind === 'inspection' && (
-          <p>
-            Scout inspected the pantry.
-            {phase === 'examples'
-              ? ''
-              : ` Actual stock: ${counts(outcome.pantry)}.`}
-          </p>
-        )}
-        {outcome?.kind === 'pickup' && (
-          <p>
-            Scout took 1 {outcome.item}. Pantry now: {counts(outcome.pantry)}.
-          </p>
-        )}
-        {outcome?.kind === 'delivery' && (
-          <p>
-            Scout delivered 1 {outcome.item} to the picnic basket. Basket:{' '}
-            {counts(outcome.basket)}. Pantry left: {counts(outcome.pantry)}.
-          </p>
-        )}
-      </div>
-      {phase === 'start' && (
+      {page === 0 && phase === 'start' && (
         <Action className="primary" onClick={start}>
           Start patrol
         </Action>
       )}
-      {waiting && interrupted && (
-        <Action className="primary" onClick={resume}>
-          Resume workflow
-        </Action>
-      )}
-      {phase === 'notice' && (
-        <Action className="primary" onClick={readNotice}>
-          Read notice
-        </Action>
-      )}
-      {phase === 'inspect' && (
-        <Action className="primary" onClick={inspectPantry}>
-          Inspect pantry
-        </Action>
-      )}
-      {phase === 'examples' && (
+      {page === 1 && (
         <>
-          <p className="hypothetical-label">
-            Hypothetical pantry · Example {example + 1}/3
-          </p>
+          {(phase === 'notice' || guided.notice) && (
+            <p>A picnic notice arrived during the patrol.</p>
+          )}
+          {phase === 'notice' && (
+            <Action className="primary" onClick={readNotice}>
+              Read notice
+            </Action>
+          )}
+        </>
+      )}
+      {page === 2 && (
+        <>
+          <WorkflowOutcome value={guided.notice} earlier={page < unlocked} />
+          {phase === 'inspect' && (
+            <Action className="primary" onClick={inspectPantry}>
+              Inspect pantry
+            </Action>
+          )}
+        </>
+      )}
+      {page >= 3 && page <= 5 && (
+        <>
+          <p className="hypothetical-label">Hypothetical pantry</p>
           <p>
             {current.pantry.apple} apples, {current.pantry.carrot} carrots.
             These are practice counts; the real pantry stays unchanged.
@@ -389,9 +443,13 @@ export function ScriptedWorkflow() {
             {['apple', 'carrot'].map((item) => (
               <Action
                 key={item}
-                disabled={correct}
+                disabled={phase !== 'examples' || correct}
                 onClick={() => {
-                  setAnswer(item);
+                  setAnswers((saved) =>
+                    saved.map((value, index) =>
+                      index === example ? item : value,
+                    ),
+                  );
                   s.event({
                     kind: 'learner_choice',
                     text: `Hypothetical example ${example + 1}: ${item}`,
@@ -402,6 +460,8 @@ export function ScriptedWorkflow() {
                       correct: item === current.item,
                     },
                   });
+                  if (item === current.item && example < 2)
+                    setUnlocked((value) => Math.max(value, page + 1));
                 }}
               >
                 Take 1 {item}
@@ -419,112 +479,139 @@ export function ScriptedWorkflow() {
               {current.explanation}
             </blockquote>
           )}
-          {correct && (
+          {page === 5 && correct && phase === 'examples' && (
             <Action
               className="primary"
               onClick={() => {
-                if (example < 2) {
-                  setExample(example + 1);
-                  setAnswer(null);
-                } else {
-                  s.event({
-                    kind: 'rule_configured',
-                    text: 'Reader supplied the apple-preserving rule',
-                  });
-                  advance('take');
-                }
+                s.event({
+                  kind: 'rule_configured',
+                  text: 'Reader supplied the apple-preserving rule',
+                });
+                advance('take');
+                reveal(6, 5);
               }}
             >
-              {example < 2 ? 'Next example' : 'Use this rule'}
+              Use this rule
             </Action>
           )}
         </>
       )}
-      {['take', 'deliver'].includes(phase) && (
+      {page === 6 && (
         <>
+          <p>
+            You supplied this rule: take an apple when more than one is
+            available; otherwise take a carrot if one is available. You
+            configured a rule; the examples did not train an AI model.
+          </p>
+          <WorkflowOutcome
+            value={guided.inspection}
+            earlier={page < unlocked}
+          />
           {phase === 'take' && (
-            <p>
-              Scout will now follow the rule you supplied: take an apple when
-              more than one is available; otherwise take a carrot if one is
-              available. You configured a rule; these examples did not train an
-              AI model.
-            </p>
-          )}
-          {phase === 'take' ? (
             <Action className="primary" onClick={takeItem}>
               Take item
             </Action>
-          ) : (
-            <>
-              <Action className="primary" onClick={deliver}>
-                Deliver to picnic basket
-              </Action>
-            </>
           )}
         </>
       )}
-      {(humanReady || phase === 'provider') && (
-        <p>
-          You supplied the route, the notice trigger, and the decision rule.
-          Scout can repeat them automatically, but that repetition is still a
-          human-designed workflow.
-        </p>
-      )}
-      {humanReady && (
-        <div className="actions">
-          <Action
-            className="primary"
-            disabled={!!s.world.snapshot().unread}
-            onClick={addAI}
-          >
-            Add an AI model to this workflow
-          </Action>
-          <Action
-            disabled={!!s.world.snapshot().unread || s.stage === 'error'}
-            onClick={postAnother}
-          >
-            Post another notice
-          </Action>
-        </div>
-      )}
-      {phase === 'provider' && (
+      {page === 7 && (
         <>
-          <fieldset className="provider-choice">
-            <legend>Item decision provider</legend>
-            {['mock', 'live'].map((mode) => (
-              <label key={mode}>
-                <input
-                  type="radio"
-                  name="workflow-provider"
-                  checked={s.settings.mode === mode}
-                  disabled={s.busy}
-                  onChange={() => ui.selectProvider(mode)}
-                />
-                {mode === 'mock'
-                  ? 'Mock · deterministic demonstration'
-                  : 'Live · configured provider'}
-              </label>
-            ))}
-          </fieldset>
+          <WorkflowOutcome value={guided.pickup} earlier={page < unlocked} />
+          {phase === 'deliver' && (
+            <Action className="primary" onClick={deliver}>
+              Deliver to picnic basket
+            </Action>
+          )}
+        </>
+      )}
+      {page === 8 && (
+        <>
+          <WorkflowOutcome
+            value={
+              humanWorking
+                ? outcome
+                : (results.human?.delivery ?? guided.delivery)
+            }
+            earlier={page < unlocked}
+          />
           <p>
-            Ollama or gateway URL and model are configured in Settings. Provider
-            selection alone makes no call. Starting restores the original pantry
-            and clears the basket and hands after Scout walks back to the board.
+            You supplied the route, the notice trigger, and the decision rule.
+            Scout can repeat them automatically, but that repetition is still a
+            human-designed workflow.
           </p>
-          <Action className="primary" onClick={startAI}>
-            Start AI workflow
-          </Action>
+          {humanReady && (
+            <div className="actions">
+              <Action
+                className="primary"
+                disabled={!!s.world.snapshot().unread}
+                onClick={addAI}
+              >
+                Add an AI model to this workflow
+              </Action>
+              <Action
+                disabled={!!s.world.snapshot().unread || s.stage === 'error'}
+                onClick={postAnother}
+              >
+                Post another notice
+              </Action>
+            </div>
+          )}
         </>
       )}
-      {phase === 'ai-take' && (
+      {page === 9 && (
         <>
-          <Action className="primary" onClick={aiTakeItem}>
-            Take item
-          </Action>
+          {phase === 'provider' ? (
+            <>
+              <fieldset className="provider-choice">
+                <legend>Item decision provider</legend>
+                {['mock', 'live'].map((mode) => (
+                  <label key={mode}>
+                    <input
+                      type="radio"
+                      name="workflow-provider"
+                      checked={s.settings.mode === mode}
+                      disabled={s.busy}
+                      onChange={() => ui.selectProvider(mode)}
+                    />
+                    {mode === 'mock'
+                      ? 'Mock · deterministic demonstration'
+                      : 'Live · configured provider'}
+                  </label>
+                ))}
+              </fieldset>
+              <p>
+                Ollama or gateway URL and model are configured in Settings.
+                Provider selection alone makes no call. Starting restores the
+                original pantry and clears the basket and hands after Scout
+                walks back to the board.
+              </p>
+              <Action className="primary" onClick={startAI}>
+                Start AI workflow
+              </Action>
+            </>
+          ) : (
+            <p>
+              Selected provider: {providerUsed === 'live' ? 'Live' : 'Mock'}.
+            </p>
+          )}
         </>
       )}
-      {phase === 'ai-done' && (
+      {page === 10 && (
         <>
+          <WorkflowOutcome
+            value={aiWorking ? outcome : results.ai?.inspection}
+            earlier={page < unlocked}
+          />
+          {phase === 'ai-take' && (
+            <Action className="primary" onClick={aiTakeItem}>
+              Take item
+            </Action>
+          )}
+        </>
+      )}
+      {page === 11 && (
+        <>
+          <WorkflowOutcome value={results.ai?.delivery} />
           <p>
             This is an AI workflow. A human-designed sequence still decided when
             Scout read, inspected, asked for a decision, and delivered. The
@@ -536,9 +623,17 @@ export function ScriptedWorkflow() {
           </Action>
         </>
       )}
-      {interrupted && ['human-done', 'provider', 'ai-done'].includes(phase) && (
-        <Action onClick={resume}>Resume patrol</Action>
+      {waiting && interrupted && page === resumePage && (
+        <Action className="primary" onClick={resume}>
+          Resume workflow
+        </Action>
       )}
+      {interrupted &&
+        ((page === 8 && phase === 'human-done') ||
+          (page === 9 && phase === 'provider') ||
+          (page === 11 && phase === 'ai-done')) && (
+          <Action onClick={resume}>Resume patrol</Action>
+        )}
       {phase !== 'start' && (
         <div className="lesson-step-footer">
           <Action className="quiet-action" onClick={restart}>
@@ -547,6 +642,45 @@ export function ScriptedWorkflow() {
         </div>
       )}
     </>
+  );
+}
+
+export function WorkflowOutcome({ value, earlier = false }) {
+  const counts = (stock) =>
+    `${stock.apple} apple${stock.apple === 1 ? '' : 's'}, ${stock.carrot} carrot${stock.carrot === 1 ? '' : 's'}`;
+  if (!value) return null;
+  return (
+    <div
+      className="workflow-outcome"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+    >
+      {earlier && <p className="hypothetical-label">Earlier observation</p>}
+      {value.kind === 'notice' && (
+        <>
+          <p>Scout read the notice:</p>
+          <blockquote>{value.notice}</blockquote>
+        </>
+      )}
+      {value.kind === 'inspection' && (
+        <p>
+          Scout inspected the pantry. Observed stock: {counts(value.pantry)}.
+        </p>
+      )}
+      {value.kind === 'pickup' && (
+        <p>
+          Scout took 1 {value.item}. Pantry after pickup: {counts(value.pantry)}
+          .
+        </p>
+      )}
+      {value.kind === 'delivery' && (
+        <p>
+          Scout delivered 1 {value.item} to the picnic basket. Basket:{' '}
+          {counts(value.basket)}. Pantry left: {counts(value.pantry)}.
+        </p>
+      )}
+    </div>
   );
 }
 

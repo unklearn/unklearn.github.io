@@ -176,3 +176,29 @@ still showed one call and zero tools. The progress line grew from 20% to 100%
 and the footer contained only Previous/Next text. The static build and existing
 18 focused checks pass. The footer portal mounts after static-HTML hydration;
 a fresh browser run logged no errors or warnings.
+
+## Step 1 mini-pages and retained outcomes
+
+Step 1 uses the shared footer navigation for twelve pages. Only the current
+page’s prose, instruction, and outcome render. Completed actions become
+read-only; practice answers and real observations remain available for review.
+Guided, repeated scripted, and AI outcomes are stored separately, so starting
+the AI comparison does not overwrite the guided observations. Restart explicitly
+clears page progress and results alongside the world.
+
+Browser-checked the complete guided workflow, wrong-answer retry, retained
+correct answers, and both backward/forward review. After pickup, reviewing the
+inspection kept Scout carrying the apple with pantry 1 apple / 2 carrots and
+zero provider calls. The old page showed its recorded 2 apples / 2 carrots and
+no Take action. Delivery could not be repeated from its earlier page.
+
+An explicitly posted scripted repeat delivered a carrot with pantry 1 apple /
+1 carrot and basket 1 apple / 1 carrot, without overwriting the guided pickup.
+The AI comparison restored the original stock and empty basket with zero calls
+before Take item. It completed with one provider call, one pickup, an apple in
+the basket, and pantry 1 apple / 2 carrots. Reviewing its observation and result
+kept those counts unchanged and exposed no duplicate Take action. System terminal
+stayed closed and the browser logged no errors or warnings.
+
+The existing 18 focused checks, formatting, and static build pass. No shared
+runtime, provider, tool handler, world rule, or later step was changed.

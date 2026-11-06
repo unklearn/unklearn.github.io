@@ -65,6 +65,14 @@ navigate the current step’s mini-pages, with a thin progress line along the to
 of the footer. Step 2 replaces its introduction with runtime, experiment,
 response, and schema pages. Revisiting a response never calls the provider again.
 
+Step 1 uses the same footer navigation for its guided actions, three practice
+examples, rule, delivery, provider choice, and AI comparison. Successful actions
+unlock later pages; correct practice answers unlock the next example. Earlier
+pages retain their observations and choices, with completed actions read-only.
+The guided observations also survive the AI comparison’s explicit world reset.
+Back/Next changes the displayed page without rewinding Scout or repeating work.
+**Restart step** explicitly clears the take, saved page outcomes, and progress.
+
 ## Contribute a step
 
 Open `article-sets/scout-foundations/articles/what-makes-scout-an-agent/`.
