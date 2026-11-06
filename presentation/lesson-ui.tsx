@@ -1,4 +1,14 @@
-import { createContext, useContext, useSyncExternalStore, useId } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useState,
+  useSyncExternalStore,
+  useId,
+} from 'react';
+import { createPortal } from 'react-dom';
 import type { ReactNode, ComponentType } from 'react';
 import type { StepMeta } from '../runtime/session.ts';
 import type { Trace } from '../runtime/types.ts';
@@ -35,12 +45,43 @@ interface LessonContext {
   host: PresentationHost;
   step: PresentationStep;
   replay: boolean;
+  active: boolean;
+  stepId: string;
+  publishNavigation: (id: string, value: MiniNavigation | null) => void;
   terminal?: (content: ReactNode) => void;
   selectProvider?: (mode: 'mock' | 'live') => void;
   navigate?: (id: string) => void;
   review?: (trace: Trace<unknown>, at?: number, seq?: number) => void;
 }
+interface MiniNavigation {
+  page: number;
+  count: number;
+  previous?: () => void;
+  next?: () => void;
+}
 const Context = createContext<LessonContext | null>(null);
+// Mini-pages are presentation state. Only authored Action handlers run experiments.
+export function useMiniSteps(
+  count: number,
+  { canNext = () => true }: { canNext?: (page: number) => boolean } = {},
+) {
+  const context = useContext(Context);
+  if (!context) throw new Error('Use mini-steps inside the lesson player');
+  const [page, setPage] = useState(0);
+  const forward = page < count - 1 && canNext(page);
+  const { active, stepId, publishNavigation } = context;
+  useLayoutEffect(() => {
+    if (!active) return;
+    publishNavigation(stepId, {
+      page,
+      count,
+      previous: page > 0 ? () => setPage((current) => current - 1) : undefined,
+      next: forward ? () => setPage((current) => current + 1) : undefined,
+    });
+    return () => publishNavigation(stepId, null);
+  }, [active, stepId, publishNavigation, page, count, forward]);
+  return [page, setPage] as const;
+}
 export function useLessonStep<T extends PresentationStep = PresentationStep>() {
   const context = useContext(Context);
   if (!context) throw new Error('Use a step inside the lesson player');
@@ -98,6 +139,8 @@ export function LessonPages({
   selectProvider,
   navigate,
   review,
+  navigationTarget,
+  onMiniStepChange,
 }: {
   article: LessonArticle;
   host: PresentationHost;
@@ -107,45 +150,103 @@ export function LessonPages({
   selectProvider?: (mode: 'mock' | 'live') => void;
   navigate?: (id: string) => void;
   review?: (trace: Trace<unknown>, at?: number, seq?: number) => void;
+  navigationTarget?: HTMLElement;
+  onMiniStepChange?: () => void;
 }) {
   useSyncExternalStore(host.subscribe, host.getRevision, host.getRevision);
+  // The footer portal joins after hydration; the initial HTML matches the static article.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const [navigation, setNavigation] = useState<
+    (MiniNavigation & { id: string }) | null
+  >(null);
+  const publishNavigation = useCallback(
+    (id: string, value: MiniNavigation | null) => {
+      setNavigation((current) =>
+        value ? { ...value, id } : current?.id === id ? null : current,
+      );
+    },
+    [],
+  );
+  const mini =
+    navigation?.id === article.steps[selected].meta.id ? navigation : null;
+  useLayoutEffect(() => {
+    onMiniStepChange?.();
+  }, [mini?.id, mini?.page]);
   return (
-    <article data-article={article.id}>
-      {article.steps.map((step, index) => {
-        const Content = step.default,
-          id = `${article.id}-${step.meta.id}`;
-        return (
-          <section
-            key={`${host.epoch}:${step.meta.id}`}
-            className={`teaching-step${index === selected ? ' selected' : ''}`}
-            hidden={index !== selected}
-            aria-labelledby={id}
-          >
-            <h1 id={id}>{step.meta.title}</h1>
-            <Context.Provider
-              value={{
-                host,
-                step: host.get(step.meta.id),
-                replay,
-                terminal,
-                selectProvider,
-                navigate,
-                review,
-              }}
+    <>
+      <article data-article={article.id}>
+        {article.steps.map((step, index) => {
+          const Content = step.default,
+            id = `${article.id}-${step.meta.id}`;
+          return (
+            <section
+              key={`${host.epoch}:${step.meta.id}`}
+              className={`teaching-step${index === selected ? ' selected' : ''}`}
+              hidden={index !== selected}
+              aria-labelledby={id}
             >
-              <div className="lesson-copy">
-                {host.get(step.meta.id).error && (
-                  <p className="lesson-error" role="alert">
-                    {host.get(step.meta.id).error}
-                  </p>
-                )}
-                <Content />
-              </div>
-            </Context.Provider>
-          </section>
-        );
-      })}
-    </article>
+              <h1 id={id}>{step.meta.title}</h1>
+              <Context.Provider
+                value={{
+                  host,
+                  step: host.get(step.meta.id),
+                  replay,
+                  active: index === selected,
+                  stepId: step.meta.id,
+                  publishNavigation,
+                  terminal,
+                  selectProvider,
+                  navigate,
+                  review,
+                }}
+              >
+                <div className="lesson-copy">
+                  {host.get(step.meta.id).error && (
+                    <p className="lesson-error" role="alert">
+                      {host.get(step.meta.id).error}
+                    </p>
+                  )}
+                  <Content />
+                </div>
+              </Context.Provider>
+            </section>
+          );
+        })}
+      </article>
+      {mounted &&
+        navigationTarget &&
+        createPortal(
+          <>
+            <button
+              aria-label="Previous mini-step"
+              disabled={!mini?.previous}
+              onClick={mini?.previous}
+            >
+              ← Previous
+            </button>
+            {mini && mini.count > 1 && (
+              <span
+                className="mini-step-progress"
+                role="progressbar"
+                aria-label="Progress within this step"
+                aria-valuemin={0}
+                aria-valuemax={mini.count}
+                aria-valuenow={mini.page + 1}
+                style={{ transform: `scaleX(${(mini.page + 1) / mini.count})` }}
+              />
+            )}
+            <button
+              aria-label="Next mini-step"
+              disabled={!mini?.next}
+              onClick={mini?.next}
+            >
+              Next →
+            </button>
+          </>,
+          navigationTarget,
+        )}
+    </>
   );
 }
 function changedLines(before: string, after: string) {

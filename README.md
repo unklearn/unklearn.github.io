@@ -60,6 +60,11 @@ noticeboard”; Live preserves its actual public response. A following mini-step
 explains the real reading schema without offering or executing it yet. Step 2
 has no prediction controls.
 
+The arrows beside **STEP 2/8** navigate article steps. Footer **Previous/Next**
+navigate the current step’s mini-pages, with a thin progress line along the top
+of the footer. Step 2 replaces its introduction with runtime, experiment,
+response, and schema pages. Revisiting a response never calls the provider again.
+
 ## Contribute a step
 
 Open `article-sets/scout-foundations/articles/what-makes-scout-an-agent/`.
@@ -72,6 +77,15 @@ and add its import to `article.ts`. Keep provider calls and job execution in
 event handlers. A cancellable idle patrol can start when the step becomes active;
 it must make no provider calls. The React component can advance through as many
 local mini-steps as the lesson needs.
+
+Use `const [page, setPage] = useMiniSteps(5)` to connect ordinary React state to
+the footer. Render each page conditionally. Optional `canNext: page => …` waits
+for real outcomes; Step 2 waits for a response before enabling its response page.
+Only an explicit `Action` runs an experiment. A completed experiment may call
+`setPage` to show its result. Browsing pages retains world state and results;
+leaving the article step still cancels unfinished work. Steps without this hook
+remain single pages, with disabled footer navigation. Header arrows and TOC
+always navigate article steps.
 
 A small authored interaction looks like this inside MDX:
 

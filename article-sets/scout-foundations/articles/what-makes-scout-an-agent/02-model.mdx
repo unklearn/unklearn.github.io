@@ -1,6 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { useScoutStep } from '../../authoring.ts';
-import { Action, RuntimeExcerpt } from '../../../../presentation/lesson-ui.tsx';
+import {
+  Action,
+  RuntimeExcerpt,
+  useMiniSteps,
+} from '../../../../presentation/lesson-ui.tsx';
 import { readSchema } from '../../tools.ts';
 
 export const meta = {
@@ -10,14 +14,13 @@ export const meta = {
   initial: { notice: '', tools: [] },
 };
 
-The AI workflow let a model choose an item inside a fixed sequence. Now we will give Scout a “brain” for deciding what to do next. That brain is a model, reached through a provider such as Mock or Ollama.
-
-Scout can be made aware of world events, such as a new notice arriving. A notification does not reveal what the notice says, and a brain does not automatically come with abilities to read, walk, or pick things up. We must connect those abilities separately.
-
 export function ModelTurn() {
   const s = useScoutStep();
   const [phase, setPhase] = useState('intro'),
     [response, setResponse] = useState(null);
+  const [page, setPage] = useMiniSteps(5, {
+    canNext: (index) => index !== 2 || !!response,
+  });
   const patrol = useRef(null),
     generation = useRef(0);
   const active = s.active;
@@ -40,7 +43,7 @@ export function ModelTurn() {
     if (patrol.current === task) patrol.current = null;
   }
   useEffect(() => {
-    if (!active || s.interrupted) return;
+    if (!active || s.interrupted || response) return;
     startPatrol();
     return () => {
       generation.current++;
@@ -57,6 +60,7 @@ export function ModelTurn() {
     if (token !== generation.current || !s.active || s.interrupted) return;
     setResponse(reply);
     setPhase(reply ? 'response' : 'retry');
+    if (reply) setPage((current) => (current === 2 ? 3 : current));
   }
   const instructions = {
     waiting: 'Scout is patrolling. A notice will arrive in a few seconds.',
@@ -67,18 +71,26 @@ export function ModelTurn() {
   };
   return (
     <>
-      {phase === 'intro' && (
+      {page === 0 && (
         <>
+          <p>
+            The AI workflow let a model choose an item inside a fixed sequence.
+            Now we will give Scout a “brain” for deciding what to do next. That
+            brain is a model, reached through a provider such as Mock or Ollama.
+          </p>
+          <p>
+            Scout can be made aware of world events, such as a new notice
+            arriving. A notification does not reveal what the notice says, and a
+            brain does not automatically come with abilities to read, walk, or
+            pick things up. We must connect those abilities separately.
+          </p>
           <p>
             Scout keeps patrolling for now. Before it can respond to an event,
             it needs a runtime to connect that event to its brain.
           </p>
-          <Action className="primary" onClick={() => setPhase('runtime')}>
-            What is a runtime?
-          </Action>
         </>
       )}
-      {phase === 'runtime' && (
+      {page === 1 && (
         <>
           <p>
             A runtime is the code that runs Scout: it receives an event, decides
@@ -93,36 +105,38 @@ export function ModelTurn() {
             <code>model(messages)</code> asks the selected provider once.
           </p>
           <RuntimeExcerpt code={blocks.invoke} method="evaluate" />
+        </>
+      )}
+      {page === 2 && (
+        <>
           <p>
             Run the experiment. After a random delay, a notice will appear.
             Scout will come to the board and invoke the model when that event
             needs a response. A thinking cloud marks the pending call; a
             question cloud afterward marks the missing reading ability.
           </p>
-          <Action className="primary" onClick={run}>
-            Run notice experiment
-          </Action>
+          {phase === 'running' && (
+            <blockquote className="workflow-instruction" aria-live="polite">
+              {s.interrupted
+                ? 'The experiment paused when you left this step. Resume to try the notice again.'
+                : (instructions[s.stage] ??
+                  'Preparing Scout’s response to the notice.')}
+            </blockquote>
+          )}
+          {(phase !== 'running' || s.interrupted) && (
+            <Action className="primary" onClick={run}>
+              {s.interrupted
+                ? 'Resume notice experiment'
+                : phase === 'retry'
+                  ? 'Try the notice again'
+                  : response
+                    ? 'Run notice experiment again'
+                    : 'Run notice experiment'}
+            </Action>
+          )}
         </>
       )}
-      {phase === 'running' && (
-        <blockquote className="workflow-instruction" aria-live="polite">
-          {s.interrupted
-            ? 'The experiment paused when you left this step. Resume to try the notice again.'
-            : (instructions[s.stage] ??
-              'Preparing Scout’s response to the notice.')}
-        </blockquote>
-      )}
-      {phase === 'running' && s.interrupted && (
-        <Action className="primary" onClick={run}>
-          Resume notice experiment
-        </Action>
-      )}
-      {phase === 'retry' && (
-        <Action className="primary" onClick={run}>
-          Try the notice again
-        </Action>
-      )}
-      {phase === 'response' && response && (
+      {page === 3 && response && (
         <>
           <p>
             {s.trace.mode === 'mock'
@@ -150,12 +164,7 @@ export function ModelTurn() {
           </p>
         </>
       )}
-      {phase === 'response' && (
-        <Action className="primary" onClick={() => setPhase('schema')}>
-          How can Scout read it?
-        </Action>
-      )}
-      {phase === 'schema' && (
+      {page === 4 && (
         <>
           <p>
             In Step 1, you called <strong>Read notice</strong> for Scout. That
@@ -189,7 +198,7 @@ export function ModelTurn() {
           </p>
         </>
       )}
-      {s.interrupted && ['intro', 'runtime'].includes(phase) && (
+      {s.interrupted && page < 2 && !response && (
         <Action onClick={startPatrol}>Resume patrol</Action>
       )}
     </>

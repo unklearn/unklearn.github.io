@@ -111,8 +111,21 @@
       </div>
       <aside id="lesson" aria-label="Lesson">
         <header class="lesson-header">
-          <span id="step-count">STEP 1/8</span
-          ><button
+          <nav class="step-navigation" aria-label="Article steps">
+            <button
+              id="previous-step"
+              aria-label="Previous step"
+              title="Previous step"
+              disabled
+            >
+              ←
+            </button>
+            <span id="step-count">STEP 1/8</span>
+            <button id="next-step" aria-label="Next step" title="Next step">
+              →
+            </button>
+          </nav>
+          <button
             id="toc-open"
             aria-haspopup="dialog"
             aria-controls="toc-panel"
@@ -121,9 +134,13 @@
           </button>
         </header>
         <div id="lesson-pages"><!-- lesson-slides --></div>
-        <footer class="lesson-navigation">
-          <button id="previous">← Previous</button
-          ><button id="next">Next →</button>
+        <footer
+          id="mini-step-navigation"
+          class="lesson-navigation"
+          aria-label="Mini-steps"
+        >
+          <button aria-label="Previous mini-step" disabled>← Previous</button>
+          <button aria-label="Next mini-step" disabled>Next →</button>
         </footer>
       </aside>
     </main>

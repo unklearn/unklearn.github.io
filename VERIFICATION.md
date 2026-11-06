@@ -160,3 +160,19 @@ executes the stored notice experiment, confirms no notice text or schemas enter
 the call, preserves the board light, and prevents a late call after navigation.
 Existing checks still verify early runtime boundaries, cancellation, all three
 autonomous picnic outcomes, source identity, and pure Replay.
+
+## Mini-step navigation
+
+Article-step arrows now sit beside STEP n/8. Footer Previous/Next changes the
+current MDX mini-page, using `useMiniSteps` presentation state. Step 2 has five
+pages and shows its actual response in place of its introduction. No visible
+mini-step numbers compete with the article-step count: a 2px footer-edge line
+shows progress and respects reduced motion.
+
+Browser checks confirmed zero calls while browsing to the experiment, disabled
+Next until a real response exists, backward/forward review without rerunning,
+and retained response/page after a header-arrow visit to Step 3 and back. Status
+still showed one call and zero tools. The progress line grew from 20% to 100%
+and the footer contained only Previous/Next text. The static build and existing
+18 focused checks pass. The footer portal mounts after static-HTML hydration;
+a fresh browser run logged no errors or warnings.

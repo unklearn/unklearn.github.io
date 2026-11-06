@@ -87,6 +87,8 @@ let queued = false,
 const isRecorded = () => reviewing || config.mode === 'replay';
 let selected = 0,
   lessonRoot: Root | undefined;
+const miniNavigation = $('mini-step-navigation');
+miniNavigation.replaceChildren();
 const host = createLessonHost({
   articleId: article.id,
   scenario: article.scenario,
@@ -122,8 +124,8 @@ function select(index: number) {
   $('lesson-pages').scrollTop = 0;
 }
 $('toc-open').onclick = () => toc.showModal();
-$('previous').onclick = () => select(selected - 1);
-$('next').onclick = () => select(selected + 1);
+$('previous-step').onclick = () => select(selected - 1);
+$('next-step').onclick = () => select(selected + 1);
 $('lesson-toggle').onclick = () => {
   const collapsed = $('app').classList.toggle('collapsed');
   $('lesson-toggle').setAttribute('aria-expanded', String(!collapsed));
@@ -142,6 +144,10 @@ function renderLesson() {
     article,
     host,
     selected,
+    navigationTarget: miniNavigation,
+    onMiniStepChange: () => {
+      $('lesson-pages').scrollTop = 0;
+    },
     replay: config.mode === 'replay',
     terminal: renderSystemTerminal,
     selectProvider: changeProvider,
@@ -163,8 +169,8 @@ function renderLesson() {
     }
   } else lessonRoot.render(content);
   $('step-count').textContent = `STEP ${selected + 1}/${steps.length}`;
-  $<HTMLButtonElement>('previous').disabled = selected === 0;
-  $<HTMLButtonElement>('next').disabled = selected === steps.length - 1;
+  $<HTMLButtonElement>('previous-step').disabled = selected === 0;
+  $<HTMLButtonElement>('next-step').disabled = selected === steps.length - 1;
   $('toc-steps')
     .querySelectorAll('button')
     .forEach((button, i) => {
