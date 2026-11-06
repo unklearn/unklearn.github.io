@@ -5,6 +5,7 @@ export interface Feedback {
   value: Record<string, unknown>;
 }
 export interface RuntimeOptions {
+  model: (messages: readonly Message[]) => Promise<Message>;
   provider: Provider;
   messages: Message[];
   tools: readonly Tool[];

@@ -1,80 +1,196 @@
-import { useState, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useScoutStep } from '../../authoring.ts';
-import {
-  Action,
-  Prediction,
-  RuntimeChange,
-  RuntimeExcerpt,
-  useLessonPresentation,
-} from '../../../../presentation/lesson-ui.tsx';
+import { Action, RuntimeExcerpt } from '../../../../presentation/lesson-ui.tsx';
+import { readSchema } from '../../tools.ts';
 
 export const meta = {
   id: 'model',
   title: 'Giving Scout control',
-  question: 'What information does the model actually have?',
-  initial: { tools: [] },
+  question: 'What can a brain do without a way to observe the world?',
+  initial: { notice: '', tools: [] },
 };
 
-The AI workflow let a model choose an item inside a fixed sequence. Now we will let it choose what to do next. Start with a fresh conversation: Scout receives only a new-notice notification, without the notice text, stock, or tools. A thinking bubble marks an actual pending provider call.
+The AI workflow let a model choose an item inside a fixed sequence. Now we will give Scout a “brain” for deciding what to do next. That brain is a model, reached through a provider such as Mock or Ollama.
+
+Scout can be made aware of world events, such as a new notice arriving. A notification does not reveal what the notice says, and a brain does not automatically come with abilities to read, walk, or pick things up. We must connect those abilities separately.
 
 export function ModelTurn() {
-  const [prediction, setPrediction] = useState(null);
-  const s = useScoutStep(),
-    [done, setDone] = useState(false),
+  const s = useScoutStep();
+  const [phase, setPhase] = useState('intro'),
     [response, setResponse] = useState(null);
-  function run() {
-    setResponse(null);
-    setDone(false);
-    s.reset({ notice: '', tools: [] });
-    s.world.postNotice();
-    s.setTools([]);
-    return s.act(async () => {
-      setResponse(await s.runtime(blocks.invoke).evaluate());
-      s.showContext({ outgoingMessages: s.messages, tools: s.schemas });
-      s.showQuestion(
-        'The reading capability is absent. No handler read the notice.',
-      );
-      s.saveCheckpoint('model-ready');
-      s.mark('needs-tool');
-      setDone(true);
-    });
+  const patrol = useRef(null),
+    generation = useRef(0);
+  const active = s.active;
+  function startPatrol() {
+    if (patrol.current && !patrol.current.signal.aborted) return;
+    const task = { stopping: false };
+    Object.assign(
+      task,
+      s.background(async (signal) => {
+        while (!task.stopping) await s.world.patrol(signal);
+      }),
+    );
+    patrol.current = task;
   }
+  async function finishPatrol() {
+    const task = patrol.current;
+    if (!task) return;
+    task.stopping = true;
+    await task.done;
+    if (patrol.current === task) patrol.current = null;
+  }
+  useEffect(() => {
+    if (!active || s.interrupted) return;
+    startPatrol();
+    return () => {
+      generation.current++;
+      patrol.current?.cancel();
+      patrol.current = null;
+    };
+  }, [active]);
+  async function run() {
+    const token = ++generation.current;
+    startPatrol();
+    setPhase('running');
+    setResponse(null);
+    const reply = await blocks.noticeTurn.module.run(s, finishPatrol);
+    if (token !== generation.current || !s.active || s.interrupted) return;
+    setResponse(reply);
+    setPhase(reply ? 'response' : 'retry');
+  }
+  const instructions = {
+    waiting: 'Scout is patrolling. A notice will arrive in a few seconds.',
+    approaching:
+      'A new notice has arrived. Scout is finishing the patrol at the noticeboard.',
+    thinking:
+      'Scout is asking its brain what to do. The thinking bubble appears only while that provider call is pending.',
+  };
   return (
     <>
-      <Prediction
-        question={meta.question}
-        choices={[
-          {
-            id: 'world',
-            label: 'The posted order and the pantry stock',
-            explanation:
-              'The input contained observations of the order and stock. Models can use information that is included in their conversation.',
-          },
-          {
-            id: 'conversation',
-            label: 'Only the conversation sent to it',
-            explanation:
-              'The outgoing input contained a new-notice notification, not the notice text or pantry stock. Running the model did not supply the missing observations.',
-          },
-        ]}
-        value={prediction}
-        onChange={setPrediction}
-        outcome={!s.busy && s.stage === 'needs-tool' ? 'conversation' : null}
-      />
-      <RuntimeChange to={blocks.invoke} />
-      <Action className="primary" onClick={run}>
-        Let Scout think
-      </Action>
-      {done && response?.content && (
-        <blockquote className="public-response">{response.content}</blockquote>
+      {phase === 'intro' && (
+        <>
+          <p>
+            Scout keeps patrolling for now. Before it can respond to an event,
+            it needs a runtime to connect that event to its brain.
+          </p>
+          <Action className="primary" onClick={() => setPhase('runtime')}>
+            What is a runtime?
+          </Action>
+        </>
       )}
-      {done && (
-        <p>
-          This is the provider’s actual public response. Whatever it proposes,
-          no reading handler ran. Context in System terminal shows the exact
-          order and stock were never sent. The question cloud marks the missing
-          capability, not private model reasoning.
-        </p>
+      {phase === 'runtime' && (
+        <>
+          <p>
+            A runtime is the code that runs Scout: it receives an event, decides
+            when to ask the model, and handles the response. The model does not
+            watch this courtyard or run itself. This connection is the beginning
+            of Scout’s agent runtime.
+          </p>
+          <p>
+            Our first version needs a model provider and a conversation. The
+            provider is simply the connection we call to ask Scout’s brain.
+            Here, <code>messages</code> contains what Scout has been told, and
+            <code>model(messages)</code> asks the selected provider once.
+          </p>
+          <RuntimeExcerpt code={blocks.invoke} method="evaluate" />
+          <p>
+            Run the experiment. After a random delay, a notice will appear.
+            Scout will come to the board and invoke the model when that event
+            needs a response. A thinking cloud marks the pending call; a
+            question cloud afterward marks the missing reading ability.
+          </p>
+          <Action className="primary" onClick={run}>
+            Run notice experiment
+          </Action>
+        </>
+      )}
+      {phase === 'running' && (
+        <blockquote className="workflow-instruction" aria-live="polite">
+          {s.interrupted
+            ? 'The experiment paused when you left this step. Resume to try the notice again.'
+            : (instructions[s.stage] ??
+              'Preparing Scout’s response to the notice.')}
+        </blockquote>
+      )}
+      {phase === 'running' && s.interrupted && (
+        <Action className="primary" onClick={run}>
+          Resume notice experiment
+        </Action>
+      )}
+      {phase === 'retry' && (
+        <Action className="primary" onClick={run}>
+          Try the notice again
+        </Action>
+      )}
+      {phase === 'response' && response && (
+        <>
+          <p>
+            {s.trace.mode === 'mock'
+              ? 'Mock’s public response:'
+              : 'The provider’s public response:'}
+          </p>
+          {response.content ? (
+            <blockquote className="public-response">
+              {response.content}
+            </blockquote>
+          ) : (
+            <p>
+              The provider returned no public text
+              {response.tool_calls?.length
+                ? ` and requested ${response.tool_calls[0].function.name}`
+                : ''}
+              . No tool was available or executed.
+            </p>
+          )}
+          <p>
+            Scout knows that a notice exists, but has not read it. The amber
+            light stays on. Even if the response promises to check the board,
+            saying that does not execute a reading function. The bubble and
+            public reply are not a display of private model reasoning.
+          </p>
+        </>
+      )}
+      {phase === 'response' && (
+        <Action className="primary" onClick={() => setPhase('schema')}>
+          How can Scout read it?
+        </Action>
+      )}
+      {phase === 'schema' && (
+        <>
+          <p>
+            In Step 1, you called <strong>Read notice</strong> for Scout. That
+            function still exists. To let the model ask for it, we will send a
+            description of the tool alongside the conversation.
+          </p>
+          <p>
+            That description is a <strong>schema</strong>: structured data
+            describing the function’s name, purpose, and accepted arguments.
+            This is the actual reading tool’s schema:
+          </p>
+          <figure className="source tool-schema">
+            <figcaption>read_notice · tool schema</figcaption>
+            <pre>
+              <code>{JSON.stringify(readSchema, null, 2)}</code>
+            </pre>
+          </figure>
+          <p>
+            <code>name</code> identifies the function to request.{' '}
+            <code>description</code> explains what it does, when to use it, and
+            what comes back. The model uses that description to infer whether
+            this tool can help with the event it was told about.{' '}
+            <code>parameters</code> defines valid arguments; this reader needs
+            none, so its properties are empty.
+          </p>
+          <p>
+            A model cannot look inside our JavaScript functions. The schema
+            gives it an interface for choosing a tool and forming a request.
+            Sending a schema does not run the function. This experiment has not
+            offered it yet; connecting and executing it comes next.
+          </p>
+        </>
+      )}
+      {s.interrupted && ['intro', 'runtime'].includes(phase) && (
+        <Action onClick={startPatrol}>Resume patrol</Action>
       )}
     </>
   );
@@ -89,8 +205,47 @@ export class AgentRuntime {
   constructor(public options: RuntimeOptions) {}
 
   async evaluate() {
-    const { provider, messages, signal } = this.options;
-    return provider(messages, [], signal);
+    const { model, messages } = this.options;
+    return model(messages);
   }
+}
+```
+
+```ts experiment="noticeTurn"
+import type { ScoutStep } from '../../session.ts';
+import type { Message } from '../../../../runtime/types.ts';
+import { scriptedObservation } from '../../workflow.ts';
+import { blocks } from './02-model.mdx';
+
+export async function run(
+  s: ScoutStep,
+  finishPatrol: () => Promise<void>,
+  delay = 2000 + Math.random() * 2000,
+) {
+  let response: Message | undefined;
+  const signal = s.signal;
+  await s.act(async () => {
+    s.mark('waiting');
+    await s.sleep(delay, signal);
+    signal.throwIfAborted();
+    s.world.postNotice();
+    s.mark('approaching');
+    await finishPatrol();
+    signal.throwIfAborted();
+    await scriptedObservation(s, 'walk_to noticeboard', () =>
+      s.world.walkTo('noticeboard', signal),
+    );
+    s.resetContext();
+    s.mark('thinking');
+    response = await s.runtime(blocks.invoke).evaluate();
+    signal.throwIfAborted();
+    s.showContext({ outgoingMessages: s.messages, tools: s.schemas });
+    s.showQuestion(
+      'The reading capability is absent. No handler read the notice.',
+    );
+    s.saveCheckpoint('model-ready');
+    s.mark('needs-tool');
+  });
+  return response;
 }
 ```

@@ -12,7 +12,7 @@ const normalize = (s: string) =>
 // Lesson-authored deterministic dialogue, not a language model or hidden reasoning.
 // Its only inputs are the conversation and available tool schemas.
 export function createMockProvider(
-  unreadNoticeIntent = 'I need a way to read that notice.',
+  unreadNoticeIntent = 'I need to read the noticeboard.',
 ): Provider {
   return async (messages, tools, signal) => {
     signal.throwIfAborted();

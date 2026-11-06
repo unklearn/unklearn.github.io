@@ -294,6 +294,10 @@ canvas {
   background: none;
   font: inherit;
 }
+.tool-schema pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
 .code-line {
   display: block;
   min-height: 1.7em;

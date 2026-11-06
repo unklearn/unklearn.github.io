@@ -309,7 +309,9 @@ export function createSessionHost<
             throw new Error('Take is no longer active');
         };
         emit({ kind: 'runtime_selected', text: block.id });
+        const provider = connectProvider();
         return new Constructor({
+          model: (input) => provider(input, [], signal),
           messages,
           tools: scenario.selectTools(world, tools),
           getTools: () => scenario.selectTools(world, tools),
@@ -318,7 +320,7 @@ export function createSessionHost<
             assertActive();
             emit(e);
           },
-          provider: connectProvider(),
+          provider,
         });
       },
       callProvider(
@@ -447,6 +449,9 @@ export function createSessionHost<
       },
       get busy() {
         return busy;
+      },
+      get signal() {
+        return abort.signal;
       },
       get messages() {
         return messages;

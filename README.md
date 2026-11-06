@@ -51,6 +51,15 @@ executed, delivered, and recorded. Live choices are never corrected silently.
 Step 1 shows no code. **Give Scout control** enters Step 2, where a fresh model
 turn receives only a notice notification and the executable runtime begins.
 
+Step 2 introduces Scout’s brain, then explains what a runtime does before showing
+the invocation-only code. Scout patrols while the reader explores the prose.
+**Run notice experiment** starts a random 2–4 second delay, posts the notice,
+finishes the patrol at the board, and makes one provider call. The model receives
+the notification without the notice text or tools. Mock says “I need to read the
+noticeboard”; Live preserves its actual public response. A following mini-step
+explains the real reading schema without offering or executing it yet. Step 2
+has no prediction controls.
+
 ## Contribute a step
 
 Open `article-sets/scout-foundations/articles/what-makes-scout-an-agent/`.
@@ -59,9 +68,10 @@ and configuration examples live together. `article.ts` imports the files and
 sets their order. There is no step generator, prompt brief, or dispatch driver.
 
 To add a step, copy an MDX file, give its exported `meta` a unique `id` and title,
-and add its import to `article.ts`. Keep interactions in event handlers, never in
-render functions or mount effects. The React component can advance through as
-many local mini-steps as the lesson needs.
+and add its import to `article.ts`. Keep provider calls and job execution in
+event handlers. A cancellable idle patrol can start when the step becomes active;
+it must make no provider calls. The React component can advance through as many
+local mini-steps as the lesson needs.
 
 A small authored interaction looks like this inside MDX:
 
@@ -138,6 +148,12 @@ resolves `getTools()` before each evaluation and retains that selection for
 matching dispatch. Adding a tool changes configuration on the same instance.
 Only the selected snapshot runs; the session host never fills in missing logic.
 The build type-checks every stored TypeScript block before bundling it.
+
+The first snapshot uses `model(messages)`, a connection to the instrumented
+provider with no tools and the session’s cancellation signal already bound.
+Later snapshots use `provider(messages, schemas, signal)` as capabilities grow.
+Both go through the same provider activity and trace recording; neither
+connection supplies dispatch, feedback, or looping behavior.
 
 `runtime/session.ts` is generic infrastructure. The article manifest supplies
 `scenario`, defined in Foundations `scenario.ts`: world creation, authoritative

@@ -10,7 +10,8 @@ const readNotice: ToolDefinition = {
   type: 'function',
   function: {
     name: 'read_notice',
-    description: 'Read the nearby noticeboard. Returns its exact text.',
+    description:
+      'Read the notice posted on the noticeboard when Scout is nearby. Returns the exact posted text so you can learn the order. Use this after a new-notice notification; that notification does not contain the notice itself.',
     parameters: { type: 'object', properties: {}, additionalProperties: false },
   },
 };

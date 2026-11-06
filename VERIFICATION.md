@@ -138,3 +138,25 @@ controls and their metadata are removed from all eight steps. The typewriter
 experiment was removed; prose, instructions, and actions appear immediately.
 Browser-checked the static build and Restart placement. All 17 checks, the
 static build, and formatting pass.
+
+## Step 2: brain, runtime, and a missing reading tool
+
+Step 2 now opens with authoritative idle patrol and explains the runtime before
+the invocation-only source excerpt. Its explicit experiment posts a notice
+after 2–4 seconds, finishes the patrol at the board, then makes one model call.
+The next mini-step explains the real reading schema without enabling it. No
+prediction interaction, tool dispatch, feedback cycle, or later curriculum was
+added to Step 2.
+
+Browser verification from the static build showed zero calls/tools during
+patrol. After Run, Mock said “I need to read the noticeboard,” Scout stood at
+the board with the question cloud, and Status showed one call, zero tools,
+unread notice, no notice in context, and unknown stock. The schema and its
+description wrapped within the content pane; System terminal remained closed.
+The browser logged no errors or warnings.
+
+All 18 focused checks, formatting, and the static build pass. The new check
+executes the stored notice experiment, confirms no notice text or schemas enter
+the call, preserves the board light, and prevents a late call after navigation.
+Existing checks still verify early runtime boundaries, cancellation, all three
+autonomous picnic outcomes, source identity, and pure Replay.

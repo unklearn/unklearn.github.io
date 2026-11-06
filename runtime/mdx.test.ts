@@ -117,6 +117,42 @@ test('MDX source is executable source; early runtimes lack dispatch and feedback
     assert.deepEqual(gated.world.snapshot().pantry, { apple: 2, carrot: 2 });
   });
 });
+test('Step 2 responds to a real notice once without reading it or offering tools', async () => {
+  const h = host();
+  h.select(1);
+  const s = h.current;
+  assert.equal(s.world.snapshot().notice, '');
+  await s.world.patrol();
+  assert(!s.trace.events.some((event) => event.kind === 'model_start'));
+  const experiment = article.steps[1].blocks.noticeTurn;
+  assert(experiment, 'Step 2 owns its notice experiment');
+  const reply = (await experiment.module.run!(s, async () => {}, 0)) as Message;
+  assert.equal(reply.content, 'I need to read the noticeboard.');
+  const calls = s.trace.events.filter((event) => event.kind === 'model_start');
+  assert.equal(calls.length, 1);
+  assert.deepEqual(calls[0].schemas, []);
+  assert(!JSON.stringify(calls[0].messages).includes(defaultOrder));
+  assert(!calls[0].messages?.some((message) => message.role === 'tool'));
+  assert(
+    s.trace.events.findIndex((event) => event.kind === 'notice_posted') <
+      s.trace.events.indexOf(calls[0]),
+  );
+  assert(
+    !s.trace.events.some((event) =>
+      ['read', 'notice_read', 'tool_start', 'tool_result'].includes(event.kind),
+    ),
+  );
+  assert.equal(s.world.snapshot().unread, true);
+  assert.equal(s.world.snapshot().place, 'noticeboard');
+  assert.equal(s.stage, 'needs-tool');
+  assert(s.trace.events.some((event) => event.kind === 'capability_missing'));
+  const interrupted = host();
+  interrupted.select(1);
+  const waiting = interrupted.current;
+  await experiment.module.run!(waiting, async () => interrupted.select(2), 0);
+  assert(waiting.signal.aborted);
+  assert(!waiting.trace.events.some((event) => event.kind === 'model_start'));
+});
 test('held observation is unknown until the evolved runtime appends matching feedback', async () => {
   const h = host();
   h.select(2);
