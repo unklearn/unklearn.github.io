@@ -18,6 +18,7 @@
     "scene",
     "presentation",
     "article-sets",
+    "labs",
     "scripts",
     "vite.config.ts",
     "authoring"

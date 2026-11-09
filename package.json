@@ -11,7 +11,7 @@
     "dev": "vite --host 127.0.0.1 --port 4333",
     "build": "tsc --noEmit && node --import tsx authoring/check.ts && vite build && node --import tsx scripts/prerender.ts",
     "preview": "vite preview --host 127.0.0.1 --port 4333",
-    "test": "node --import tsx --test runtime/*.test.ts",
+    "test": "node --import tsx --test runtime/*.test.ts labs/last-apple/*.test.ts",
     "record": "node --import tsx scripts/record.ts",
     "verify:live": "node --env-file-if-exists=.env --import tsx scripts/live.ts",
     "format": "prettier --write .",

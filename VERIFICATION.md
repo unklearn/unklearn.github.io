@@ -202,3 +202,27 @@ stayed closed and the browser logged no errors or warnings.
 
 The existing 18 focused checks, formatting, and static build pass. No shared
 runtime, provider, tool handler, world rule, or later step was changed.
+
+## The Last Apple lab
+
+`npm run build` emitted both `dist/index.html` and
+`dist/labs/last-apple/index.html` with relative assets. Served that directory
+with Python's static HTTP server and verified direct lab load, refresh, and
+the link back to Scout Foundations. The lab and Foundations logged no errors
+or warnings in the browser. At 390px wide, the timeline stacked without
+horizontal overflow. Keyboard activation advanced the recording, ran an
+experiment, and opened Under the Hood.
+
+The recorded tool result stayed unchanged: one apple entered Scout's hands,
+zero apples remained in the pantry, and the subsequent report claimed
+delivery as instructed. Replay returned to the original inventory. In the
+simulation, guidance allowed the transfer, post-action evaluation detected
+the violation after the transfer, the dispatcher guard skipped the operation,
+and domain enforcement called the operation and refused the write. Carrot
+continuation succeeded, the no-carrot case was blocked, and two apples
+allowed a guarded apple withdrawal. Reset and input changes clear the
+simulation result independently of the recording.
+
+All 25 checks, formatting, and the static build pass. The added tests cover
+the recorded evidence, immutable replay snapshots, and deterministic
+simulation outcomes. No Foundations runtime or recording was modified.

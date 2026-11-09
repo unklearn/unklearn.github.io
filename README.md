@@ -17,6 +17,26 @@ Use `npm run dev` when editing: MDX changes refresh the browser and reset the ta
 `npm run build` produces the independently hostable static site with relative URLs
 and pre-rendered lesson HTML. Serve it over HTTP; `file://` is unsupported.
 
+## The Last Apple lab
+
+With the same server running, open http://127.0.0.1:4333/labs/last-apple/.
+Step through the actual Qwen3 browser-world recording, then run the scripted
+comparison. Try one apple with **Model guidance only**, then switch to
+**Domain enforcement** and run again. Enable the carrot continuation to
+complete the job after a refusal, or start with two apples to see the guard
+allow an apple withdrawal.
+
+The recorded walkthrough uses `traces/ollama-last-apple.json` unchanged.
+The simulation uses its own inventory and stops at pickup. Its outcome check
+requires one collected snack and at least one apple remaining. No model,
+application backend, or API key is needed. Replay only moves the playhead.
+
+`routes.ts` registers both directory URLs for one Vite build. To add a route,
+register its URL and place an HTML entry at the corresponding path. Publish
+the entire `dist/` directory to a static host that serves directory indexes.
+Use the host's `/labs/last-apple/` URL in the accompanying article. Both routes
+work on direct load and refresh without a client router or fallback rewrite.
+
 ## Formatting
 
 Prettier formats TypeScript, React, CSS, HTML, Markdown, and MDX, including the
