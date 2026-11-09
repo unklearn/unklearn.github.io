@@ -77,10 +77,10 @@ is unlisted and remains reachable at `/foundations/`.
 3. In **Settings → Pages → Build and deployment**, set **Source** to
    **GitHub Actions**.
    [GitHub Pages publishing sources](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site)
-4. In **Actions → Publish Unklearn**, select **Run workflow** on `main`.
-   The workflow runs only when manually started. It tests the runtime and
-   publishes `dist-release/`. Use [the lab URL](https://unklearn.github.io/labs/last-apple/)
-   in the article.
+4. Each push to `main` runs **Publish Unklearn**. The workflow tests the runtime
+   and publishes `dist-release/`. You can also start it manually under
+   **Actions → Publish Unklearn → Run workflow**. Use
+   [the lab URL](https://unklearn.github.io/labs/last-apple/) in the article.
 
 ## Formatting
 
