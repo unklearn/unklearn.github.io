@@ -12,6 +12,7 @@ import { createPortal } from 'react-dom';
 import type { ReactNode, ComponentType } from 'react';
 import type { StepMeta } from '../runtime/session.ts';
 import type { Trace } from '../runtime/types.ts';
+import type { ReplayCue } from '../runtime/replay.ts';
 interface PresentationStep {
   busy: boolean;
   error?: string;
@@ -50,8 +51,10 @@ interface LessonContext {
   publishNavigation: (id: string, value: MiniNavigation | null) => void;
   terminal?: (content: ReactNode) => void;
   selectProvider?: (mode: 'mock' | 'live') => void;
+  openSettings?: () => void;
   navigate?: (id: string) => void;
-  review?: (trace: Trace<unknown>, at?: number, seq?: number) => void;
+  review?: (trace: Trace<unknown>, cue?: ReplayCue) => void;
+  leaveReview?: () => void;
 }
 interface MiniNavigation {
   page: number;
@@ -60,7 +63,7 @@ interface MiniNavigation {
   next?: () => void;
 }
 const Context = createContext<LessonContext | null>(null);
-// Mini-pages are presentation state. Only authored Action handlers run experiments.
+// Mini-pages are presentation state. Explicit controls run experiments and replay.
 export function useMiniSteps(
   count: number,
   { canNext = () => true }: { canNext?: (page: number) => boolean } = {},
@@ -96,12 +99,14 @@ export function useLessonPresentation() {
   const context = useContext(Context)!;
   return {
     selectProvider: (mode: 'mock' | 'live') => context.selectProvider?.(mode),
+    openSettings: context.openSettings,
     goToStep: (id: string) => context.navigate?.(id),
     renderSystemTerminal: (content: ReactNode) => context.terminal?.(content),
     showContext: context.step.showContext,
     showQuestion: context.step.showQuestion,
-    reviewTrace: (trace: Trace<unknown>, at?: number, seq?: number) =>
-      context.review?.(trace, at, seq),
+    reviewTrace: (trace: Trace<unknown>, cue?: ReplayCue) =>
+      context.review?.(trace, cue),
+    leaveReview: context.leaveReview,
   };
 }
 export function Action({
@@ -137,8 +142,10 @@ export function LessonPages({
   replay = false,
   terminal,
   selectProvider,
+  openSettings,
   navigate,
   review,
+  leaveReview,
   navigationTarget,
   onMiniStepChange,
 }: {
@@ -148,8 +155,10 @@ export function LessonPages({
   replay?: boolean;
   terminal?: (content: ReactNode) => void;
   selectProvider?: (mode: 'mock' | 'live') => void;
+  openSettings?: () => void;
   navigate?: (id: string) => void;
-  review?: (trace: Trace<unknown>, at?: number, seq?: number) => void;
+  review?: (trace: Trace<unknown>, cue?: ReplayCue) => void;
+  leaveReview?: () => void;
   navigationTarget?: HTMLElement;
   onMiniStepChange?: () => void;
 }) {
@@ -170,6 +179,11 @@ export function LessonPages({
   );
   const mini =
     navigation?.id === article.steps[selected].meta.id ? navigation : null;
+  const nextStep = article.steps[selected + 1];
+  const nextSlide =
+    (!mini || mini.page === mini.count - 1) && nextStep && navigate
+      ? () => navigate(nextStep.meta.id)
+      : undefined;
   useLayoutEffect(() => {
     onMiniStepChange?.();
   }, [mini?.id, mini?.page]);
@@ -197,8 +211,10 @@ export function LessonPages({
                   publishNavigation,
                   terminal,
                   selectProvider,
+                  openSettings,
                   navigate,
                   review,
+                  leaveReview,
                 }}
               >
                 <div className="lesson-copy">
@@ -237,9 +253,9 @@ export function LessonPages({
               />
             )}
             <button
-              aria-label="Next mini-step"
-              disabled={!mini?.next}
-              onClick={mini?.next}
+              aria-label={nextSlide ? 'Next lesson step' : 'Next mini-step'}
+              disabled={!mini?.next && !nextSlide}
+              onClick={mini?.next ?? nextSlide}
             >
               Next →
             </button>

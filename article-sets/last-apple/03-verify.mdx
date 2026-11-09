@@ -1,0 +1,128 @@
+import {
+  Action,
+  useLessonPresentation,
+} from '../../presentation/lesson-ui.tsx';
+import { useScoutStep } from '../scout-foundations/authoring.ts';
+import { blocks as agent } from '../scout-foundations/articles/what-makes-scout-an-agent/06-capabilities.mdx';
+import {
+  continueVerification,
+  pantryRefusalCheckpoint,
+  reserveRefusal,
+  runEnforcement,
+} from './experiment.ts';
+import { picnicNotice, picnicPantry } from './guidance.ts';
+
+export const meta = {
+  id: 'verify',
+  title: 'Verify · Did protecting the apple complete the picnic?',
+  initial: {
+    notice: picnicNotice,
+    pantry: picnicPantry,
+    checkpoint: pantryRefusalCheckpoint,
+    pickupPolicy: reserveRefusal,
+  },
+};
+
+export function VerifyPicnic() {
+  const step = useScoutStep();
+  const { selectProvider } = useLessonPresentation();
+  const final = step.trace.final;
+  const outcome = step.trace.events.findLast(
+    (event) => event.kind === 'outcome_check',
+  )?.result;
+  const hasRefusal = step.data.pantryRefused === true;
+  const savedRefusal =
+    step.recall('last-apple-enforcement-domain')?.status === 'pickup refused';
+  const canContinue =
+    !outcome &&
+    (hasRefusal || savedRefusal) &&
+    (step.stage === 'ready' || step.stage === 'pickup refused');
+  return (
+    <div className="verify-flow">
+      <p>
+        This demonstration uses <strong>Mock</strong> so Scout starts by asking
+        for the last apple. The pantry checks its current stock and refuses the
+        request. Can Scout use that reply to finish the picnic?
+      </p>
+      <p>
+        At the end, we’ll check for one snack in the basket, empty hands, and an
+        apple still on the shelf.
+      </p>
+      {!hasRefusal && !savedRefusal && (
+        <Action
+          className="primary"
+          onClick={() => {
+            selectProvider('mock');
+            return runEnforcement(step, 'domain', agent.dynamic);
+          }}
+        >
+          {step.busy ? 'Scout is working…' : 'Try taking the last apple'}
+        </Action>
+      )}
+      {canContinue && !step.busy && (
+        <>
+          <section aria-label="Refusal checkpoint">
+            <p className="trial-outcome failure">
+              <strong>Picnic incomplete.</strong> The pantry kept its last
+              apple. The picnic basket is still empty.
+            </p>
+          </section>
+          <p>
+            The pantry’s reply says why it refused the apple. Let Scout use that
+            reply and the earlier pantry count to choose another snack.
+          </p>
+          <Action
+            className="primary"
+            onClick={() => {
+              selectProvider('mock');
+              if (
+                !hasRefusal &&
+                !step.restoreCheckpoint(pantryRefusalCheckpoint)
+              )
+                return;
+              return continueVerification(step, agent.dynamic);
+            }}
+          >
+            Let Scout try another snack
+          </Action>
+        </>
+      )}
+      {step.busy && (hasRefusal || savedRefusal) && (
+        <p role="status">Scout is working on the picnic…</p>
+      )}
+      {outcome && final && !step.busy && (
+        <section aria-label="Final verification">
+          <p
+            className={
+              outcome.reserveHeld && outcome.picnicComplete
+                ? 'trial-outcome success'
+                : 'trial-outcome failure'
+            }
+          >
+            <strong>
+              {outcome.picnicComplete
+                ? 'Picnic complete.'
+                : 'Picnic incomplete.'}
+            </strong>{' '}
+            {outcome.picnicComplete &&
+              'Scout delivered a carrot to the picnic basket and has empty hands. '}
+            {outcome.reserveHeld
+              ? 'The last apple is still in the pantry.'
+              : 'The pantry has no apples left, breaking the reserve rule.'}
+          </p>
+        </section>
+      )}
+      {hasRefusal && (outcome || step.error) && (
+        <Action
+          onClick={() => {
+            step.restoreCheckpoint(pantryRefusalCheckpoint);
+          }}
+        >
+          Restart from the refusal
+        </Action>
+      )}
+    </div>
+  );
+}
+
+<VerifyPicnic />

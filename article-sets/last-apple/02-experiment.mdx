@@ -1,0 +1,206 @@
+import {
+  Action,
+  useLessonPresentation,
+  useMiniSteps,
+} from '../../presentation/lesson-ui.tsx';
+import { useScoutStep } from '../scout-foundations/authoring.ts';
+import { blocks as agent } from '../scout-foundations/articles/what-makes-scout-an-agent/06-capabilities.mdx';
+import recording from '../../traces/last-apple-guidance.json';
+import { runEnforcement } from './experiment.ts';
+import {
+  guidanceEvidence,
+  picnicNotice,
+  picnicPantry,
+  reserveRule,
+} from './guidance.ts';
+
+export const meta = {
+  id: 'experiment',
+  title: 'Enforce · Can the system reject a bad proposal?',
+  initial: { notice: picnicNotice, pantry: picnicPantry },
+};
+
+export const strategies = [
+  {
+    id: 'guidance',
+    title: 'Guidance only',
+    description:
+      'The pickup tool is the action that takes a snack off the shelf. The model receives a short specification, called a JSON schema, that tells it how to request the action. We add the reserve rule to the description in that specification.',
+  },
+  {
+    id: 'evaluate',
+    title: 'Check after the pickup',
+    description:
+      'Scout attempts the pickup first. Then the system counts the apples left on the shelf. If it finds zero, it reports that the rule was broken. By then, the apple is already in Scout’s hands.',
+  },
+  {
+    id: 'guard',
+    title: 'Check before the pickup',
+    description:
+      'The system checks the request before it reaches the pantry. It uses the stock count from Scout’s earlier inspection to see whether taking one apple would leave at least one behind. If it would empty the shelf, the system refuses the request. This approach depends on how current the inspection is.',
+  },
+];
+
+export function carrotCount(placement) {
+  const trials = recording.trials.filter(
+    (trial) => trial.placement === placement,
+  );
+  const carrots = trials.filter(
+    ({ trace }) => guidanceEvidence(trace).decision.item === 'carrot',
+  );
+  return carrots.length + ' of ' + trials.length;
+}
+
+export function ReserveExperiment() {
+  const step = useScoutStep();
+  const { openSettings } = useLessonPresentation();
+  const [page] = useMiniSteps(strategies.length + 2);
+  const strategy = strategies[page - 1];
+  if (page === 0)
+    return (
+      <>
+        <h2>Why enforce the rule?</h2>
+        <p>
+          In Inform we stopped after the model asked for a snack. Here Scout
+          attempts the pickup. We’ll compare what happens when the system checks
+          the reserve rule before the pickup, after it, or leaves the rule as
+          guidance for the model.
+        </p>
+        <p>
+          Every run starts with one apple and three carrots. In{' '}
+          <strong>Mock</strong>, Scout always asks for the last apple, so you
+          can compare how each strategy handles the same request. Mock works
+          without any setup.
+        </p>
+        <p>
+          Choose <strong>Live</strong> in Settings to let a model propose the
+          pickup. Ollama runs language models on your computer. Once it’s
+          running with a model that supports tool calls, choose{' '}
+          <strong>Local Ollama</strong> and enter its URL and model name. The
+          strategy will handle whatever pickup the model requests.{' '}
+          <a href="https://docs.ollama.com/quickstart">Ollama quickstart</a>
+        </p>
+        <Action onClick={() => openSettings?.()}>Open Settings</Action>
+        <p>
+          Choose <strong>Next</strong> below to try the first strategy.
+        </p>
+      </>
+    );
+  if (!strategy)
+    return (
+      <>
+        <h2>What the trials showed</h2>
+        <p>
+          With the reserve rule only in the tool description, Qwen3 proposed a
+          carrot in {carrotCount('tool')} trials. With the same description and
+          the rule repeated on the noticeboard, it proposed a carrot in{' '}
+          {carrotCount('both')} trials. The two groups had identical tool
+          schemas. The difference was where Qwen3 encountered the rule.
+        </p>
+        <p>
+          Guidance can affect what Scout asks for. The check before pickup uses
+          Scout’s earlier count to stop a request before it reaches the pantry.
+          In Verify, the pantry itself checks what’s on the shelf as Scout tries
+          to take a snack. Then we’ll see how Scout responds to a refusal.
+        </p>
+      </>
+    );
+  const resultKey = 'last-apple-enforcement-' + strategy.id;
+  const trace = step.recall(resultKey);
+  const result = trace?.events.find(
+    (event) => event.kind === 'tool_result' && event.tool?.name === 'take_one',
+  )?.result;
+  const audit = trace?.events.find((event) => event.kind === 'outcome_check');
+  const final = trace?.final;
+  const reserveHeld = final?.pantry.apple >= 1;
+  const pickedCarrot = result?.ok && result.item === 'carrot';
+  const pickup = result?.ok
+    ? `Scout picked up ${result.item === 'apple' ? 'the apple' : 'a carrot'}.`
+    : result?.source === 'dispatcher'
+      ? 'The system stopped the request before it reached the pantry.'
+      : 'The pantry refused the pickup.';
+  const noProposal = trace?.status === 'no proposal';
+  const malformed = trace?.status === 'malformed';
+  return (
+    <>
+      <h2>{strategy.title}</h2>
+      <p>{strategy.description}</p>
+      {strategy.id === 'guidance' && (
+        <>
+          <figure className="source tool-schema">
+            <figcaption>Text added to the JSON description</figcaption>
+            <pre>
+              <code>
+                {JSON.stringify({ description: '… ' + reserveRule }, null, 2)}
+              </code>
+            </pre>
+          </figure>
+          <p>
+            The description tells the model what to do. When the request reaches
+            the pantry, the pickup checks whether the snack is on the shelf. Try
+            it to see what happens to the last apple.
+          </p>
+        </>
+      )}
+      <Action
+        className="primary"
+        onClick={async () => {
+          const previousId = step.trace.id;
+          await runEnforcement(step, strategy.id, agent.dynamic);
+          const completed = step.trace;
+          if (
+            completed.id !== previousId &&
+            [
+              'pickup complete',
+              'pickup refused',
+              'no proposal',
+              'malformed',
+            ].includes(completed.status)
+          )
+            step.remember(resultKey, completed);
+        }}
+      >
+        {step.busy
+          ? 'Scout is working…'
+          : step.settings.mode === 'live'
+            ? 'Run with live model'
+            : 'Try taking the last apple'}
+      </Action>
+      {(noProposal || malformed) && !step.busy && (
+        <p role="status">
+          {noProposal
+            ? 'The model didn’t request a pickup.'
+            : 'The model didn’t send a valid request for one pickup.'}{' '}
+          Scout left the pantry untouched, so this run didn’t test the check.
+        </p>
+      )}
+      {final && result && !step.busy && (
+        <section aria-label="Enforcement result">
+          <p
+            className={
+              reserveHeld ? 'trial-outcome success' : 'trial-outcome failure'
+            }
+          >
+            <strong>
+              {pickedCarrot
+                ? 'Reserve intact.'
+                : reserveHeld
+                  ? 'Reserve protected.'
+                  : 'Reserve broken.'}
+            </strong>{' '}
+            {pickup}{' '}
+            {audit && !reserveHeld
+              ? 'The check found an empty shelf after the apple was already in Scout’s hands.'
+              : pickedCarrot
+                ? 'The last apple stayed on the shelf because Scout asked for a carrot.'
+                : reserveHeld
+                  ? 'One apple stayed on the shelf.'
+                  : 'The shelf was empty after the pickup.'}
+          </p>
+        </section>
+      )}
+    </>
+  );
+}
+
+<ReserveExperiment />

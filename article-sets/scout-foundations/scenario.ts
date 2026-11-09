@@ -1,4 +1,5 @@
 import { createWorld } from './world.ts';
+import type { PickupPolicy } from './world.ts';
 import { initialMessages } from './conversation.ts';
 import { selectTools } from './tools.ts';
 import { mockProvider } from './mock.ts';
@@ -15,6 +16,7 @@ export interface Settings extends ExecutionSettings {
 export interface Initial {
   notice?: string;
   pantry?: Inventory;
+  pickupPolicy?: PickupPolicy;
 }
 export type StepMeta = Meta<Initial>;
 const helpers = ({
@@ -56,6 +58,7 @@ export const picnicScenario: Scenario<
       pantry: initial.pantry ?? { apple: settings.apples, carrot: 2 },
       clock,
       initial: snapshot,
+      pickupPolicy: initial.pickupPolicy,
       emit,
     }),
   helpers,

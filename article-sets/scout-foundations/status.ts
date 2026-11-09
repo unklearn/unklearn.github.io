@@ -46,7 +46,9 @@ export function renderStatus(
       recorded ? 'Recorded tool results' : 'Tools executed',
       trace.events.filter(
         (e) =>
-          e.kind === 'tool_result' && e.result?.reason !== 'tool_unavailable',
+          e.kind === 'tool_result' &&
+          e.result?.reason !== 'tool_unavailable' &&
+          e.result?.source !== 'dispatcher',
       ).length,
     ],
     ['Active tools', activeTools.join(', ') || 'None'],

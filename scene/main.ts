@@ -30,12 +30,22 @@ import type {
   TraceEvent,
 } from '../article-sets/scout-foundations/types.ts';
 import { createReplay } from '../runtime/replay.ts';
+import type { ReplayCue } from '../runtime/replay.ts';
 import apple from '../traces/apple.json';
 import carrot from '../traces/carrot.json';
-import ollama from '../traces/ollama-last-apple.json';
+import guidance from '../traces/last-apple-guidance.json';
+import { guidancePlacements } from '../article-sets/last-apple/guidance.ts';
+import { articleIds } from '../routes.ts';
 
 const parameters = new URLSearchParams(location.search);
-const article = selectArticle(articles, parameters.get('article'));
+const defaultArticle = document.body.dataset.defaultArticle;
+const publicLab =
+  import.meta.env.MODE === 'release' && defaultArticle === articleIds.lastApple;
+const article = selectArticle(
+  articles,
+  publicLab ? defaultArticle : (parameters.get('article') ?? defaultArticle),
+);
+const visibleArticles = publicLab ? [article] : articles;
 const steps = article.steps;
 const $ = <T extends HTMLElement>(id: string) =>
   document.querySelector<T>(`#${id}`)!;
@@ -44,14 +54,17 @@ for (const id of ['settings', 'status', 'history'])
 $('lesson-toggle').innerHTML = icon('lesson');
 $('film').innerHTML = icon('film');
 document.title = `${article.title} · Unklearn`;
+$('brand-label').textContent =
+  article.id === articleIds.lastApple ? 'UNKLEARN' : 'SCOUT FOUNDATIONS';
 $('article-title').textContent =
   `Lesson ${String(article.number).padStart(2, '0')} · ${article.title}`;
 for (const content of document.querySelectorAll<HTMLElement>('[data-article]'))
   content.hidden = content.dataset.article !== article.id;
 const articleSelect = $<HTMLSelectElement>('article-select');
-for (const item of articles) articleSelect.add(new Option(item.title, item.id));
+for (const item of visibleArticles)
+  articleSelect.add(new Option(item.title, item.id));
 articleSelect.value = article.id;
-$('article-picker').hidden = articles.length < 2;
+$('article-picker').hidden = visibleArticles.length < 2;
 articleSelect.onchange = () => navigateArticle(articleSelect.value);
 const config: Settings = {
   mode: 'mock',
@@ -64,12 +77,19 @@ const config: Settings = {
   },
 };
 $<HTMLTextAreaElement>('order').value = defaultOrder;
+$('order-form').hidden = article.id === articleIds.lastApple;
 const view = createView($('stage'));
+const guidanceRecording = 'last-apple-guidance';
 const recordings = new Map<string, Trace>([
   ['apple', apple as Trace],
   ['carrot', carrot as Trace],
-  ['ollama', ollama as Trace],
 ]);
+if (article.id === articleIds.lastApple) {
+  const firstTrial = guidance.trials.find(
+    ({ placement }) => placement === guidancePlacements[0].id,
+  );
+  if (firstTrial) recordings.set(guidanceRecording, firstTrial.trace as Trace);
+}
 try {
   for (const trace of JSON.parse(
     localStorage.getItem('scout-lesson-takes-v1') || '[]',
@@ -82,8 +102,7 @@ let replay: ReturnType<typeof createReplay<Snapshot>> | undefined;
 let replayTrace: Trace | undefined;
 let queued = false,
   initialized = false,
-  reviewing = false,
-  recordedContext = '';
+  reviewing = false;
 const isRecorded = () => reviewing || config.mode === 'replay';
 let selected = 0,
   lessonRoot: Root | undefined;
@@ -116,7 +135,7 @@ function select(index: number) {
   replay?.pause();
   view.recorded(config.mode === 'replay');
   $('replay-bar').hidden = config.mode !== 'replay';
-  view.pause(false);
+  view.pause(config.mode === 'replay');
   host.select(index);
   selected = index;
   paintCheckpoint();
@@ -151,11 +170,13 @@ function renderLesson() {
     replay: config.mode === 'replay',
     terminal: renderSystemTerminal,
     selectProvider: changeProvider,
+    openSettings: () => openPanel('settings'),
     navigate: (id) => {
       const index = steps.findIndex((step) => step.meta.id === id);
       if (index >= 0) select(index);
     },
     review: reviewExecution,
+    leaveReview,
   });
   if (!lessonRoot) {
     const element = $('lesson-pages');
@@ -202,7 +223,7 @@ function fail(error: unknown) {
 function save(trace: Trace) {
   recordings.set(trace.id, trace);
   const local = [...recordings]
-    .filter(([key]) => !['apple', 'carrot', 'ollama'].includes(key))
+    .filter(([key]) => !['apple', 'carrot', guidanceRecording].includes(key))
     .slice(-12);
   try {
     localStorage.setItem(
@@ -218,21 +239,30 @@ function refreshRecordings() {
   const select = $<HTMLSelectElement>('recording'),
     previous = select.value;
   select.replaceChildren(
-    ...[...recordings].map(([id, trace]) => {
-      const option = document.createElement('option');
-      option.value = id;
-      option.textContent =
-        id === 'apple'
-          ? 'Two apples → apple'
-          : id === 'carrot'
-            ? 'One apple → carrot'
-            : id === 'ollama'
-              ? 'Live recording · took the last apple'
-              : `Step ${replayStepIndex(recordingArticle(articles, trace.lesson) ?? article, trace.lesson) + 1} · ${trace.provider} · ${trace.status} · ${new Date(trace.startedAt).toLocaleTimeString()}`;
-      return option;
-    }),
+    ...[...recordings]
+      .filter(
+        ([, trace]) =>
+          !publicLab ||
+          recordingArticle(articles, trace.lesson)?.id === article.id,
+      )
+      .map(([id, trace]) => {
+        const option = document.createElement('option');
+        option.value = id;
+        option.textContent =
+          id === 'apple'
+            ? 'Two apples → apple'
+            : id === 'carrot'
+              ? 'One apple → carrot'
+              : id === guidanceRecording
+                ? 'Inform · Recorded guidance trial'
+                : `Step ${replayStepIndex(recordingArticle(articles, trace.lesson) ?? article, trace.lesson) + 1} · ${trace.provider} · ${trace.status} · ${new Date(trace.startedAt).toLocaleTimeString()}`;
+        return option;
+      }),
   );
-  if (recordings.has(previous)) select.value = previous;
+  if ([...select.options].some(({ value }) => value === previous))
+    select.value = previous;
+  else if (article.id === articleIds.lastApple)
+    select.value = guidanceRecording;
 }
 function apply(event: TraceEvent, elapsed = 0) {
   if (event.kind === 'checkpoint') screen.reset(source());
@@ -272,7 +302,13 @@ function render() {
     trace = currentTrace();
   screen.context(
     `${steps[selected].meta.id}:${step.stage}`,
-    reviewing ? recordedContext : config.mode === 'replay' ? '' : step.context,
+    reviewing
+      ? replay?.playing
+        ? ''
+        : (JSON.stringify(replay?.currentEvent, null, 2) ?? '')
+      : config.mode === 'replay'
+        ? ''
+        : step.context,
   );
   view.idle(!step.busy && !step.backgroundActive && !isRecorded());
   if ($<HTMLDialogElement>('status-panel').open)
@@ -289,7 +325,7 @@ function render() {
 function statusMessages() {
   return isRecorded() && replayTrace
     ? (replayTrace.events
-        .filter((event) => event.at <= (replay?.elapsed ?? 0))
+        .filter((event) => event.seq <= (replay?.currentEvent?.seq ?? -1))
         .findLast((event) => ['model_start', 'context'].includes(event.kind))
         ?.messages ?? [])
     : host.current.messages;
@@ -299,8 +335,7 @@ function currentTrace() {
 }
 function currentState() {
   return isRecorded() && replayTrace
-    ? (replayTrace.events.filter((e) => e.at <= (replay?.elapsed ?? 0)).at(-1)
-        ?.state ?? replayTrace.initial)
+    ? (replay?.currentEvent?.state ?? replayTrace.initial)
     : host.current.world.snapshot();
 }
 function loadReplay(id: string) {
@@ -315,68 +350,55 @@ function loadReplay(id: string) {
     return;
   }
   if (targetArticle.id !== article.id) {
+    if (publicLab) {
+      fail('This recording belongs to a different article.');
+      return;
+    }
     navigateArticle(targetArticle.id, id);
     return;
   }
   const recordedStep = replayStepIndex(targetArticle, replayTrace.lesson);
   select(recordedStep);
+  resetReplay(replayTrace).restart();
+  syncReplayControls();
+  scheduleRender();
+}
+function resetReplay(trace: Trace) {
+  replayTrace = trace;
   screen.reset(source());
   view.recorded(true);
   view.apply({
     kind: 'checkpoint',
-    text: '',
-    state: replayTrace.initial,
+    text: 'Recorded execution',
+    state: trace.initial,
     seq: 0,
     at: 0,
   });
-  view.pause(true);
-  replay = createReplay(replayTrace, apply);
-  replay.restart();
-  scheduleRender();
+  replay = createReplay(trace, apply);
+  return replay;
 }
 // Article review uses only the recording playhead; it never starts a runtime.
 function reviewExecution(
   recording: import('../runtime/types.ts').Trace<unknown>,
-  at?: number,
-  seq?: number,
+  cue?: ReplayCue,
 ) {
   host.current.cancel();
-  replay?.pause();
-  replayTrace = parseTrace(JSON.stringify(recording));
+  const current = replay;
+  const continueReplay =
+    cue &&
+    current &&
+    isRecorded() &&
+    replayTrace?.id === recording.id &&
+    current.elapsed <= cue.at &&
+    (current.currentEvent?.seq ?? -1) < cue.seq;
   reviewing = true;
-  recordedContext = '';
-  screen.reset(source());
-  view.recorded(true);
-  view.pause(true);
-  view.apply({
-    kind: 'checkpoint',
-    text: 'Recorded execution',
-    state: replayTrace.initial,
-    seq: 0,
-    at: 0,
-  });
-  replay = createReplay(replayTrace, apply);
+  const player = continueReplay
+    ? current
+    : resetReplay(parseTrace(JSON.stringify(recording)));
   $('replay-bar').hidden = false;
-  if (at === undefined) {
-    replay.restart();
-    replay.play();
-    view.pause(false);
-  } else {
-    replay.seek(at, seq);
-    const point = replayTrace.events.findLast(
-      (event) => event.at <= at && (seq === undefined || event.seq <= seq),
-    );
-    recordedContext = JSON.stringify(point, null, 2);
-    const state = point?.state ?? replayTrace.initial;
-    view.apply({
-      kind: 'checkpoint',
-      text: 'Recorded checkpoint',
-      state,
-      seq: 0,
-      at,
-    });
-    view.pause(true);
-  }
+  if (cue) player.playTo(cue);
+  else player.play();
+  syncReplayControls();
   scheduleRender();
 }
 $('settings-button').onclick = () => openPanel('settings');
@@ -395,21 +417,24 @@ $('history-button').onclick = () => {
   renderHistory(currentTrace());
   openPanel('history');
 };
+function leaveReview() {
+  if (!reviewing) return;
+  reviewing = false;
+  replay?.pause();
+  view.recorded(false);
+  view.pause(false);
+  $('replay-bar').hidden = true;
+  paintCheckpoint();
+}
 $<HTMLFormElement>('order-form').onsubmit = (event) => {
   event.preventDefault();
+  if (article.id === articleIds.lastApple || config.mode === 'replay') return;
   config.order = $<HTMLTextAreaElement>('order').value;
   if (!config.order.trim()) {
     fail('Write a notice before posting.');
     return;
   }
-  if (config.mode === 'replay') return;
-  if (reviewing) {
-    reviewing = false;
-    replay?.pause();
-    view.recorded(false);
-    view.pause(false);
-    $('replay-bar').hidden = true;
-  }
+  leaveReview();
   if (!host.current.busy && !host.current.backgroundActive)
     host.current.reset({ tools: host.current.tools });
   host.current.world.postNotice(config.order);
@@ -436,6 +461,7 @@ for (const id of ['transport', 'endpoint', 'model'])
     };
   };
 function changeProvider(mode: 'mock' | 'live') {
+  leaveReview();
   if (config.mode === mode) return;
   if (host.current.busy) host.current.cancel();
   config.mode = mode;
@@ -485,26 +511,44 @@ $<HTMLSelectElement>('recording').onchange = () =>
   loadReplay($<HTMLSelectElement>('recording').value);
 $('replay-play').onclick = () => {
   if (!replay) return;
-  if (replay.playing) {
-    replay.pause();
-    view.pause(true);
-  } else {
-    replay.play();
-    view.pause(false);
-  }
+  if (replay.playing) replay.pause();
+  else if (replayEnded() && replayTrace) resetReplay(replayTrace).play();
+  else replay.play();
+  syncReplayControls();
+  scheduleRender();
 };
 $('replay-restart').onclick = () => {
-  screen.reset(source());
-  replay?.restart();
-  view.pause(true);
+  if (!replayTrace) return;
+  resetReplay(replayTrace).restart();
+  syncReplayControls();
+  scheduleRender();
 };
-view.onFrame((dt) => {
-  if (!isRecorded() || !replay) return;
-  replay.advance(dt * 1000);
+function replayEnded() {
+  return (
+    replay?.elapsed === replay?.duration &&
+    replay?.currentEvent?.seq === replayTrace?.events.at(-1)?.seq
+  );
+}
+function syncReplayControls() {
+  if (!replay) return;
+  const label = replay.pausedAtCue ? 'Paused at cue' : 'Recorded';
   $('replay-time').textContent =
-    `Recorded · ${(replay.elapsed / 1000).toFixed(1)} / ${(replay.duration / 1000).toFixed(1)}s`;
-  $('replay-play').textContent = replay.playing ? 'Pause' : 'Play';
-  if (!replay.playing) view.pause(true);
+    `${label} · ${(replay.elapsed / 1000).toFixed(1)} / ${(replay.duration / 1000).toFixed(1)}s`;
+  $('replay-play').textContent = replay.playing
+    ? 'Pause'
+    : replayEnded()
+      ? 'Play again'
+      : replay.elapsed || replay.pausedAtCue
+        ? 'Resume'
+        : 'Play';
+  view.pause(!replay.playing);
+  screen.pauseNotices(!replay.playing);
+}
+view.onFrame((dt) => {
+  if (!isRecorded() || !replay?.playing) return;
+  replay.advance(dt * 1000);
+  syncReplayControls();
+  if (!replay.playing) scheduleRender();
 });
 $('export').onclick = () => exportTrace(currentTrace());
 $<HTMLInputElement>('import').onchange = async () => {
@@ -512,6 +556,11 @@ $<HTMLInputElement>('import').onchange = async () => {
     const file = $<HTMLInputElement>('import').files?.[0];
     if (!file) return;
     const trace = parseTrace(await file.text());
+    if (
+      publicLab &&
+      recordingArticle(articles, trace.lesson)?.id !== article.id
+    )
+      throw new Error('This recording belongs to a different article.');
     save(trace);
     $<HTMLSelectElement>('recording').value = trace.id;
     $<HTMLSelectElement>('mode').value = 'replay';

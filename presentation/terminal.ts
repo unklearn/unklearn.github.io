@@ -1,4 +1,6 @@
 import type { RuntimeEvent } from '../runtime/types.ts';
+import { createActivityNotices } from './activity-notices.ts';
+const notices = createActivityNotices();
 const terminal = document.querySelector<HTMLElement>('#terminal')!;
 const lines = document.querySelector<HTMLOListElement>('#terminal-lines')!;
 const launcher = document.querySelector<HTMLButtonElement>('#activity-button')!;
@@ -43,6 +45,7 @@ export const screen = {
     this.render();
   },
   reset(label: string) {
+    notices.reset(label);
     document.querySelector<HTMLElement>('#terminal-custom')!.hidden = true;
     entries = [];
     pending = false;
@@ -55,6 +58,7 @@ export const screen = {
     this.render();
   },
   event(event: RuntimeEvent, quiet = false) {
+    if (!quiet) notices.event(event);
     if (event.kind === 'model_start') {
       pending = true;
       document.querySelector<HTMLElement>('#terminal-custom')!.hidden = true;
@@ -103,6 +107,7 @@ export const screen = {
     this.render();
   },
   render() {
+    notices.visible(terminal.hidden);
     terminal.classList.toggle('pending', pending);
     launcher.classList.toggle('pending', pending);
     launcher.hidden = false;
@@ -151,6 +156,9 @@ export const screen = {
   },
   get pending() {
     return pending;
+  },
+  pauseNotices(paused: boolean) {
+    notices.pause(paused);
   },
 };
 launcher.onclick = () => {

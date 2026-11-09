@@ -10,18 +10,25 @@ import type {
   WorldEvent,
 } from './types.ts';
 
+export type PickupPolicy = (
+  item: Item,
+  pantry: Readonly<Inventory>,
+) => string | undefined;
+
 export function createWorld({
   notice,
   pantry,
   clock = realClock,
   emit = () => {},
   initial,
+  pickupPolicy,
 }: {
   notice: string;
   pantry: Inventory;
   clock?: Clock;
   emit?: (event: WorldEvent) => void;
   initial?: Snapshot;
+  pickupPolicy?: PickupPolicy;
 }) {
   const state: Snapshot = {
     notice,
@@ -113,7 +120,9 @@ export function createWorld({
       await clock.sleep(650, signal);
       signal.throwIfAborted();
       if (state.pantry[item] < 1) return fail('out_of_stock');
-      // Physical availability is the only stock rule. The last apple is legal.
+      // An optional scenario policy checks the same state as the write below.
+      const refusal = pickupPolicy?.(item, state.pantry);
+      if (refusal) return { ...fail(refusal), source: 'inventory' };
       state.pantry[item]--;
       state.carried = item;
       show('pickup', `Picked up one ${item}`);

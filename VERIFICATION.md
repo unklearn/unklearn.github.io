@@ -203,7 +203,7 @@ stayed closed and the browser logged no errors or warnings.
 The existing 18 focused checks, formatting, and static build pass. No shared
 runtime, provider, tool handler, world rule, or later step was changed.
 
-## The Last Apple lab
+## The Last Apple lab (previous standalone implementation)
 
 `npm run build` emitted both `dist/index.html` and
 `dist/labs/last-apple/index.html` with relative assets. Served that directory
@@ -226,3 +226,17 @@ simulation result independently of the recording.
 All 25 checks, formatting, and the static build pass. The added tests cover
 the recorded evidence, immutable replay snapshots, and deterministic
 simulation outcomes. No Foundations runtime or recording was modified.
+
+## The Last Apple in Scout’s playground
+
+The lab now uses the shared world, runtime, and slide player. Browser replay
+showed the original pickup event with one apple in Scout’s hands and zero on
+the shelf. In Mock, model guidance allowed an apple delivery and broke the
+reserve. Domain enforcement with carrot continuation delivered a carrot and
+left one apple in the pantry. Live exposed the existing Ollama settings;
+the local endpoint did not respond, so no new live model run was recorded.
+
+Vite preview and a plain static server each resolved slashless lab and
+Foundations URLs in one redirect. Vite returned 404 for the old nested loop
+URL. The public build at a subdirectory root loaded the lab with no article
+picker, and the direct Foundations URL loaded its original eight slides.

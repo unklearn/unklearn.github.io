@@ -12,7 +12,8 @@ Node 22.12+ and `npm ci`, then:
 npm start
 ```
 
-Open http://127.0.0.1:4333/. This builds and serves `dist/`.
+Open http://127.0.0.1:4333/ to enter Scout Foundations. This builds and serves
+`dist/`. If the port is already in use, open the address printed by Vite.
 Use `npm run dev` when editing: MDX changes refresh the browser and reset the take.
 `npm run build` produces the independently hostable static site with relative URLs
 and pre-rendered lesson HTML. Serve it over HTTP; `file://` is unsupported.
@@ -20,22 +21,66 @@ and pre-rendered lesson HTML. Serve it over HTTP; `file://` is unsupported.
 ## The Last Apple lab
 
 With the same server running, open http://127.0.0.1:4333/labs/last-apple/.
-Step through the actual Qwen3 browser-world recording, then run the scripted
-comparison. Try one apple with **Model guidance only**, then switch to
-**Domain enforcement** and run again. Enable the carrot continuation to
-complete the job after a refusal, or start with two apples to see the guard
-allow an apple withdrawal.
+The lab uses Scout’s village, slides, History, and Settings.
 
-The recorded walkthrough uses `traces/ollama-last-apple.json` unchanged.
-The simulation uses its own inventory and stops at pickup. Its outcome check
-requires one collected snack and at least one apple remaining. No model,
-application backend, or API key is needed. Replay only moves the playhead.
+1. **Inform** introduces Scout, then compares nine recorded Qwen3 proposals
+   across three placements of the reserve rule.
+2. **Enforce** compares guidance alone, a check after pickup, and a check before
+   pickup. Use **Next** to browse the strategies. Run each with the repeatable
+   Mock provider or select Live in Settings to use your own model.
+3. **Verify** demonstrates a pantry that refuses to hand over its last apple.
+   Choose **Let Scout try another snack** to continue with the refusal and the
+   earlier inspection. The final check reads the pantry, basket, and Scout’s hands.
 
-`routes.ts` registers both directory URLs for one Vite build. To add a route,
-register its URL and place an HTML entry at the corresponding path. Publish
-the entire `dist/` directory to a static host that serves directory indexes.
-Use the host's `/labs/last-apple/` URL in the accompanying article. Both routes
-work on direct load and refresh without a client router or fallback rewrite.
+The recorded comparison and scripted experiments work offline. To recapture
+the comparison against local Ollama with `qwen3:14b` installed, run
+`npm run record:last-apple-guidance`. A completed batch replaces
+`traces/last-apple-guidance.json`.
+
+`routes.ts` registers the directory URLs for one Vite build. To add a route,
+register its URL and put a `<!-- scout-shell -->` entry at the corresponding
+path. Vite fills it from `scene/shell.html` and pre-renders the route’s MDX
+article. The lab and Foundations load directly on a static host without a
+client router or fallback rewrite.
+
+## Publish on GitHub Pages
+
+Preview the public build before publishing:
+
+```sh
+npm run build:release
+npm run preview:release
+```
+
+This serves `dist-release/` at http://127.0.0.1:4334/. The public home opens
+The Last Apple. Scout Foundations is unlisted and remains reachable by anyone
+with the `/foundations/` URL. The local build opens Foundations at `/` and can
+switch articles from the table of contents.
+
+1. For a checkout without the `upstream` remote, add it over SSH and fetch
+   GitHub’s `main` branch:
+
+   ```sh
+   git remote add upstream git@github.com:unklearn/unklearn.github.io.git
+   git fetch upstream
+   git branch --set-upstream-to=upstream/main main
+   ```
+
+2. Review and commit the release changes, including
+   `.github/workflows/pages.yml`, then push `main`:
+
+   ```sh
+   git switch main
+   git push upstream main
+   ```
+
+3. In **Settings → Pages → Build and deployment**, set **Source** to
+   **GitHub Actions**.
+   [GitHub Pages publishing sources](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site)
+4. In **Actions → Publish Unklearn**, select **Run workflow** on `main`.
+   The workflow runs only when manually started. It tests the runtime and
+   publishes `dist-release/`. Use [the lab URL](https://unklearn.github.io/labs/last-apple/)
+   in the article.
 
 ## Formatting
 
@@ -109,11 +154,9 @@ local mini-steps as the lesson needs.
 Use `const [page, setPage] = useMiniSteps(5)` to connect ordinary React state to
 the footer. Render each page conditionally. Optional `canNext: page => …` waits
 for real outcomes; Step 2 waits for a response before enabling its response page.
-Only an explicit `Action` runs an experiment. A completed experiment may call
-`setPage` to show its result. Browsing pages retains world state and results;
-leaving the article step still cancels unfinished work. Steps without this hook
-remain single pages, with disabled footer navigation. Header arrows and TOC
-always navigate article steps.
+Experiment actions can call `setPage` to show their results. Leaving the article
+step cancels unfinished work. At the end of a step, footer Next opens the next
+step when one exists. Header arrows and TOC always navigate article steps.
 
 A small authored interaction looks like this inside MDX:
 

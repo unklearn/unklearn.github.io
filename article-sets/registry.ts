@@ -1,7 +1,11 @@
 import type { LessonArticle } from '../presentation/lesson-ui.tsx';
 import type { Trace } from '../runtime/types.ts';
 import { article } from './scout-foundations/articles/what-makes-scout-an-agent/article.ts';
-export const articleRegistry: readonly (typeof article)[] = [article];
+import { article as lastApple } from './last-apple/article.ts';
+export const articleRegistry: readonly (typeof article)[] = [
+  article,
+  lastApple,
+];
 export function selectArticle<T extends LessonArticle>(
   articles: readonly T[],
   id?: string | null,

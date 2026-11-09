@@ -1,13 +1,20 @@
-// Canonical directory routes. Vite builds every entry into the same dist folder.
+// Canonical directory routes for the static build.
 export const routes = {
-  foundations: '/',
+  home: '/',
+  foundations: '/foundations/',
   lastApple: '/labs/last-apple/',
 } as const;
 
-type Route = (typeof routes)[keyof typeof routes];
+export type Route = (typeof routes)[keyof typeof routes];
 
-// Relative links also work when dist is published beneath a site subdirectory.
-export function routeLink(from: Route, to: Route) {
-  const depth = from.split('/').filter(Boolean).length;
-  return '../'.repeat(depth) + to.slice(1) || './';
+export const articleIds = {
+  foundations: 'what-makes-scout-an-agent',
+  lastApple: 'last-apple',
+} as const;
+
+export function routeArticle(route: Route, mode: string) {
+  return route === routes.lastApple ||
+    (route === routes.home && mode === 'release')
+    ? articleIds.lastApple
+    : articleIds.foundations;
 }

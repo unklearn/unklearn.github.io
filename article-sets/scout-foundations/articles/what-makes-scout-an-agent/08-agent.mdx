@@ -114,7 +114,7 @@ export function UnderstandAgent() {
                   setFocus(point.method);
                   setReviewed(true);
                   s.showContext(point.event);
-                  ui.reviewTrace(run, point.event.at, point.event.seq);
+                  ui.reviewTrace(run, point.event);
                 }}
               >
                 {point.label}

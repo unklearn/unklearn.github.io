@@ -296,7 +296,16 @@ export function createSessionHost<
         reset({}, name);
         return true;
       },
-      runtime(block: StoredCode) {
+      runtime(
+        block: StoredCode,
+        {
+          mock,
+          mapTools = (selection) => selection,
+        }: {
+          mock?: Provider;
+          mapTools?: (selection: readonly Tool[]) => readonly Tool[];
+        } = {},
+      ) {
         if (settings().mode === 'replay' || steps[index].id !== meta.id)
           throw new Error('This step is not active');
         const Constructor = block.module.AgentRuntime;
@@ -309,12 +318,13 @@ export function createSessionHost<
             throw new Error('Take is no longer active');
         };
         emit({ kind: 'runtime_selected', text: block.id });
-        const provider = connectProvider();
+        const provider = connectProvider(mock);
+        const getTools = () => mapTools(scenario.selectTools(world, tools));
         return new Constructor({
           model: (input) => provider(input, [], signal),
           messages,
-          tools: scenario.selectTools(world, tools),
-          getTools: () => scenario.selectTools(world, tools),
+          tools: getTools(),
+          getTools,
           signal,
           emit: (e) => {
             assertActive();
