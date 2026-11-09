@@ -12,9 +12,8 @@ export const articleIds = {
   lastApple: 'last-apple',
 } as const;
 
-export function routeArticle(route: Route, mode: string) {
-  return route === routes.lastApple ||
-    (route === routes.home && mode === 'release')
-    ? articleIds.lastApple
-    : articleIds.foundations;
-}
+export const routeArticles = {
+  [routes.home]: undefined,
+  [routes.foundations]: articleIds.foundations,
+  [routes.lastApple]: articleIds.lastApple,
+} as const;

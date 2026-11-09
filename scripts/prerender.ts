@@ -1,6 +1,6 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { createServer } from 'vite';
-import { routeArticle, routes } from '../routes.ts';
+import { routeArticles, routes } from '../routes.ts';
 
 const release = process.argv.includes('--release');
 const server = await createServer({
@@ -13,10 +13,10 @@ try {
   );
   const directory = release ? 'dist-release' : 'dist';
   for (const route of Object.values(routes)) {
+    const article = routeArticles[route];
+    if (!article) continue;
     const file = `${directory}${route}index.html`;
-    const { lesson, count } = prerender(
-      routeArticle(route, release ? 'release' : 'production'),
-    );
+    const { lesson, count } = prerender(article);
     writeFileSync(
       file,
       readFileSync(file, 'utf8')

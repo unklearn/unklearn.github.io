@@ -4,7 +4,7 @@ import mdx from '@mdx-js/rollup';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { lessonCode } from './authoring/mdx-code.ts';
-import { articleIds, routeArticle, routes } from './routes.ts';
+import { articleIds, routeArticles, routes } from './routes.ts';
 
 const directoryRoutes = new Set<string>(Object.values(routes));
 const entries = Object.entries(routes).map(([id, route]) => ({
@@ -41,14 +41,18 @@ export default defineConfig(({ mode }) => ({
         order: 'pre',
         handler(html, { filename }) {
           const entry = entries.find(({ file }) => file === filename);
-          if (!entry || !html.includes('<!-- scout-shell -->')) return html;
-          const article = routeArticle(entry.route, mode);
+          const article = entry && routeArticles[entry.route];
+          if (!article || !html.includes('<!-- scout-shell -->')) return html;
+          const homeLink = '../'.repeat(
+            entry.route.split('/').filter(Boolean).length,
+          );
           const lab = article === articleIds.lastApple;
           const shell = readFileSync(
             new URL('./scene/shell.html', import.meta.url),
             'utf8',
           );
           return shell
+            .replace('%HOME_LINK%', homeLink)
             .replace('%ARTICLE_ID%', article)
             .replace(
               '%ARTICLE_TITLE%',

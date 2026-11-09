@@ -1,1 +1,86 @@
-<!-- scout-shell -->
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f9f7ef" />
+    <meta
+      name="description"
+      content="Interactive articles and labs about how AI agents work."
+    />
+    <title>Unklearn</title>
+    <style>
+      :root {
+        color: #263e3a;
+        background: #f9f7ef;
+        font-family: system-ui, sans-serif;
+        line-height: 1.6;
+      }
+      body {
+        margin: 0;
+      }
+      main {
+        max-width: 38rem;
+        margin: 0 auto;
+        padding: clamp(3rem, 10vw, 7rem) 1.5rem 3rem;
+      }
+      h1 {
+        margin: 0;
+        font:
+          500 clamp(3rem, 10vw, 5rem) / 1.05 Georgia,
+          serif;
+        letter-spacing: -0.04em;
+      }
+      header p {
+        max-width: 36ch;
+        font-size: 1.125rem;
+      }
+      h2 {
+        margin: 3rem 0 0.75rem;
+        font-size: 1rem;
+      }
+      ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+      li {
+        padding: 1rem 0;
+        border-top: 1px solid #d6d9ca;
+      }
+      li p {
+        margin: 0.25rem 0 0;
+        color: #53635a;
+      }
+      a {
+        color: #315b59;
+        font-weight: 650;
+        text-underline-offset: 0.18em;
+      }
+      a:focus-visible {
+        outline: 3px solid #bb7641;
+        outline-offset: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>Unklearn</h1>
+        <p>Interactive articles and labs about how AI agents work.</p>
+      </header>
+      <section aria-labelledby="labs-heading">
+        <h2 id="labs-heading">Labs</h2>
+        <ul role="list">
+          <li>
+            <a href="./labs/last-apple/">The Last Apple</a>
+            <p>
+              Can Scout pack a picnic without taking the pantry’s last apple?
+              See what changes when you guide the model or enforce the rule.
+            </p>
+          </li>
+        </ul>
+      </section>
+    </main>
+  </body>
+</html>

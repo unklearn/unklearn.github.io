@@ -12,8 +12,9 @@ Node 22.12+ and `npm ci`, then:
 npm start
 ```
 
-Open http://127.0.0.1:4333/ to enter Scout Foundations. This builds and serves
-`dist/`. If the port is already in use, open the address printed by Vite.
+Open http://127.0.0.1:4333/ for the Unklearn homepage or
+http://127.0.0.1:4333/foundations/ for Scout Foundations. This builds and
+serves `dist/`. If the port is already in use, open the address printed by Vite.
 Use `npm run dev` when editing: MDX changes refresh the browser and reset the take.
 `npm run build` produces the independently hostable static site with relative URLs
 and pre-rendered lesson HTML. Serve it over HTTP; `file://` is unsupported.
@@ -52,10 +53,9 @@ npm run build:release
 npm run preview:release
 ```
 
-This serves `dist-release/` at http://127.0.0.1:4334/. The public home opens
-The Last Apple. Scout Foundations is unlisted and remains reachable by anyone
-with the `/foundations/` URL. The local build opens Foundations at `/` and can
-switch articles from the table of contents.
+This serves `dist-release/` at http://127.0.0.1:4334/. The homepage lists the
+public labs, including The Last Apple at `/labs/last-apple/`. Scout Foundations
+is unlisted and remains reachable at `/foundations/`.
 
 1. For a checkout without the `upstream` remote, add it over SSH and fetch
    GitHub’s `main` branch:
