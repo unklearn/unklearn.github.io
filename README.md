@@ -320,12 +320,33 @@ Question clouds mark unavailable capabilities, never private model reasoning.
 
 ## Live
 
-Settings → Live → configure Ollama URL/model or a provider gateway.
-[Ollama browser origins](https://docs.ollama.com/faq#how-can-i-allow-additional-web-origins-to-access-ollama)
-must allow the static site’s origin. The gateway may hold API keys, but owns no
-world and executes no tools. Errors stay visible; Live never falls back to Mock.
-Mock supports the default order and explicit carrot order; other orders explain
-that limitation. Live retains the model’s actual decisions.
+In **Settings → Live**, select **Local Ollama** or **Provider gateway**. Local
+Ollama runs on the device where you open the lab. Use
+`http://127.0.0.1:11434` as the provider URL and enter a tool-capable model
+installed on that device.
+
+### Connect to Ollama from the hosted lab
+
+The GitHub Pages site makes requests from the origin
+`https://unklearn.github.io`. Add that exact origin to Ollama’s
+`OLLAMA_ORIGINS` allowlist. If you use the macOS desktop app, quit it first,
+then run this command in a terminal and leave the terminal open:
+
+```sh
+OLLAMA_HOST=127.0.0.1:11434 OLLAMA_ORIGINS=https://unklearn.github.io ollama serve
+```
+
+If you already run Ollama as a service, add the origin to the service’s
+existing allowlist and restart it. [Ollama’s browser origin setup](https://docs.ollama.com/faq#how-can-i-allow-additional-web-origins-to-access-ollama)
+
+Reload the lab. If your browser prompts for local network access, allow it
+for Unklearn. If your browser still blocks the connection, use `npm start`
+and open the local lab at `http://127.0.0.1:4333/labs/last-apple/`.
+
+The gateway can hold API keys and relay model requests. Scout still executes
+tools in the browser. Live shows provider errors and retains the model’s
+actual decisions. Mock works offline and supports the default order and the
+explicit carrot order.
 
 ## Verification
 
