@@ -90,12 +90,9 @@ a {
 .brand {
   color: var(--teal);
   text-decoration: none;
-  font:
-    italic 32px Georgia,
-    serif;
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
 }
 .brand span {
   font:
@@ -734,7 +731,6 @@ body.film::after {
     gap: 1px;
   }
   .brand {
-    font-size: 26px;
     gap: 7px;
   }
   .brand span {

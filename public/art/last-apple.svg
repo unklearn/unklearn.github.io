@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="480" height="240" viewBox="0 0 480 240" fill="none">
+  <defs>
+    <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+      <path d="M20 0H0v20" stroke="#8c9a75" stroke-opacity=".35" />
+    </pattern>
+    <linearGradient id="apple" x1="207" y1="57" x2="271" y2="154" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#e89163" /><stop offset="1" stop-color="#a94332" />
+    </linearGradient>
+  </defs>
+  <path fill="#dfe4ca" d="M0 0h480v240H0z" />
+  <path fill="url(#grid)" d="M0 0h480v240H0z" />
+  <circle cx="240" cy="115" r="91" stroke="#8c9a75" stroke-dasharray="3 5" />
+  <path d="M22 44V22h22m392 0h22v22M22 196v22h22m392 0h22v-22" stroke="#8c9a75" />
+  <path d="m130 170 110-51 110 51-110 51z" fill="#9eab87" opacity=".4" />
+  <path d="m145 150 95 44v22l-95-44z" fill="#b98d5f" />
+  <path d="m240 194 95-44v22l-95 44z" fill="#876e50" />
+  <path d="m145 150 95-44 95 44-95 44z" fill="#efdbab" stroke="#f6e9c9" />
+  <path d="m168 150 72-33 72 33-72 33z" stroke="#bca16d" stroke-dasharray="3 4" />
+  <ellipse cx="242" cy="152" rx="47" ry="12" fill="#a58557" opacity=".35" />
+  <path d="M240 80c15-12 33-9 45 3 17 18 7 56-11 71-9 8-20 9-34 3-14 6-25 5-34-3-18-15-28-53-11-71 12-12 30-15 45-3Z" fill="url(#apple)" stroke="#983f2f" stroke-width="2" />
+  <path d="M204 99c4-10 12-13 20-13" stroke="#ffce9a" stroke-width="4" stroke-linecap="round" />
+  <path d="M240 83c0-14 3-24 10-33" stroke="#554733" stroke-width="5" stroke-linecap="round" />
+  <path d="M243 69c7-17 24-23 38-20-5 14-18 24-38 20Z" fill="#53714c" />
+  <path d="M246 68c11-7 20-11 29-15" stroke="#bac693" stroke-linecap="round" />
+</svg>

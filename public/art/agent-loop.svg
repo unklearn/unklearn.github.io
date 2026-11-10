@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="430" viewBox="0 0 640 430" fill="none">
+  <defs>
+    <pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse">
+      <path d="M24 0H0v24" stroke="#6c8770" stroke-opacity=".28" />
+    </pattern>
+    <radialGradient id="light" cx=".5" cy=".46" r=".66">
+      <stop stop-color="#42634b" />
+      <stop offset="1" stop-color="#20382e" />
+    </radialGradient>
+    <linearGradient id="surface" x1="320" y1="93" x2="320" y2="351" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#78916e" />
+      <stop offset="1" stop-color="#4b6b53" />
+    </linearGradient>
+    <linearGradient id="amber" x1="319" y1="101" x2="319" y2="185" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ffca8d" />
+      <stop offset="1" stop-color="#ec9a60" />
+    </linearGradient>
+    <pattern id="plate-grid" width="26" height="26" patternUnits="userSpaceOnUse" patternTransform="matrix(.88 .48 -.88 .48 320 100)">
+      <path d="M26 0H0v26" stroke="#d4dec0" stroke-opacity=".32" />
+    </pattern>
+  </defs>
+  <path fill="url(#light)" d="M0 0h640v430H0z" />
+  <path fill="url(#grid)" d="M0 0h640v430H0z" />
+  <g stroke="#a0ad89" stroke-opacity=".6">
+    <path d="M26 48V26h22m544 0h22v22M26 382v22h22m544 0h22v-22" />
+    <path d="M314 26h12m-6-6v12M314 404h12m-6-6v12" />
+  </g>
+  <g stroke="#b5c2a0" stroke-opacity=".55">
+    <path d="M78 139h53l48 26m336 143h48l26-14M510 91h-39l-35 19M88 328h68l32-18" />
+    <circle cx="75" cy="139" r="3" /><circle cx="513" cy="91" r="3" />
+    <circle cx="85" cy="328" r="3" /><circle cx="592" cy="293" r="3" />
+  </g>
+  <path d="m94 249 226 124 226-124-226-124z" fill="#182f26" />
+  <path d="m94 222 226 124v25L94 247z" fill="#34513f" stroke="#a8bb96" stroke-opacity=".38" />
+  <path d="m320 346 226-124v25L320 371z" fill="#304939" stroke="#a8bb96" stroke-opacity=".38" />
+  <path d="m94 222 226-124 226 124-226 124z" fill="url(#surface)" stroke="#b2c59d" />
+  <path d="m94 222 226-124 226 124-226 124z" fill="url(#plate-grid)" />
+  <path d="m127 222 193-106 193 106-193 106z" stroke="#e1e7c8" stroke-opacity=".55" stroke-dasharray="3 5" />
+  <path d="m175 213 52 29 78-43m91-29 58 32-69 38 44 24m-109 45-62-34 32-17" stroke="#d9e3bf" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="m192 222 8 4m242-19 9-5-9-5m-43 53 9 5m-125 6 7-3-1 7" stroke="#ecf1d4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="m236 213 85-47 86 47-86 48z" fill="#2e4f3d" />
+  <path d="m229 215 92 51v17l-92-51z" fill="#a8b795" />
+  <path d="m321 266 92-51v17l-92 51z" fill="#758d70" />
+  <path d="m229 215 92-50 92 50-92 51z" fill="#ced9ac" />
+  <path d="m254 206 67 37v-62l-67-37z" fill="#e9945b" stroke="#4b402e" stroke-opacity=".42" />
+  <path d="m321 243 67-37v-62l-67 37z" fill="#bd6846" stroke="#4b402e" stroke-opacity=".42" />
+  <path d="m254 144 67-37 67 37-67 37z" fill="url(#amber)" stroke="#ffe2a8" />
+  <path d="m286 144 35-19 35 19-35 19z" fill="#e68f58" stroke="#a95b3e" stroke-opacity=".68" />
+  <path d="m298 144 23-13 23 13-23 13z" fill="#ffda9c" />
+  <path d="m267 167 41 22m-41-10 41 22m-41-10 41 22m27-12 39-22m-39 34 39-22" stroke="#ffe4b4" stroke-opacity=".54" />
+  <path d="m336 192 8-4v8l-8 4zm12-7 8-4v8l-8 4zm12-7 8-4v8l-8 4z" fill="#ffc68b" />
+  <g stroke="#e7edcc" stroke-width="1.5">
+    <path d="m153 205 22-12 22 12-22 12z" fill="#dde6bb" />
+    <path d="m153 205 22 12v12l-22-12z" fill="#a7b78e" /><path d="m175 217 22-12v12l-22 12z" fill="#718c72" />
+    <path d="m407 260 22-12 22 12-22 12z" fill="#dde6bb" />
+    <path d="m407 260 22 12v12l-22-12z" fill="#a7b78e" /><path d="m429 272 22-12v12l-22 12z" fill="#718c72" />
+  </g>
+  <path d="m308 304 12-7 12 7-12 7z" fill="#ffc487" stroke="#f9d49a" />
+  <g fill="#e5ebcd" font-family="monospace" font-size="10" letter-spacing="2">
+    <text x="42" y="50">UN / 01</text>
+    <text x="562" y="392">LOOP</text>
+  </g>
+  <circle cx="592" cy="46" r="4" fill="#ffbe81" />
+  <circle cx="592" cy="46" r="9" stroke="#ffbe81" stroke-opacity=".55" />
+</svg>

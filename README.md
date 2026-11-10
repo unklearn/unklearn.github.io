@@ -38,11 +38,27 @@ the comparison against local Ollama with `qwen3:14b` installed, run
 `npm run record:last-apple-guidance`. A completed batch replaces
 `traces/last-apple-guidance.json`.
 
-`routes.ts` registers the directory URLs for one Vite build. To add a route,
-register its URL and put a `<!-- scout-shell -->` entry at the corresponding
-path. Vite fills it from `scene/shell.html` and pre-renders the route’s MDX
-article. The lab and Foundations load directly on a static host without a
-client router or fallback rewrite.
+## Add a standalone lab
+
+Create `labs/my-lab/index.html` and add an entry to `labs` in `routes.ts`:
+
+```ts
+{
+  path: '/labs/my-lab/',
+  title: 'My Lab',
+  description: 'A short description for the homepage.',
+}
+```
+
+Vite builds the page and adds it to the homepage automatically. To give the
+lab card an illustration, put it in `public/art/` and set `cover` to its URL,
+such as `/art/my-lab.svg`.
+
+For a lab that uses Scout’s world and slides, use `<!-- scout-shell -->` as the
+HTML entry and add `articleId: 'my-lab'` to the registry entry. Export an
+`article` with that ID from `article-sets/my-lab/article.ts`. Vite fills in the
+shared shell and the build pre-renders the article. Every lab has its own static
+URL.
 
 ## Publish on GitHub Pages
 

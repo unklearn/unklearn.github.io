@@ -3,84 +3,66 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#f9f7ef" />
+    <meta name="theme-color" content="#f4f1e8" />
     <meta
       name="description"
-      content="Interactive articles and labs about how AI agents work."
+      content="Learn how AI agents work through small, interactive experiments."
     />
-    <title>Unklearn</title>
-    <style>
-      :root {
-        color: #263e3a;
-        background: #f9f7ef;
-        font-family: system-ui, sans-serif;
-        line-height: 1.6;
-      }
-      body {
-        margin: 0;
-      }
-      main {
-        max-width: 38rem;
-        margin: 0 auto;
-        padding: clamp(3rem, 10vw, 7rem) 1.5rem 3rem;
-      }
-      h1 {
-        margin: 0;
-        font:
-          500 clamp(3rem, 10vw, 5rem) / 1.05 Georgia,
-          serif;
-        letter-spacing: -0.04em;
-      }
-      header p {
-        max-width: 36ch;
-        font-size: 1.125rem;
-      }
-      h2 {
-        margin: 3rem 0 0.75rem;
-        font-size: 1rem;
-      }
-      ul {
-        margin: 0;
-        padding: 0;
-        list-style: none;
-      }
-      li {
-        padding: 1rem 0;
-        border-top: 1px solid #d6d9ca;
-      }
-      li p {
-        margin: 0.25rem 0 0;
-        color: #53635a;
-      }
-      a {
-        color: #315b59;
-        font-weight: 650;
-        text-underline-offset: 0.18em;
-      }
-      a:focus-visible {
-        outline: 3px solid #bb7641;
-        outline-offset: 4px;
-      }
-    </style>
+    <title>Unklearn — Interactive labs for AI agents</title>
+    <link rel="icon" type="image/svg+xml" href="/unklearn.svg" />
+    <link rel="stylesheet" href="./home.css" />
   </head>
   <body>
-    <main>
-      <header>
-        <h1>Unklearn</h1>
-        <p>Interactive articles and labs about how AI agents work.</p>
+    <div class="site-frame">
+      <header class="site-header">
+        <a class="site-brand" href="./">
+          <img src="/unklearn.svg" alt="" width="36" height="36" />
+          <span>unklearn</span>
+        </a>
+        <nav aria-label="Main navigation">
+          <a class="index-link" href="#labs"
+            >Lab index <span aria-hidden="true">↓</span></a
+          >
+        </nav>
       </header>
-      <section aria-labelledby="labs-heading">
-        <h2 id="labs-heading">Labs</h2>
-        <ul role="list">
-          <li>
-            <a href="./labs/last-apple/">The Last Apple</a>
-            <p>
-              Can Scout pack a picnic without taking the pantry’s last apple?
-              See what changes when you guide the model or enforce the rule.
+
+      <main>
+        <section class="hero" aria-labelledby="home-title">
+          <div class="hero-copy">
+            <p class="eyebrow">Interactive labs for AI agents</p>
+            <h1 id="home-title">Open the <em>black box.</em></h1>
+            <p class="intro">
+              Learn how AI agents work through small experiments. Change what an
+              agent knows or what it can do, then see what happens.
             </p>
-          </li>
-        </ul>
-      </section>
-    </main>
+            <a class="hero-action" href="#labs">
+              Explore the labs <span aria-hidden="true">↓</span>
+            </a>
+          </div>
+          <figure class="hero-figure">
+            <img src="/art/agent-loop.svg" alt="" width="640" height="430" />
+            <figcaption>
+              <span>Fig. 01</span>
+              <span
+                >Observe <b aria-hidden="true">→</b> Decide
+                <b aria-hidden="true">→</b> Act</span
+              >
+            </figcaption>
+          </figure>
+        </section>
+
+        <section class="lab-index" id="labs" aria-labelledby="labs-heading">
+          <header class="section-heading">
+            <p class="eyebrow">The index</p>
+            <h2 id="labs-heading">Labs</h2>
+          </header>
+          <ul class="lab-list" role="list">
+            <!-- lab-list -->
+          </ul>
+        </section>
+      </main>
+
+      <footer class="site-footer">Unklearn</footer>
+    </div>
   </body>
 </html>

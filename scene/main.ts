@@ -35,16 +35,19 @@ import apple from '../traces/apple.json';
 import carrot from '../traces/carrot.json';
 import guidance from '../traces/last-apple-guidance.json';
 import { guidancePlacements } from '../article-sets/last-apple/guidance.ts';
-import { articleIds } from '../routes.ts';
+import { articleIds, labs } from '../routes.ts';
 
 const parameters = new URLSearchParams(location.search);
 const defaultArticle = document.body.dataset.defaultArticle;
 const publicLab =
-  import.meta.env.MODE === 'release' && defaultArticle === articleIds.lastApple;
+  import.meta.env.MODE === 'release' &&
+  defaultArticle !== undefined &&
+  labs.some(({ articleId }) => articleId === defaultArticle);
 const article = selectArticle(
   articles,
   publicLab ? defaultArticle : (parameters.get('article') ?? defaultArticle),
 );
+const standalone = labs.some(({ articleId }) => articleId === article.id);
 const visibleArticles = publicLab ? [article] : articles;
 const steps = article.steps;
 const $ = <T extends HTMLElement>(id: string) =>
@@ -54,8 +57,7 @@ for (const id of ['settings', 'status', 'history'])
 $('lesson-toggle').innerHTML = icon('lesson');
 $('film').innerHTML = icon('film');
 document.title = `${article.title} · Unklearn`;
-$('brand-label').textContent =
-  article.id === articleIds.lastApple ? 'UNKLEARN' : 'SCOUT FOUNDATIONS';
+$('brand-label').textContent = standalone ? 'UNKLEARN' : 'SCOUT FOUNDATIONS';
 $('article-title').textContent =
   `Lesson ${String(article.number).padStart(2, '0')} · ${article.title}`;
 for (const content of document.querySelectorAll<HTMLElement>('[data-article]'))
@@ -77,7 +79,7 @@ const config: Settings = {
   },
 };
 $<HTMLTextAreaElement>('order').value = defaultOrder;
-$('order-form').hidden = article.id === articleIds.lastApple;
+$('order-form').hidden = standalone;
 const view = createView($('stage'));
 const guidanceRecording = 'last-apple-guidance';
 const recordings = new Map<string, Trace>([
@@ -428,7 +430,7 @@ function leaveReview() {
 }
 $<HTMLFormElement>('order-form').onsubmit = (event) => {
   event.preventDefault();
-  if (article.id === articleIds.lastApple || config.mode === 'replay') return;
+  if (standalone || config.mode === 'replay') return;
   config.order = $<HTMLTextAreaElement>('order').value;
   if (!config.order.trim()) {
     fail('Write a notice before posting.');

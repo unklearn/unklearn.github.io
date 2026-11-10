@@ -4,12 +4,12 @@ import * as verify from './03-verify.mdx';
 import { blocks } from '../scout-foundations/articles/what-makes-scout-an-agent/06-capabilities.mdx';
 import type { LessonArticle } from '../../presentation/lesson-ui.tsx';
 import { picnicScenario } from '../scout-foundations/scenario.ts';
-import { articleIds } from '../../routes.ts';
+import { lastAppleLab } from '../../routes.ts';
 
 export const article: LessonArticle<typeof picnicScenario> = {
-  id: articleIds.lastApple,
+  id: lastAppleLab.articleId,
   number: 1,
-  title: 'The Last Apple',
+  title: lastAppleLab.title,
   scenario: picnicScenario,
   runtime: blocks.dynamic,
   steps: [inform, experiment, verify],

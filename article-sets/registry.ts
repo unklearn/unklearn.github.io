@@ -1,10 +1,22 @@
 import type { LessonArticle } from '../presentation/lesson-ui.tsx';
 import type { Trace } from '../runtime/types.ts';
+import { labs } from '../routes.ts';
 import { article } from './scout-foundations/articles/what-makes-scout-an-agent/article.ts';
-import { article as lastApple } from './last-apple/article.ts';
+
+const labArticles = import.meta.glob<typeof article>('./*/article.ts', {
+  eager: true,
+  import: 'article',
+});
+
 export const articleRegistry: readonly (typeof article)[] = [
   article,
-  lastApple,
+  ...labs.flatMap(({ articleId }) => {
+    if (!articleId) return [];
+    const lab = labArticles[`./${articleId}/article.ts`];
+    if (!lab || lab.id !== articleId)
+      throw new Error(`Missing or mismatched lab article: ${articleId}`);
+    return [lab];
+  }),
 ];
 export function selectArticle<T extends LessonArticle>(
   articles: readonly T[],
